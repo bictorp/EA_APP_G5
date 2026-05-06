@@ -1,15 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:get/get.dart';
 import '../models/post.dart';
 import '../constants/app_colors.dart';
+import '../controllers/home_controller.dart';
+import 'heart_anim_button.dart';
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
   final Post post;
 
   const PostCard({super.key, required this.post});
 
   @override
+  State<PostCard> createState() => _PostCardState();
+}
+
+class _PostCardState extends State<PostCard> {
+  bool _showLargeHeart = false;
+
+  void _handleDoubleTap(HomeController controller) {
+    final isLiked = widget.post.likes.contains(controller.currentUserId.value);
+    if (!isLiked) {
+      controller.toggleLike(widget.post.id);
+    }
+    
+    // Siempre mostramos la animación al hacer doble tap, estilo Instagram
+    setState(() => _showLargeHeart = true);
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted) setState(() => _showLargeHeart = false);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final HomeController controller = Get.find<HomeController>();
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -28,11 +53,11 @@ class PostCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundImage: NetworkImage(post.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${post.usuario.nombre}'),
+                  backgroundImage: NetworkImage(widget.post.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${widget.post.usuario.nombre}'),
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  post.usuario.nombre,
+                  widget.post.usuario.nombre,
                   style: GoogleFonts.inter(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -45,25 +70,57 @@ class PostCard extends StatelessWidget {
             ),
           ),
 
-          // Post Image
-          if (post.imageUrl != null && post.imageUrl!.isNotEmpty)
-            AspectRatio(
-              aspectRatio: 1,
-              child: Image.network(
-                post.imageUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  width: double.infinity,
-                  color: Colors.white.withOpacity(0.05),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.broken_image_outlined, color: Colors.white24, size: 40),
-                      SizedBox(height: 8),
-                      Text('Imagen no disponible', style: TextStyle(color: Colors.white24, fontSize: 12)),
-                    ],
+          // Post Image with Double Tap
+          if (widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty)
+            GestureDetector(
+              onDoubleTap: () => _handleDoubleTap(controller),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: Image.network(
+                      widget.post.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: double.infinity,
+                        color: Colors.white.withOpacity(0.05),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image_outlined, color: Colors.white24, size: 40),
+                            SizedBox(height: 8),
+                            Text('Imagen no disponible', style: TextStyle(color: Colors.white24, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  
+                  // Large Heart Animation
+                  if (_showLargeHeart)
+                    TweenAnimationBuilder<double>(
+                      duration: const Duration(milliseconds: 400),
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      curve: Curves.elasticOut,
+                      builder: (context, value, child) {
+                        return Opacity(
+                          opacity: value.clamp(0.0, 1.0),
+                          child: Transform.scale(
+                            scale: value,
+                            child: Icon(
+                              Icons.favorite_rounded,
+                              color: Colors.white.withOpacity(0.5),
+                              size: 200,
+                              shadows: const [
+                                Shadow(color: Colors.black26, blurRadius: 20),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                ],
               ),
             ),
 
@@ -72,7 +129,15 @@ class PostCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10.0),
             child: Row(
               children: [
-                const Icon(Icons.favorite_border_rounded, color: Colors.white, size: 28),
+                GetX<HomeController>(
+                  builder: (controller) {
+                    final isLiked = widget.post.likes.contains(controller.currentUserId.value);
+                    return HeartAnimButton(
+                      isLiked: isLiked,
+                      onTap: () => controller.toggleLike(widget.post.id),
+                    );
+                  },
+                ),
                 const SizedBox(width: 16),
                 const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 26),
                 const SizedBox(width: 16),
@@ -85,7 +150,7 @@ class PostCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14.0),
             child: Text(
-              '${post.likes.length} likes',
+              '${widget.post.likes.length} likes',
               style: GoogleFonts.inter(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -95,14 +160,14 @@ class PostCard extends StatelessWidget {
           ),
 
           // Caption
-          if (post.caption != null && post.caption!.isNotEmpty)
+          if (widget.post.caption != null && widget.post.caption!.isNotEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
               child: RichText(
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '${post.usuario.nombre} ',
+                      text: '${widget.post.usuario.nombre} ',
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -110,7 +175,7 @@ class PostCard extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: post.caption,
+                      text: widget.post.caption,
                       style: GoogleFonts.inter(
                         color: Colors.white,
                         fontSize: 13,
@@ -122,11 +187,11 @@ class PostCard extends StatelessWidget {
             ),
 
           // Comments Count
-          if (post.commentsCount > 0)
+          if (widget.post.commentsCount > 0)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 4.0),
               child: Text(
-                'Ver los ${post.commentsCount} comentarios',
+                'Ver los ${widget.post.commentsCount} comentarios',
                 style: GoogleFonts.inter(
                   color: AppColors.textMuted,
                   fontSize: 13,

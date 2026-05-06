@@ -45,4 +45,19 @@ class PostService {
       return {'posts': <Post>[], 'hasNextPage': false};
     }
   }
+
+  Future<Post?> toggleLike(String postId) async {
+    try {
+      final response = await _dio.patch('${ApiConstants.baseUrl}/posts/$postId/like');
+      if (response.statusCode == 200) {
+        return Post.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error toggling like: $e');
+      }
+      return null;
+    }
+  }
 }
