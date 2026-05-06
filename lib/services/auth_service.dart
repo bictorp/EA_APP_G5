@@ -7,22 +7,25 @@ import 'storage_service.dart';
 import 'auth_interceptor.dart';
 
 class AuthService {
-  static final Dio _dio = Dio();
-  final StorageService _storageService = StorageService();
+  // Centralizamos la instancia de Dio
+  static final Dio _dio = _createDio();
 
-  AuthService() {
-    if (_dio.interceptors.isEmpty) {
-      _dio.interceptors.add(AuthInterceptor());
-    }
+  static Dio _createDio() {
+    final dio = Dio();
+    dio.interceptors.add(AuthInterceptor());
+    return dio;
   }
+
+  // Getter para que otros servicios usen la misma instancia configurada
+  static Dio get dio => _dio;
+
+  final StorageService _storageService = StorageService();
 
   String _parseError(dynamic e) {
     if (e is DioException) {
       if (e.response != null && e.response?.data is Map) {
         return e.response?.data['message'] ?? 'Error del servidor';
       }
-      if (e.type == DioExceptionType.connectionTimeout) return 'Tiempo de espera agotado';
-      if (e.type == DioExceptionType.receiveTimeout) return 'El servidor tarda mucho en responder';
       return 'Error de conexión con el servidor';
     }
     return e.toString();
@@ -76,6 +79,7 @@ class AuthService {
     if (refresh == null || JwtDecoder.isExpired(refresh)) return null;
 
     try {
+      // Usamos una instancia limpia de Dio para el refresh
       final response = await Dio().post(
         ApiConstants.refreshEndpoint,
         data: {'refreshToken': refresh},
