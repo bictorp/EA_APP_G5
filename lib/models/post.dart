@@ -20,6 +20,39 @@ class Post {
     required this.createdAt,
   });
 
+  String get timeAgo {
+    final now = DateTime.now();
+    final difference = now.difference(createdAt);
+
+    if (difference.inSeconds < 60) {
+      return 'Hace ${difference.inSeconds} s';
+    } else if (difference.inMinutes < 60) {
+      return 'Hace ${difference.inMinutes} min';
+    } else if (difference.inHours < 24) {
+      return 'Hace ${difference.inHours} h';
+    } else if (difference.inDays < 365) {
+      return 'Hace ${difference.inDays} d';
+    } else {
+      final years = (difference.inDays / 365).floor();
+      final months = ((difference.inDays % 365) / 30).floor();
+      if (months > 0) {
+        return 'Hace ${years}a ${months}m';
+      }
+      return 'Hace ${years}a';
+    }
+  }
+
+  static String formatCount(int count) {
+    if (count >= 1000000) {
+      double millions = count / 1000000;
+      return '${millions.toStringAsFixed(millions < 10 ? 1 : 0)}M';
+    } else if (count >= 1000) {
+      double thousands = count / 1000;
+      return '${thousands.toStringAsFixed(thousands < 10 ? 1 : 0)}k';
+    }
+    return count.toString();
+  }
+
   factory Post.fromJson(Map<String, dynamic> json) {
     try {
       return Post(

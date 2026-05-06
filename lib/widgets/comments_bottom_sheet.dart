@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,6 +17,161 @@ class CommentsBottomSheet extends StatelessWidget {
       () => ReportScreen(tipo: 'comment', objetivoId: commentId),
       fullscreenDialog: true,
       transition: Transition.downToUp,
+    );
+  }
+
+  void _confirmDeleteComment(BuildContext context, CommentsController controller, String commentId) {
+    Get.dialog(
+      BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+        child: Dialog(
+          backgroundColor: AppColors.containerBg.withOpacity(0.9),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: BorderSide(color: AppColors.error.withOpacity(0.2), width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.error.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.error.withOpacity(0.2),
+                        blurRadius: 20,
+                        spreadRadius: 5,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.delete_sweep_rounded, color: AppColors.error, size: 40),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  '¿Eliminar comentario?',
+                  style: GoogleFonts.inter(
+                    color: AppColors.textHeader,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 20,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Esta acción borrará permanentemente tu comentario.',
+                  style: GoogleFonts.inter(
+                    color: AppColors.textMuted,
+                    fontSize: 14,
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Get.back();
+                          controller.deleteComment(commentId);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.error,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          'Eliminar permanentemente',
+                          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: TextButton(
+                        onPressed: () => Get.back(),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textHeader,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: const BorderSide(color: AppColors.border),
+                          ),
+                        ),
+                        child: Text(
+                          'Cancelar',
+                          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showCommentOptions(BuildContext context, CommentsController controller, String commentId, bool isOwnComment) {
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: AppColors.containerBg,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Wrap(
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: double.infinity,
+              alignment: Alignment.center,
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            if (isOwnComment) ...[
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                title: const Text('Eliminar comentario', style: TextStyle(color: AppColors.error)),
+                onTap: () {
+                  Get.back();
+                  _confirmDeleteComment(context, controller, commentId);
+                },
+              ),
+            ] else ...[
+              ListTile(
+                leading: const Icon(Icons.report_problem_outlined, color: AppColors.error),
+                title: const Text('Reportar comentario', style: TextStyle(color: AppColors.error)),
+                onTap: () {
+                  Get.back();
+                  _showReportScreen(context, commentId);
+                },
+              ),
+            ],
+            ListTile(
+              leading: const Icon(Icons.close, color: AppColors.textHeader),
+              title: const Text('Cancelar', style: TextStyle(color: AppColors.textHeader)),
+              onTap: () => Get.back(),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
     );
   }
 
@@ -84,108 +240,60 @@ class CommentsBottomSheet extends StatelessWidget {
                   final comment = controller.comments[index];
                   final isOwnComment = comment.usuario.id == homeController.currentUserId.value;
 
-                  return GestureDetector(
-                    onLongPress: () {
-                      Get.bottomSheet(
-                        Container(
-                          decoration: const BoxDecoration(
-                            color: AppColors.containerBg,
-                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                          ),
-                          child: Wrap(
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          radius: 16,
+                          backgroundImage: NetworkImage(comment.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${comment.usuario.nombre}'),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                margin: const EdgeInsets.symmetric(vertical: 12),
-                                width: double.infinity,
-                                alignment: Alignment.center,
-                                child: Container(
-                                  width: 40,
-                                  height: 4,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.border,
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: '${comment.usuario.nombre} ',
+                                      style: GoogleFonts.inter(
+                                        color: AppColors.textHeader,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: comment.texto,
+                                      style: GoogleFonts.inter(
+                                        color: AppColors.textHeader,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              if (isOwnComment) ...[
-                                ListTile(
-                                  leading: const Icon(Icons.delete_outline, color: AppColors.error),
-                                  title: const Text('Eliminar comentario', style: TextStyle(color: AppColors.error)),
-                                  onTap: () {
-                                    Get.back();
-                                    // TODO: Eliminar comentario
-                                  },
+                              const SizedBox(height: 4),
+                              Text(
+                                comment.timeAgo,
+                                style: GoogleFonts.inter(
+                                  color: AppColors.textMuted,
+                                  fontSize: 11,
                                 ),
-                              ] else ...[
-                                ListTile(
-                                  leading: const Icon(Icons.report_problem_outlined, color: AppColors.error),
-                                  title: const Text('Reportar comentario', style: TextStyle(color: AppColors.error)),
-                                  onTap: () {
-                                    Get.back();
-                                    _showReportScreen(context, comment.id);
-                                  },
-                                ),
-                              ],
-                              ListTile(
-                                leading: const Icon(Icons.close, color: AppColors.textHeader),
-                                title: const Text('Cancelar', style: TextStyle(color: AppColors.textHeader)),
-                                onTap: () => Get.back(),
                               ),
-                              const SizedBox(height: 20),
                             ],
                           ),
                         ),
-                      );
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CircleAvatar(
-                            radius: 16,
-                            backgroundImage: NetworkImage(comment.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${comment.usuario.nombre}'),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: '${comment.usuario.nombre} ',
-                                        style: GoogleFonts.inter(
-                                          color: AppColors.textHeader,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                      TextSpan(
-                                        text: comment.texto,
-                                        style: GoogleFonts.inter(
-                                          color: AppColors.textHeader,
-                                          fontSize: 13,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Hace un momento', // TODO: Format date
-                                  style: GoogleFonts.inter(
-                                    color: AppColors.textMuted,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Icon(Icons.favorite_border, color: AppColors.textMuted, size: 14),
-                        ],
-                      ),
+                        IconButton(
+                          onPressed: () => _showCommentOptions(context, controller, comment.id, isOwnComment),
+                          icon: const Icon(Icons.more_horiz, color: AppColors.textMuted, size: 20),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ],
                     ),
                   );
                 },
@@ -206,23 +314,37 @@ class CommentsBottomSheet extends StatelessWidget {
               border: const Border(top: BorderSide(color: AppColors.border)),
             ),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const CircleAvatar(
-                  radius: 18,
+                  radius: 20,
                   backgroundImage: NetworkImage('https://api.dicebear.com/7.x/avataaars/png?seed=me'),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: TextField(
-                    controller: controller.textController,
-                    style: const TextStyle(color: AppColors.textHeader, fontSize: 14),
-                    decoration: const InputDecoration(
-                      hintText: 'Añadir un comentario...',
-                      hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14),
-                      border: InputBorder.none,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.containerBg,
+                      borderRadius: BorderRadius.circular(24),
+                      border: Border.all(color: AppColors.border, width: 1.5),
+                    ),
+                    child: TextField(
+                      controller: controller.textController,
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      style: const TextStyle(color: AppColors.textHeader, fontSize: 14),
+                      decoration: const InputDecoration(
+                        hintText: 'Añadir un comentario...',
+                        hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10),
+                      ),
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
                 TextButton(
                   onPressed: controller.sendComment,
                   child: const Text(

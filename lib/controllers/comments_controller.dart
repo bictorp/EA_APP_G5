@@ -41,6 +41,28 @@ class CommentsController extends GetxController {
     }
   }
 
+  Future<void> deleteComment(String commentId) async {
+    final success = await _postService.deleteComment(commentId);
+    if (success) {
+      comments.removeWhere((c) => c.id == commentId);
+      Get.snackbar(
+        'Comentario eliminado',
+        'Tu comentario ha sido borrado.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.black87,
+        colorText: Colors.white,
+      );
+    } else {
+      Get.snackbar(
+        'Error',
+        'No se pudo eliminar el comentario.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
+    }
+  }
+
   @override
   void onClose() {
     textController.dispose();

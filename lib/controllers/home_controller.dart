@@ -43,7 +43,9 @@ class HomeController extends GetxController {
 
   Future<void> fetchPosts() async {
     try {
-      isLoading.value = true;
+      if (posts.isEmpty) {
+        isLoading.value = true;
+      }
       currentPage = 1;
       final result = await _postService.getFollowingFeed(page: currentPage);
       
@@ -112,6 +114,28 @@ class HomeController extends GetxController {
 
   Future<void> logout() async {
     await _authService.logout();
+  }
+
+  Future<void> deletePost(String postId) async {
+    final success = await _postService.deletePost(postId);
+    if (success) {
+      posts.removeWhere((p) => p.id == postId);
+      Get.snackbar(
+        'Publicación eliminada',
+        'Tu post ha sido borrado correctamente.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.success.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } else {
+      Get.snackbar(
+        'Error',
+        'No se pudo eliminar la publicación.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.error.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    }
   }
 
   Future<void> toggleFollow(String targetId, String nombre) async {

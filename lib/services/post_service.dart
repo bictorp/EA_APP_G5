@@ -95,6 +95,26 @@ class PostService {
     }
   }
 
+  Future<bool> deleteComment(String commentId) async {
+    try {
+      final response = await _dio.delete('${ApiConstants.baseUrl}/comments/$commentId');
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      if (kDebugMode) print('Error deleting comment: $e');
+      return false;
+    }
+  }
+
+  Future<bool> deletePost(String postId) async {
+    try {
+      final response = await _dio.delete('${ApiConstants.baseUrl}/posts/$postId');
+      return response.statusCode == 200;
+    } catch (e) {
+      if (kDebugMode) print('Error deleting post: $e');
+      return false;
+    }
+  }
+
   Future<bool> toggleFollow(String targetId) async {
     try {
       final response = await _dio.post('${ApiConstants.baseUrl}/usuarios/follow/$targetId');
