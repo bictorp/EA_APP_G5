@@ -15,8 +15,8 @@ class MainScreen extends StatelessWidget {
     final List<Widget> pages = [
       const HomeScreen(),
       const SearchScreen(),
-      const Scaffold(backgroundColor: Colors.black, body: Center(child: Text('Add Post', style: TextStyle(color: Colors.white)))),
-      const Scaffold(backgroundColor: Colors.black, body: Center(child: Text('Notifications', style: TextStyle(color: Colors.white)))),
+      const Scaffold(backgroundColor: AppColors.bg, body: Center(child: Text('Modo Tinder / Conocer gente', style: TextStyle(color: AppColors.textHeader)))),
+      const Scaffold(backgroundColor: AppColors.bg, body: Center(child: Text('Chats / Notificaciones', style: TextStyle(color: Colors.white)))),
       const Scaffold(backgroundColor: Colors.black, body: Center(child: Text('Profile', style: TextStyle(color: Colors.white)))),
     ];
 
@@ -42,7 +42,7 @@ class MainScreen extends StatelessWidget {
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
             BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-            BottomNavigationBarItem(icon: Icon(Icons.add_box_outlined), label: 'Add'),
+            BottomNavigationBarItem(icon: Icon(Icons.style_rounded), label: 'Match'),
             BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline_rounded), label: 'Chats'),
             BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
           ],
