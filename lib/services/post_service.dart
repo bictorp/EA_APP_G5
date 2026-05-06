@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../constants/api_constants.dart';
 import '../models/post.dart';
+import '../models/comment.dart';
 import 'auth_service.dart';
 
 class PostService {
@@ -57,6 +58,39 @@ class PostService {
       if (kDebugMode) {
         print('Error toggling like: $e');
       }
+      return null;
+    }
+  }
+
+  Future<List<Comment>> getComments(String postId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/posts/$postId');
+      if (response.statusCode == 200) {
+        final List commentsData = response.data['comments'] ?? [];
+        return commentsData.map((json) => Comment.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      if (kDebugMode) print('Error fetching comments: $e');
+      return [];
+    }
+  }
+
+  Future<Comment?> addComment(String postId, String texto) async {
+    try {
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}/comments',
+        data: {
+          'post': postId,
+          'texto': texto,
+        },
+      );
+      if (response.statusCode == 201) {
+        return Comment.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('Error adding comment: $e');
       return null;
     }
   }

@@ -6,6 +6,8 @@ import '../constants/app_colors.dart';
 import '../controllers/home_controller.dart';
 import 'heart_anim_button.dart';
 
+import 'comments_bottom_sheet.dart';
+
 class PostCard extends StatefulWidget {
   final Post post;
 
@@ -17,6 +19,15 @@ class PostCard extends StatefulWidget {
 
 class _PostCardState extends State<PostCard> {
   bool _showLargeHeart = false;
+
+  void _showComments(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CommentsBottomSheet(postId: widget.post.id),
+    );
+  }
 
   void _handleDoubleTap(HomeController controller) {
     final isLiked = widget.post.likes.contains(controller.currentUserId.value);
@@ -139,7 +150,10 @@ class _PostCardState extends State<PostCard> {
                   },
                 ),
                 const SizedBox(width: 16),
-                const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 26),
+                GestureDetector(
+                  onTap: () => _showComments(context),
+                  child: const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 26),
+                ),
                 const SizedBox(width: 16),
                 const Icon(Icons.send_rounded, color: Colors.white, size: 26),
               ],
@@ -190,11 +204,14 @@ class _PostCardState extends State<PostCard> {
           if (widget.post.commentsCount > 0)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 4.0),
-              child: Text(
-                'Ver los ${widget.post.commentsCount} comentarios',
-                style: GoogleFonts.inter(
-                  color: AppColors.textMuted,
-                  fontSize: 13,
+              child: GestureDetector(
+                onTap: () => _showComments(context),
+                child: Text(
+                  'Ver los ${widget.post.commentsCount} comentarios',
+                  style: GoogleFonts.inter(
+                    color: AppColors.textMuted,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ),
