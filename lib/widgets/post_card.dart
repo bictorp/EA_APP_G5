@@ -5,8 +5,8 @@ import '../models/post.dart';
 import '../constants/app_colors.dart';
 import '../controllers/home_controller.dart';
 import 'heart_anim_button.dart';
-
 import 'comments_bottom_sheet.dart';
+import 'report_dialog.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -26,6 +26,13 @@ class _PostCardState extends State<PostCard> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => CommentsBottomSheet(postId: widget.post.id),
+    );
+  }
+
+  void _showReportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => ReportDialog(tipo: 'post', objetivoId: widget.post.id),
     );
   }
 
@@ -76,7 +83,34 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 const Spacer(),
-                const Icon(Icons.more_horiz, color: Colors.white70),
+                PopupMenuButton<String>(
+                  icon: const Icon(Icons.more_horiz, color: Colors.white70),
+                  color: const Color(0xFF1E1E1E), // Más oscuro, estilo premium
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  offset: const Offset(0, 40),
+                  onSelected: (value) {
+                    if (value == 'report') {
+                      _showReportDialog(context);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'report',
+                      height: 40,
+                      child: Center(
+                        child: Text(
+                          'Reportar',
+                          style: GoogleFonts.inter(
+                            color: const Color(0xFFFF4D4D), // Rojo más suave/moderno
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),

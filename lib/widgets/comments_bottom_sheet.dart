@@ -3,11 +3,19 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/comments_controller.dart';
 import '../constants/app_colors.dart';
+import 'report_dialog.dart';
 
 class CommentsBottomSheet extends StatelessWidget {
   final String postId;
 
   const CommentsBottomSheet({super.key, required this.postId});
+
+  void _showReportDialog(BuildContext context, String commentId) {
+    showDialog(
+      context: context,
+      builder: (context) => ReportDialog(tipo: 'comment', objetivoId: commentId),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,54 +79,80 @@ class CommentsBottomSheet extends StatelessWidget {
                 itemCount: controller.comments.length,
                 itemBuilder: (context, index) {
                   final comment = controller.comments[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 16,
-                          backgroundImage: NetworkImage(comment.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${comment.usuario.nombre}'),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  return GestureDetector(
+                    onLongPress: () {
+                      Get.bottomSheet(
+                        Container(
+                          color: const Color(0xFF1E1E1E),
+                          child: Wrap(
                             children: [
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: '${comment.usuario.nombre} ',
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: comment.texto,
-                                      style: GoogleFonts.inter(
-                                        color: Colors.white,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              ListTile(
+                                leading: const Icon(Icons.report_problem_outlined, color: Colors.redAccent),
+                                title: const Text('Reportar comentario', style: TextStyle(color: Colors.redAccent)),
+                                onTap: () {
+                                  Get.back();
+                                  _showReportDialog(context, comment.id);
+                                },
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Hace un momento', // TODO: Format date
-                                style: GoogleFonts.inter(
-                                  color: Colors.white38,
-                                  fontSize: 11,
-                                ),
+                              ListTile(
+                                leading: const Icon(Icons.close, color: Colors.white),
+                                title: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+                                onTap: () => Get.back(),
                               ),
                             ],
                           ),
                         ),
-                        const Icon(Icons.favorite_border, color: Colors.white38, size: 14),
-                      ],
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundImage: NetworkImage(comment.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${comment.usuario.nombre}'),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: '${comment.usuario.nombre} ',
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: comment.texto,
+                                        style: GoogleFonts.inter(
+                                          color: Colors.white,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Hace un momento', // TODO: Format date
+                                  style: GoogleFonts.inter(
+                                    color: Colors.white38,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.favorite_border, color: Colors.white38, size: 14),
+                        ],
+                      ),
                     ),
                   );
                 },
