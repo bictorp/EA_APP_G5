@@ -21,22 +21,22 @@ class MainScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.bg,
       body: Obx(() => IndexedStack(
         index: controller.selectedIndex.value,
         children: pages,
       )),
       bottomNavigationBar: Obx(() => Container(
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1), width: 0.5)),
+        decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: AppColors.border, width: 0.5)),
         ),
         child: BottomNavigationBar(
           currentIndex: controller.selectedIndex.value,
           onTap: controller.changePage,
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.black,
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Colors.white38,
+          backgroundColor: AppColors.bg,
+          selectedItemColor: AppColors.accent,
+          unselectedItemColor: AppColors.textMuted.withOpacity(0.5),
           showSelectedLabels: false,
           showUnselectedLabels: false,
           items: const [

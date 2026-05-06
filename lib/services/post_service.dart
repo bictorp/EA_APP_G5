@@ -94,4 +94,14 @@ class PostService {
       return null;
     }
   }
+
+  Future<bool> toggleFollow(String targetId) async {
+    try {
+      final response = await _dio.post('${ApiConstants.baseUrl}/usuarios/follow/$targetId');
+      return response.statusCode == 200;
+    } catch (e) {
+      if (kDebugMode) print('Error toggling follow: $e');
+      return false;
+    }
+  }
 }

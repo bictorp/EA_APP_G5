@@ -1,25 +1,44 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Web Premium Palette (Dark/Purple Space)
-  static const Color bgDarkStart = Color(0xFF1E1B4B); // #1e1b4b
-  static const Color bgDarkMid = Color(0xFF0F172A);   // #0f172a
-  static const Color bgDarkEnd = Color(0xFF000000);   // #000000
+  // Brand / Primary (Atenea)
+  static const Color accent = Color(0xFFC084FC); // Purple from Web
+  static const Color accentBg = Color(0x26C084FC); // 15% opacity
+  static const Color accentBorder = Color(0x80C084FC); // 50% opacity
 
-  static const Color containerBg = Color(0x99141623); // rgba(20, 22, 35, 0.6)
-  static const Color borderWhite = Color(0x1AFFFFFF); // rgba(255, 255, 255, 0.1)
+  // Backgrounds
+  static const Color bg = Color(0xFF16171D); // Web dark bg
+  static const Color containerBg = Color(0xFF1F2028); // Web code-bg / card bg
+  static const Color socialBg = Color(0x802F303A); // Web social-bg
 
-  static const Color titleStart = Color(0xFFFFFFFF);
-  static const Color titleEnd = Color(0xFFA78BFA);    // #a78bfa
+  // Text
+  static const Color textHeader = Color(0xFFF3F4F6); // Web text-h
+  static const Color textMuted = Color(0xFF9CA3AF); // Web text
+  static const Color textLink = Color(0xFFC084FC); // Same as accent
 
-  static const Color textMain = Color(0xFFFFFFFF);
-  static const Color textMuted = Color(0xFF94A3B8);   // #94a3b8
-  static const Color textLink = Color(0xFFA78BFA);    // #a78bfa
+  // Borders
+  static const Color border = Color(0xFF2E303A); // Web border
+  static const Color borderWhite = Color(0x1AFFFFFF); // 10% white for subtle separators
 
-  static const Color inputBg = Color(0x660F111A);     // rgba(15, 17, 26, 0.4)
-  static const Color inputBorder = Color(0x1AFFFFFF);  // rgba(255, 255, 255, 0.1)
-  static const Color inputFocus = Color(0xFF8B5CF6);   // #8b5cf6
+  // Status
+  static const Color error = Color(0xFFFF4D4D);
+  static const Color success = Color(0xFF10B981);
 
-  static const Color btnStart = Color(0xFF7C3AED);    // #7c3aed
-  static const Color btnEnd = Color(0xFF3B82F6);      // #3b82f6
+  // --- Aliases for legacy components ---
+  static const Color bgDarkStart = bg;
+  static const Color bgDarkMid = containerBg;
+  static const Color bgDarkEnd = bg;
+  
+  static const Color textMain = textHeader;
+  
+  static const Color inputBg = containerBg;
+  static const Color inputBorder = border;
+  static const Color inputFocus = accent;
+  
+  static const Color btnStart = accent;
+  static const Color btnEnd = Color(0xFF8B5CF6);
+
+  // Gradients
+  static const Color titleStart = Color(0xFFC084FC);
+  static const Color titleEnd = Color(0xFF8B5CF6);
 }

@@ -13,9 +13,9 @@ class HomeScreen extends StatelessWidget {
     final HomeController controller = Get.put(HomeController());
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.bg,
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: AppColors.bg,
         elevation: 0,
         centerTitle: false,
         title: ShaderMask(
@@ -35,18 +35,18 @@ class HomeScreen extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.add_box_outlined, color: Colors.white),
+            icon: const Icon(Icons.add_box_outlined, color: AppColors.textHeader),
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.favorite_border_rounded, color: Colors.white),
+            icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textHeader),
           ),
           IconButton(
             onPressed: () async {
               await controller.logout();
               Get.offAllNamed('/login');
             },
-            icon: const Icon(Icons.logout_rounded, color: Colors.white),
+            icon: const Icon(Icons.logout_rounded, color: AppColors.textHeader),
           ),
         ],
       ),

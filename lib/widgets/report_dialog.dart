@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/report_service.dart';
+import '../constants/app_colors.dart';
 
 class ReportDialog extends StatefulWidget {
   final String tipo;
@@ -47,7 +48,7 @@ class _ReportDialogState extends State<ReportDialog> {
         'Reporte enviado',
         'Gracias por ayudarnos a mantener la comunidad segura.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green.withOpacity(0.8),
+        backgroundColor: AppColors.success.withOpacity(0.8),
         colorText: Colors.white,
       );
     } else {
@@ -55,7 +56,7 @@ class _ReportDialogState extends State<ReportDialog> {
         'Error',
         'No se pudo enviar el reporte. Inténtalo de nuevo.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.8),
+        backgroundColor: AppColors.error.withOpacity(0.8),
         colorText: Colors.white,
       );
     }
@@ -64,8 +65,11 @@ class _ReportDialogState extends State<ReportDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF1E1E1E),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: AppColors.containerBg,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: AppColors.border, width: 0.5),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -75,7 +79,7 @@ class _ReportDialogState extends State<ReportDialog> {
             Text(
               'Reportar ${widget.tipo == 'post' ? 'Publicación' : 'Comentario'}',
               style: GoogleFonts.inter(
-                color: Colors.white,
+                color: AppColors.textHeader,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
@@ -83,23 +87,24 @@ class _ReportDialogState extends State<ReportDialog> {
             const SizedBox(height: 16),
             const Text(
               '¿Por qué quieres reportar este contenido?',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+              style: TextStyle(color: AppColors.textMuted, fontSize: 14),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: Colors.white10,
+                color: AppColors.bg,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.border),
               ),
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   value: _selectedReason,
-                  dropdownColor: const Color(0xFF2C2C2C),
+                  dropdownColor: AppColors.containerBg,
                   isExpanded: true,
                   items: _reasons.map((r) => DropdownMenuItem(
                     value: r,
-                    child: Text(r, style: const TextStyle(color: Colors.white)),
+                    child: Text(r, style: const TextStyle(color: AppColors.textHeader)),
                   )).toList(),
                   onChanged: (val) => setState(() => _selectedReason = val!),
                 ),
@@ -109,15 +114,19 @@ class _ReportDialogState extends State<ReportDialog> {
             TextField(
               controller: _controller,
               maxLines: 3,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: AppColors.textHeader),
               decoration: InputDecoration(
                 hintText: 'Detalles adicionales (opcional)',
-                hintStyle: const TextStyle(color: Colors.white38),
+                hintStyle: const TextStyle(color: AppColors.textMuted),
                 filled: true,
-                fillColor: Colors.white10,
-                border: OutlineInputBorder(
+                fillColor: AppColors.bg,
+                enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: AppColors.accent),
                 ),
               ),
             ),
@@ -127,13 +136,13 @@ class _ReportDialogState extends State<ReportDialog> {
               children: [
                 TextButton(
                   onPressed: () => Get.back(),
-                  child: const Text('Cancelar', style: TextStyle(color: Colors.white54)),
+                  child: const Text('Cancelar', style: TextStyle(color: AppColors.textMuted)),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _isSending ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
+                    backgroundColor: AppColors.error,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: _isSending 

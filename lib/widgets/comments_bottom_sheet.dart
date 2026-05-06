@@ -2,29 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/comments_controller.dart';
+import '../controllers/home_controller.dart';
 import '../constants/app_colors.dart';
-import 'report_dialog.dart';
+import '../screens/report_screen.dart';
 
 class CommentsBottomSheet extends StatelessWidget {
   final String postId;
 
   const CommentsBottomSheet({super.key, required this.postId});
 
-  void _showReportDialog(BuildContext context, String commentId) {
-    showDialog(
-      context: context,
-      builder: (context) => ReportDialog(tipo: 'comment', objetivoId: commentId),
+  void _showReportScreen(BuildContext context, String commentId) {
+    Get.to(
+      () => ReportScreen(tipo: 'comment', objetivoId: commentId),
+      fullscreenDialog: true,
+      transition: Transition.downToUp,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(CommentsController(postId), tag: postId);
+    final homeController = Get.find<HomeController>();
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
-        color: Color(0xFF121212),
+        color: AppColors.bg,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -35,7 +38,7 @@ class CommentsBottomSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white24,
+              color: AppColors.border,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
@@ -43,19 +46,19 @@ class CommentsBottomSheet extends StatelessWidget {
           Text(
             'Comentarios',
             style: GoogleFonts.inter(
-              color: Colors.white,
+              color: AppColors.textHeader,
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
           ),
           
-          const Divider(color: Colors.white10, height: 24),
+          const Divider(color: AppColors.border, height: 24),
           
           // Comments List
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator(color: AppColors.textLink));
+                return const Center(child: CircularProgressIndicator(color: AppColors.accent));
               }
               
               if (controller.comments.isEmpty) {
@@ -63,11 +66,11 @@ class CommentsBottomSheet extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.chat_bubble_outline, color: Colors.white24, size: 48),
+                      const Icon(Icons.chat_bubble_outline, color: AppColors.textMuted, size: 48),
                       const SizedBox(height: 16),
                       Text(
                         'Aún no hay comentarios',
-                        style: GoogleFonts.inter(color: Colors.white54),
+                        style: GoogleFonts.inter(color: AppColors.textMuted),
                       ),
                     ],
                   ),
@@ -79,26 +82,56 @@ class CommentsBottomSheet extends StatelessWidget {
                 itemCount: controller.comments.length,
                 itemBuilder: (context, index) {
                   final comment = controller.comments[index];
+                  final isOwnComment = comment.usuario.id == homeController.currentUserId.value;
+
                   return GestureDetector(
                     onLongPress: () {
                       Get.bottomSheet(
                         Container(
-                          color: const Color(0xFF1E1E1E),
+                          decoration: const BoxDecoration(
+                            color: AppColors.containerBg,
+                            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
                           child: Wrap(
                             children: [
-                              ListTile(
-                                leading: const Icon(Icons.report_problem_outlined, color: Colors.redAccent),
-                                title: const Text('Reportar comentario', style: TextStyle(color: Colors.redAccent)),
-                                onTap: () {
-                                  Get.back();
-                                  _showReportDialog(context, comment.id);
-                                },
+                              Container(
+                                margin: const EdgeInsets.symmetric(vertical: 12),
+                                width: double.infinity,
+                                alignment: Alignment.center,
+                                child: Container(
+                                  width: 40,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.border,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
                               ),
+                              if (isOwnComment) ...[
+                                ListTile(
+                                  leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                                  title: const Text('Eliminar comentario', style: TextStyle(color: AppColors.error)),
+                                  onTap: () {
+                                    Get.back();
+                                    // TODO: Eliminar comentario
+                                  },
+                                ),
+                              ] else ...[
+                                ListTile(
+                                  leading: const Icon(Icons.report_problem_outlined, color: AppColors.error),
+                                  title: const Text('Reportar comentario', style: TextStyle(color: AppColors.error)),
+                                  onTap: () {
+                                    Get.back();
+                                    _showReportScreen(context, comment.id);
+                                  },
+                                ),
+                              ],
                               ListTile(
-                                leading: const Icon(Icons.close, color: Colors.white),
-                                title: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+                                leading: const Icon(Icons.close, color: AppColors.textHeader),
+                                title: const Text('Cancelar', style: TextStyle(color: AppColors.textHeader)),
                                 onTap: () => Get.back(),
                               ),
+                              const SizedBox(height: 20),
                             ],
                           ),
                         ),
@@ -124,7 +157,7 @@ class CommentsBottomSheet extends StatelessWidget {
                                       TextSpan(
                                         text: '${comment.usuario.nombre} ',
                                         style: GoogleFonts.inter(
-                                          color: Colors.white,
+                                          color: AppColors.textHeader,
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
                                         ),
@@ -132,7 +165,7 @@ class CommentsBottomSheet extends StatelessWidget {
                                       TextSpan(
                                         text: comment.texto,
                                         style: GoogleFonts.inter(
-                                          color: Colors.white,
+                                          color: AppColors.textHeader,
                                           fontSize: 13,
                                         ),
                                       ),
@@ -143,14 +176,14 @@ class CommentsBottomSheet extends StatelessWidget {
                                 Text(
                                   'Hace un momento', // TODO: Format date
                                   style: GoogleFonts.inter(
-                                    color: Colors.white38,
+                                    color: AppColors.textMuted,
                                     fontSize: 11,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.favorite_border, color: Colors.white38, size: 14),
+                          const Icon(Icons.favorite_border, color: AppColors.textMuted, size: 14),
                         ],
                       ),
                     ),
@@ -169,8 +202,8 @@ class CommentsBottomSheet extends StatelessWidget {
               right: 16,
             ),
             decoration: BoxDecoration(
-              color: Colors.black,
-              border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1))),
+              color: AppColors.bg,
+              border: const Border(top: BorderSide(color: AppColors.border)),
             ),
             child: Row(
               children: [
@@ -182,10 +215,10 @@ class CommentsBottomSheet extends StatelessWidget {
                 Expanded(
                   child: TextField(
                     controller: controller.textController,
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                    decoration: InputDecoration(
+                    style: const TextStyle(color: AppColors.textHeader, fontSize: 14),
+                    decoration: const InputDecoration(
                       hintText: 'Añadir un comentario...',
-                      hintStyle: const TextStyle(color: Colors.white38, fontSize: 14),
+                      hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14),
                       border: InputBorder.none,
                     ),
                   ),
@@ -194,7 +227,7 @@ class CommentsBottomSheet extends StatelessWidget {
                   onPressed: controller.sendComment,
                   child: const Text(
                     'Publicar',
-                    style: TextStyle(color: AppColors.textLink, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],

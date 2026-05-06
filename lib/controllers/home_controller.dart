@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/post.dart';
+import '../constants/app_colors.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
@@ -111,6 +112,21 @@ class HomeController extends GetxController {
 
   Future<void> logout() async {
     await _authService.logout();
+  }
+
+  Future<void> toggleFollow(String targetId, String nombre) async {
+    final success = await _postService.toggleFollow(targetId);
+    if (success) {
+      Get.snackbar(
+        'Acción realizada',
+        'Has cambiado tu estado de seguimiento con $nombre',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.accent.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+      // Opcional: Refrescar el feed para quitar los posts si dejó de seguir
+      fetchPosts();
+    }
   }
 
   @override
