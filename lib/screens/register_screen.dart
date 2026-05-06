@@ -6,6 +6,7 @@ import '../constants/app_colors.dart';
 import '../controllers/register_controller.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
+import '../widgets/error_banner.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -80,25 +81,10 @@ class RegisterScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 40),
 
-                        Obx(() {
-                          if (controller.errorMessage.value.isNotEmpty) {
-                            return Container(
-                              margin: const EdgeInsets.only(bottom: 24),
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.red.withAlpha(25),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.red.withAlpha(50)),
-                              ),
-                              child: Text(
-                                controller.errorMessage.value,
-                                style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 13),
-                                textAlign: TextAlign.center,
-                              ),
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        }),
+                        Obx(() => ErrorBanner(
+                          message: controller.errorMessage.value,
+                          onClose: () => controller.errorMessage.value = '',
+                        )),
 
                         CustomTextField(
                           label: 'Nombre completo',

@@ -29,18 +29,10 @@ class LoginController extends GetxController {
           colorText: Get.theme.colorScheme.primary,
           margin: const EdgeInsets.all(16),
         );
-        // Get.offAll(() => const HomeScreen()); // Redirigir usando GetX
+        Get.offAllNamed('/home');
       }
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
-      Get.snackbar(
-        'Error',
-        errorMessage.value,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
-        colorText: Colors.red,
-        margin: const EdgeInsets.all(16),
-      );
+      errorMessage.value = e.toString();
     } finally {
       isLoading.value = false;
     }

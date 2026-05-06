@@ -45,11 +45,9 @@ class RegisterController extends GetxController {
           backgroundColor: Colors.green.withAlpha(200),
           colorText: Colors.white,
         );
-      } else {
-        errorMessage.value = 'Error al registrar el usuario';
       }
     } catch (e) {
-      errorMessage.value = 'Error de conexión';
+      errorMessage.value = e.toString();
     } finally {
       isLoading.value = false;
     }

@@ -1,9 +1,32 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import '../constants/api_constants.dart';
 import '../models/user.dart';
+import 'storage_service.dart';
+import 'auth_interceptor.dart';
 
 class AuthService {
-  final Dio _dio = Dio();
+  static final Dio _dio = Dio();
+  final StorageService _storageService = StorageService();
+
+  AuthService() {
+    if (_dio.interceptors.isEmpty) {
+      _dio.interceptors.add(AuthInterceptor());
+    }
+  }
+
+  String _parseError(dynamic e) {
+    if (e is DioException) {
+      if (e.response != null && e.response?.data is Map) {
+        return e.response?.data['message'] ?? 'Error del servidor';
+      }
+      if (e.type == DioExceptionType.connectionTimeout) return 'Tiempo de espera agotado';
+      if (e.type == DioExceptionType.receiveTimeout) return 'El servidor tarda mucho en responder';
+      return 'Error de conexión con el servidor';
+    }
+    return e.toString();
+  }
 
   Future<User?> login(String email, String password) async {
     try {
@@ -17,21 +40,18 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = response.data;
-        final String token = data['accessToken'] ?? '';
+        final String accessToken = data['accessToken'] ?? '';
+        final String refreshToken = data['refreshToken'] ?? '';
         final Map<String, dynamic> userData = data['usuario'] ?? {};
         
-        return User.fromJson(userData, token);
-      } else {
-        throw Exception(response.data['message'] ?? 'Error desconocido');
+        await _storageService.saveTokens(accessToken, refreshToken);
+        await _storageService.saveUserData(jsonEncode(userData));
+        
+        return User.fromJson(userData, accessToken);
       }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        // El servidor respondió con un error (4xx, 5xx)
-        throw Exception(e.response?.data['message'] ?? 'Error de autenticación');
-      }
-      throw Exception('Error de conexión al iniciar sesión');
+      return null;
     } catch (e) {
-      throw Exception('Error inesperado: $e');
+      throw _parseError(e);
     }
   }
 
@@ -45,15 +65,49 @@ class AuthService {
           'password': password,
         },
       );
-
       return response.statusCode == 201;
-    } on DioException catch (e) {
-      if (e.response != null) {
-        throw Exception(e.response?.data['message'] ?? 'Error de registro');
-      }
-      throw Exception('Error de conexión al registrarse');
     } catch (e) {
-      throw Exception('Error inesperado: $e');
+      throw _parseError(e);
     }
+  }
+
+  Future<String?> refreshToken() async {
+    final String? refresh = await _storageService.getRefreshToken();
+    if (refresh == null || JwtDecoder.isExpired(refresh)) return null;
+
+    try {
+      final response = await Dio().post(
+        ApiConstants.refreshEndpoint,
+        data: {'refreshToken': refresh},
+      );
+
+      if (response.statusCode == 200) {
+        final String newAccess = response.data['accessToken'];
+        final String newRefresh = response.data['refreshToken'] ?? refresh;
+        await _storageService.saveTokens(newAccess, newRefresh);
+        return newAccess;
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
+  }
+
+  Future<bool> checkSession() async {
+    String? accessToken = await _storageService.getAccessToken();
+    if (accessToken == null) return false;
+
+    if (JwtDecoder.isExpired(accessToken)) {
+      accessToken = await refreshToken();
+      if (accessToken == null) {
+        await logout();
+        return false;
+      }
+    }
+    return true;
+  }
+
+  Future<void> logout() async {
+    await _storageService.clearAll();
   }
 }
