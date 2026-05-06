@@ -3,18 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
-import '../controllers/login_controller.dart';
+import '../controllers/register_controller.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
 
-import '../screens/register_screen.dart';
-
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatelessWidget {
+  const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final LoginController controller = Get.put(LoginController());
+    final RegisterController controller = Get.put(RegisterController());
 
     return Scaffold(
       body: Stack(
@@ -40,7 +38,7 @@ class LoginScreen extends StatelessWidget {
           // 2. Contenido centrado con Glassmorphism
           Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: BackdropFilter(
@@ -74,7 +72,7 @@ class LoginScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Bienvenido de nuevo',
+                          'Crea tu cuenta',
                           style: GoogleFonts.inter(
                             color: AppColors.textMuted,
                             fontSize: 16,
@@ -103,6 +101,11 @@ class LoginScreen extends StatelessWidget {
                         }),
 
                         CustomTextField(
+                          label: 'Nombre completo',
+                          controller: controller.nameController,
+                        ),
+                        const SizedBox(height: 20),
+                        CustomTextField(
                           label: 'Correo electrónico',
                           controller: controller.emailController,
                         ),
@@ -112,11 +115,17 @@ class LoginScreen extends StatelessWidget {
                           controller: controller.passwordController,
                           isPassword: true,
                         ),
+                        const SizedBox(height: 20),
+                        CustomTextField(
+                          label: 'Confirmar Contraseña',
+                          controller: controller.confirmPasswordController,
+                          isPassword: true,
+                        ),
                         const SizedBox(height: 32),
                         
                         Obx(() => CustomButton(
-                          text: 'Iniciar Sesión',
-                          onPressed: controller.login,
+                          text: 'Registrarse',
+                          onPressed: controller.register,
                           isLoading: controller.isLoading.value,
                         )),
                         
@@ -125,13 +134,13 @@ class LoginScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              '¿No tienes cuenta?',
+                              '¿Ya tienes cuenta?',
                               style: GoogleFonts.inter(color: AppColors.textMuted),
                             ),
                             TextButton(
-                              onPressed: () => Get.to(() => const RegisterScreen()),
+                              onPressed: () => Get.back(),
                               child: Text(
-                                'Regístrate',
+                                'Inicia Sesión',
                                 style: GoogleFonts.inter(
                                   color: AppColors.textLink,
                                   fontWeight: FontWeight.bold,

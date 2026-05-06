@@ -34,4 +34,26 @@ class AuthService {
       throw Exception('Error inesperado: $e');
     }
   }
+
+  Future<bool> register(String name, String email, String password) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.registerEndpoint,
+        data: {
+          'nombre': name,
+          'email': email,
+          'password': password,
+        },
+      );
+
+      return response.statusCode == 201;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        throw Exception(e.response?.data['message'] ?? 'Error de registro');
+      }
+      throw Exception('Error de conexión al registrarse');
+    } catch (e) {
+      throw Exception('Error inesperado: $e');
+    }
+  }
 }
