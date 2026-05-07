@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/main_controller.dart';
 import 'home_screen.dart';
 import 'search_screen.dart';
+import 'profile_screen.dart';
 import '../constants/app_colors.dart';
 
 class MainScreen extends StatelessWidget {
@@ -17,7 +18,7 @@ class MainScreen extends StatelessWidget {
       const SearchScreen(),
       const Scaffold(backgroundColor: AppColors.bg, body: Center(child: Text('Modo Tinder / Conocer gente', style: TextStyle(color: AppColors.textHeader)))),
       const Scaffold(backgroundColor: AppColors.bg, body: Center(child: Text('Chats / Notificaciones', style: TextStyle(color: Colors.white)))),
-      const Scaffold(backgroundColor: Colors.black, body: Center(child: Text('Profile', style: TextStyle(color: Colors.white)))),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
