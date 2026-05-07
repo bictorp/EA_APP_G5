@@ -4,6 +4,7 @@ import 'theme/app_theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/main_screen.dart';
+import 'screens/edit_profile_screen.dart';
 import 'services/auth_service.dart';
 
 void main() async {
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/login', page: () => const LoginScreen()),
         GetPage(name: '/register', page: () => const RegisterScreen()),
         GetPage(name: '/home', page: () => const MainScreen()),
+        GetPage(name: '/profile/edit', page: () => const EditProfileScreen()),
       ],
       debugShowCheckedModeBanner: false,
     );

@@ -51,4 +51,16 @@ class UserService {
       return false;
     }
   }
+
+  Future<Map<String, dynamic>?> updateUser(String userId, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.patch('${ApiConstants.baseUrl}/usuarios/$userId', data: data);
+      if (response.statusCode == 200) {
+        return response.data;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
 }
