@@ -34,7 +34,7 @@ class HomeScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () => Get.toNamed('/create-post'),
             icon: const Icon(Icons.add_box_outlined, color: AppColors.textHeader),
           ),
           IconButton(

@@ -115,6 +115,25 @@ class PostService {
     }
   }
 
+  Future<Post?> createPost(String imageUrl, String caption) async {
+    try {
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}/posts',
+        data: {
+          'imageUrl': imageUrl,
+          'caption': caption,
+        },
+      );
+      if (response.statusCode == 201) {
+        return Post.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('Error creating post: $e');
+      return null;
+    }
+  }
+
   Future<bool> toggleFollow(String targetId) async {
     try {
       final response = await _dio.post('${ApiConstants.baseUrl}/usuarios/follow/$targetId');
