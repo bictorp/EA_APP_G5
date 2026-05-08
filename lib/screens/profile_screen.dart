@@ -4,6 +4,7 @@ import 'dart:ui';
 import '../controllers/profile_controller.dart';
 import '../constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -62,7 +63,7 @@ class ProfileScreen extends StatelessWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.settings_outlined, color: Colors.white),
-          onPressed: () {},
+          onPressed: () => Get.to(() => const SettingsScreen()),
         ),
       ],
     );

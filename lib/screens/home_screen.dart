@@ -41,13 +41,7 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {},
             icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textHeader),
           ),
-          IconButton(
-            onPressed: () async {
-              await controller.logout();
-              Get.offAllNamed('/login');
-            },
-            icon: const Icon(Icons.logout_rounded, color: AppColors.textHeader),
-          ),
+
         ],
       ),
       body: Obx(() {
