@@ -6,9 +6,18 @@ import 'screens/register_screen.dart';
 import 'screens/main_screen.dart';
 import 'screens/create_post_screen.dart';
 import 'services/auth_service.dart';
+import 'package:camera/camera.dart';
+
+List<CameraDescription> cameras = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  try {
+    cameras = await availableCameras();
+  } catch (e) {
+    print("Error inicializando cámaras: $e");
+  }
   
   final AuthService authService = AuthService();
   final bool isLoggedIn = await authService.checkSession();

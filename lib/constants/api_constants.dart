@@ -6,7 +6,8 @@ class ApiConstants {
     if (kIsWeb) {
       return 'http://localhost:1337';
     } else if (Platform.isAndroid) {
-      return 'http://10.0.2.2:1337';
+      // Usamos la IP local de tu PC para máxima compatibilidad
+      return 'http://192.168.1.24:1337';
     } else {
       return 'http://localhost:1337';
     }

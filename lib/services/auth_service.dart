@@ -32,6 +32,7 @@ class AuthService {
   }
 
   Future<User?> login(String email, String password) async {
+    print('Intentando login en: ${ApiConstants.loginEndpoint}');
     try {
       final response = await _dio.post(
         ApiConstants.loginEndpoint,

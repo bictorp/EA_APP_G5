@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import '../screens/camera_screen.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:photofilters/photofilters.dart';
+import 'package:image/image.dart' as img;
+import 'package:path/path.dart';
+import 'dart:io';
 import '../services/post_service.dart';
 import '../services/upload_service.dart';
 import '../constants/app_colors.dart';
@@ -18,6 +24,26 @@ class CreatePostController extends GetxController {
 
   final ImagePicker _picker = ImagePicker();
 
+  Future<void> startMediaFlow() async {
+    try {
+      final XFile? pickedFile = await Get.to(() => const CameraScreen());
+      if (pickedFile != null) {
+        await _cropImage(pickedFile);
+      } else {
+        // Si el usuario cancela la cámara/galería, volvemos atrás
+        if (selectedImage.value == null) {
+          Get.back();
+        }
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'No se pudo abrir la cámara',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.error.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    }
+  }
+
   Future<void> pickImage(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(source: source);
@@ -33,7 +59,18 @@ class CreatePostController extends GetxController {
     }
   }
 
+  Future<void> reEditImage() async {
+    if (selectedImage.value != null) {
+      await _cropImage(selectedImage.value!);
+    }
+  }
+
   Future<void> _cropImage(XFile imgFile) async {
+    if (kIsWeb) {
+      print("Saltando recorte en Web para evitar errores de inicialización");
+      await _applyFilters(imgFile);
+      return;
+    }
     try {
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: imgFile.path,
@@ -42,38 +79,104 @@ class CreatePostController extends GetxController {
               toolbarTitle: 'Recortar foto',
               toolbarColor: AppColors.bg,
               toolbarWidgetColor: Colors.white,
-              initAspectRatio: CropAspectRatioPreset.original,
-              lockAspectRatio: false,
-              aspectRatioPresets: [
-                CropAspectRatioPreset.square,
-                CropAspectRatioPreset.ratio3x2,
-                CropAspectRatioPreset.original,
-                CropAspectRatioPreset.ratio4x3,
-                CropAspectRatioPreset.ratio16x9
-              ],
+              activeControlsWidgetColor: AppColors.accent,
+              backgroundColor: AppColors.bg,
+              initAspectRatio: CropAspectRatioPreset.square,
+              lockAspectRatio: true,
+              hideBottomControls: true, // Ocultamos todo para máxima limpieza
           ),
           IOSUiSettings(
             title: 'Recortar foto',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+            aspectRatioPickerButtonHidden: true,
             aspectRatioPresets: [
               CropAspectRatioPreset.square,
-              CropAspectRatioPreset.ratio3x2,
-              CropAspectRatioPreset.original,
-              CropAspectRatioPreset.ratio4x3,
-              CropAspectRatioPreset.ratio16x9
             ],
           ),
         ],
       );
 
       if (croppedFile != null) {
-        selectedImage.value = XFile(croppedFile.path);
+        XFile croppedXFile = XFile(croppedFile.path);
+        await _applyFilters(croppedXFile);
       } else {
-        selectedImage.value = imgFile;
+        // Si cancela el recorte en móvil, cancelamos todo. 
+        // Pero en Web, como el cropper a veces falla, intentamos seguir con los filtros si ya teníamos la imagen.
+        if (kIsWeb) {
+          await _applyFilters(imgFile);
+        }
       }
     } catch (e) {
       print("Error cropping image: $e");
-      // Fallback if cropper is not supported on Web without proper index.html
-      selectedImage.value = imgFile;
+      // Si falla el cropper (común en web si no está configurado), saltamos a filtros
+      await _applyFilters(imgFile);
+    }
+  }
+
+  Future<void> _applyFilters(XFile file) async {
+    if (kIsWeb) {
+      print("Saltando filtros en Web por incompatibilidad de plataforma");
+      selectedImage.value = file;
+      return;
+    }
+    try {
+      String fileName = basename(file.path);
+      var imageBytes = await file.readAsBytes();
+      var decodedImage = img.decodeImage(imageBytes);
+      
+      if (decodedImage == null) return;
+
+      Map? imagefile = await Navigator.push(
+        Get.context!,
+        MaterialPageRoute(
+          builder: (context) => Theme(
+            data: ThemeData.dark().copyWith(
+              primaryColor: AppColors.accent,
+              scaffoldBackgroundColor: AppColors.bg,
+              appBarTheme: const AppBarTheme(
+                backgroundColor: AppColors.bg,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+              colorScheme: const ColorScheme.dark(
+                primary: AppColors.accent,
+                secondary: AppColors.accent,
+                surface: AppColors.containerBg,
+                background: AppColors.bg,
+              ),
+            ),
+            child: PhotoFilterSelector(
+              appBarColor: AppColors.bg,
+              title: const Text("Aplicar filtros", style: TextStyle(color: Colors.white)),
+              image: decodedImage,
+              filters: presetFiltersList,
+              filename: fileName,
+              loader: const Center(child: CircularProgressIndicator()),
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
+      );
+
+      if (imagefile != null && imagefile.containsKey('image_filtered')) {
+        File filteredFile = imagefile['image_filtered'];
+        selectedImage.value = XFile(filteredFile.path);
+      } else {
+        // Si no aplica filtros, nos quedamos con la recortada
+        selectedImage.value = file;
+      }
+
+      // Una vez procesada la imagen, vamos a la pantalla de descripción
+      if (Get.currentRoute != '/create-post') {
+        Get.toNamed('/create-post');
+      }
+    } catch (e) {
+      print("Error applying filters: $e");
+      selectedImage.value = file;
+      if (Get.currentRoute != '/create-post') {
+        Get.toNamed('/create-post');
+      }
     }
   }
 

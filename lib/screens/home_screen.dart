@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 import '../controllers/home_controller.dart';
+import '../controllers/create_post_controller.dart';
 import '../widgets/post_card.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -34,7 +35,10 @@ class HomeScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () => Get.toNamed('/create-post'),
+            onPressed: () {
+              final CreatePostController createPostController = Get.put(CreatePostController());
+              createPostController.startMediaFlow();
+            },
             icon: const Icon(Icons.add_box_outlined, color: AppColors.textHeader),
           ),
           IconButton(

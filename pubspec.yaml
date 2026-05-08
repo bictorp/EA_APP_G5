@@ -41,6 +41,11 @@ dependencies:
   jwt_decoder: ^2.0.1
   image_picker: ^1.2.2
   image_cropper: ^12.2.1
+  photofilters: ^3.0.1
+  image: ^3.3.0
+  camera: ^0.12.0+1
+  path_provider: ^2.1.5
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:
