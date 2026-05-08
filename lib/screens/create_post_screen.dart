@@ -1,11 +1,47 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../constants/app_colors.dart';
 import '../controllers/create_post_controller.dart';
 
 class CreatePostScreen extends StatelessWidget {
   const CreatePostScreen({super.key});
+
+  void _showPicker(BuildContext context, CreatePostController controller) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.containerBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext bc) {
+        return SafeArea(
+          child: Wrap(
+            children: <Widget>[
+              ListTile(
+                  leading: const Icon(Icons.photo_library, color: Colors.white),
+                  title: const Text('Galería', style: TextStyle(color: Colors.white)),
+                  onTap: () {
+                    controller.pickImage(ImageSource.gallery);
+                    Navigator.of(context).pop();
+                  }),
+              ListTile(
+                leading: const Icon(Icons.photo_camera, color: Colors.white),
+                title: const Text('Cámara', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  controller.pickImage(ImageSource.camera);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      }
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,29 +83,37 @@ class CreatePostScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Enlace de la foto',
-              style: GoogleFonts.inter(
-                color: AppColors.textHeader,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: controller.urlController,
-              style: GoogleFonts.inter(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'https://ejemplo.com/imagen.jpg',
-                hintStyle: GoogleFonts.inter(color: Colors.white24),
-                filled: true,
-                fillColor: AppColors.containerBg,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+            GestureDetector(
+              onTap: () => _showPicker(context, controller),
+              child: Obx(() => Container(
+                width: double.infinity,
+                height: 300,
+                decoration: BoxDecoration(
+                  color: AppColors.containerBg,
+                  borderRadius: BorderRadius.circular(16),
+                  image: controller.selectedImage.value != null
+                      ? DecorationImage(
+                          image: kIsWeb 
+                              ? NetworkImage(controller.selectedImage.value!.path) as ImageProvider
+                              : FileImage(File(controller.selectedImage.value!.path)),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              ),
+                child: controller.selectedImage.value == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.add_a_photo, size: 50, color: Colors.white54),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Toca para seleccionar o tomar foto',
+                            style: GoogleFonts.inter(color: Colors.white54),
+                          )
+                        ],
+                      )
+                    : null,
+              )),
             ),
             const SizedBox(height: 24),
             Text(

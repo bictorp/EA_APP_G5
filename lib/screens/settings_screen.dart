@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth_service.dart';
+import 'bug_report_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -44,6 +45,18 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
             physics: const BouncingScrollPhysics(),
             children: [
+              _buildSettingsSection(
+                title: 'General',
+                children: [
+                  _buildSettingsItem(
+                    icon: Icons.bug_report_rounded,
+                    title: 'Reportar un bug',
+                    color: const Color(0xFF6366F1), // Indigo color
+                    onTap: () => Get.to(() => const BugReportScreen()),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
               _buildSettingsSection(
                 title: 'Cuenta',
                 children: [
