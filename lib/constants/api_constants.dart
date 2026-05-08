@@ -1,5 +1,5 @@
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, kReleaseMode;
 
 class ApiConstants {
   static String get baseUrl {
@@ -11,7 +11,7 @@ class ApiConstants {
     if (kIsWeb) {
       return 'http://localhost:1337';
     } else if (Platform.isAndroid) {
-      // Usamos tu IP local para desarrollo en el emulador/móvil
+      // Usamos tu IP local que sabemos que funciona en tu entorno
       return 'http://192.168.1.24:1337';
     } else {
       return 'http://localhost:1337';

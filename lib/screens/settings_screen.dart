@@ -46,6 +46,41 @@ class SettingsScreen extends StatelessWidget {
             physics: const BouncingScrollPhysics(),
             children: [
               _buildSettingsSection(
+                title: 'Apariencia',
+                children: [
+                  _buildSettingsToggle(
+                    icon: Icons.dark_mode_rounded,
+                    title: 'Modo Oscuro',
+                    color: const Color(0xFFC084FC),
+                    value: true, // Siempre activo de momento
+                    onChanged: (val) {
+                      Get.snackbar(
+                        'Próximamente', 
+                        'El cambio de tema se implementará en el futuro',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: const Color(0xFF1E293B),
+                        colorText: Colors.white,
+                      );
+                    },
+                  ),
+                  _buildSettingsItem(
+                    icon: Icons.language_rounded,
+                    title: 'Idioma',
+                    color: const Color(0xFFC084FC),
+                    onTap: () {
+                      Get.snackbar(
+                        'Próximamente', 
+                        'La selección de idioma estará disponible en futuras versiones',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: const Color(0xFF1E293B),
+                        colorText: Colors.white,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _buildSettingsSection(
                 title: 'General',
                 children: [
                   _buildSettingsItem(
@@ -102,6 +137,47 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSettingsToggle({
+    required IconData icon,
+    required String title,
+    required Color color,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              title,
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: color,
+            activeTrackColor: color.withOpacity(0.2),
+          ),
+        ],
+      ),
     );
   }
 
