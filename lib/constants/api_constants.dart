@@ -3,10 +3,15 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiConstants {
   static String get baseUrl {
+    // Si la app está compilada para producción (Release Mode)
+    if (const bool.fromEnvironment('dart.vm.product') || kReleaseMode) {
+      return 'https://tu-servidor-produccion.com'; // CAMBIAR AQUÍ PARA PRODUCCIÓN
+    }
+
     if (kIsWeb) {
       return 'http://localhost:1337';
     } else if (Platform.isAndroid) {
-      // Usamos la IP local de tu PC para máxima compatibilidad
+      // Usamos tu IP local para desarrollo en el emulador/móvil
       return 'http://192.168.1.24:1337';
     } else {
       return 'http://localhost:1337';
