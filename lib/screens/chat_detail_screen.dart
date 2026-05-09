@@ -97,32 +97,35 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       body: Column(
         children: [
           Expanded(
-            child: GetBuilder<ChatController>(
-              builder: (controller) {
-                if (controller.isMessagesLoading && controller.messages.isEmpty) {
-                  return const Center(child: CircularProgressIndicator(color: AppColors.accent));
-                }
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  reverse: true, // Invertimos la lista para que empiece abajo
-                  cacheExtent: 5000,
-                  itemCount: controller.messages.length,
-                  itemBuilder: (context, index) {
-                    final msg = controller.messages[index];
-                    final isMe = msg.remitenteId == myId;
-                    final isSelected = controller.selectedMessageIds.contains(msg.id);
-                    
-                    // Asignar o recuperar la llave para este mensaje
-                    final key = _messageKeys.putIfAbsent(msg.id, () => GlobalKey());
-                    
-                    return Container(
-                      key: key,
-                      child: _buildMessageBubble(msg, isMe, isSelected, myId),
+            child: Stack(
+              children: [
+                GetBuilder<ChatController>(
+                  builder: (controller) {
+                    if (controller.isMessagesLoading && controller.messages.isEmpty) {
+                      return const Center(child: CircularProgressIndicator(color: AppColors.accent));
+                    }
+                    return ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      reverse: true,
+                      cacheExtent: 5000,
+                      itemCount: controller.messages.length,
+                      itemBuilder: (context, index) {
+                        final msg = controller.messages[index];
+                        final isMe = msg.remitenteId == myId;
+                        final isSelected = controller.selectedMessageIds.contains(msg.id);
+                        
+                        final key = _messageKeys.putIfAbsent(msg.id, () => GlobalKey());
+                        
+                        return Container(
+                          key: key,
+                          child: _buildMessageBubble(msg, isMe, isSelected, myId),
+                        );
+                      },
                     );
                   },
-                );
-              },
+                ),
+              ],
             ),
           ),
           _buildInput(),
@@ -233,7 +236,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         child: const Icon(Icons.reply, color: AppColors.accent),
       ),
       child: GestureDetector(
-        onLongPress: msg.eliminadoParaTodos ? null : () => _chatController.toggleSelection(msg.id),
+        onLongPress: msg.eliminadoParaTodos ? null : () {
+          _chatController.toggleSelection(msg.id);
+          _showEmojiPicker(msg.id);
+        },
         onTap: _chatController.isSelectionMode.value && !msg.eliminadoParaTodos
             ? () => _chatController.toggleSelection(msg.id)
             : null,
@@ -332,12 +338,19 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       right: isMe ? 20 : 0,
                       bottom: 4,
                     ),
-                    child: Text(
-                      DateFormat('HH:mm').format(msg.createdAt),
-                      style: TextStyle(
-                        color: AppColors.textMuted.withOpacity(0.6),
-                        fontSize: 9,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          DateFormat('HH:mm').format(msg.createdAt),
+                          style: TextStyle(
+                            color: AppColors.textMuted.withOpacity(0.6),
+                            fontSize: 9,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        _buildReactionsBadge(msg),
+                      ],
                     ),
                   ),
               ],
@@ -566,6 +579,135 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             child: const Text('Vaciar', style: TextStyle(color: Colors.redAccent)),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showEmojiPicker(String messageId) {
+    final List<String> commonEmojis = ['❤️', '👍', '😂', '😮', '😢', '🙏'];
+    final List<String> allEmojis = [
+      '🔥', '✨', '💯', '👏', '🙌', '🎉', '🤩', '🤔', '🤐', '😴', '💩', '💀',
+      '🚀', '⭐', '🎈', '🎁', '🍔', '🍦', '🍕', '🍺', '⚽', '🏀', '🎮', '🎸',
+      '🌈', '⚡', '💡', '🔔', '📌', '📍', '✅', '❌', '⚠️', '🆘', '🛑', '🏁'
+    ];
+
+    bool isExpanded = false;
+
+    Get.bottomSheet(
+      StatefulBuilder(
+        builder: (context, setSheetState) {
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ...commonEmojis.map((emoji) => GestureDetector(
+                        onTap: () {
+                          Get.back();
+                          _chatController.reactToMessage(messageId, emoji, widget.contactId);
+                        },
+                        child: Text(
+                          emoji, 
+                          style: TextStyle(
+                            fontSize: 28, 
+                            color: emoji == '❤️' ? Colors.red : null
+                          )
+                        ),
+                      )),
+                      // Botón expandir
+                      if (!isExpanded)
+                        GestureDetector(
+                          onTap: () => setSheetState(() => isExpanded = true),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(color: Colors.white10, shape: BoxShape.circle),
+                            child: const Icon(Icons.add, color: Colors.white, size: 22),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                if (isExpanded) ...[
+                  const Divider(color: Colors.white10, height: 40, thickness: 1),
+                  SizedBox(
+                    height: 250,
+                    child: GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 6,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                      ),
+                      itemCount: allEmojis.length,
+                      itemBuilder: (context, index) => GestureDetector(
+                        onTap: () {
+                          Get.back();
+                          _chatController.reactToMessage(messageId, allEmojis[index], widget.contactId);
+                        },
+                        child: Center(
+                          child: Text(allEmojis[index], style: const TextStyle(fontSize: 24)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }
+      ),
+      isScrollControlled: true,
+    ).then((_) {
+      _chatController.clearSelection();
+    });
+  }
+
+  Widget _buildReactionsBadge(Message msg) {
+    if (msg.reactions == null || msg.reactions!.isEmpty) return const SizedBox.shrink();
+
+    final Map<String, int> emojiCounts = {};
+    for (var r in msg.reactions!) {
+      emojiCounts[r.emoji] = (emojiCounts[r.emoji] ?? 0) + 1;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.bg,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border.withOpacity(0.4), width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: emojiCounts.entries.map((entry) {
+          final isHeart = entry.key == '❤️' || entry.key == '♥️';
+          return Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Text(
+              '${entry.key}${entry.value > 1 ? entry.value : ""}',
+              style: TextStyle(
+                fontSize: 13, 
+                color: isHeart ? Colors.red : Colors.white
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

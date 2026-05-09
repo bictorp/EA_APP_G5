@@ -6,7 +6,8 @@ class Message {
   final String destinatarioId;
   final String contenido;
   final Post? post; 
-  final Message? parentMessage; // Referencia al mensaje citado
+  final Message? parentMessage; 
+  final List<MessageReaction>? reactions; 
   final DateTime createdAt;
   final bool leido;
   final bool eliminadoParaTodos;
@@ -18,6 +19,7 @@ class Message {
     required this.contenido,
     this.post,
     this.parentMessage,
+    this.reactions,
     required this.createdAt,
     this.leido = false,
     this.eliminadoParaTodos = false,
@@ -36,12 +38,15 @@ class Message {
         parentMessage: (json['parentMessage'] != null && json['parentMessage'] is Map)
                ? Message.fromJson(Map<String, dynamic>.from(json['parentMessage']))
                : null,
+        reactions: (json['reactions'] != null && json['reactions'] is List)
+               ? (json['reactions'] as List).map((r) => MessageReaction.fromJson(Map<String, dynamic>.from(r))).toList()
+               : [],
         createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
         leido: json['leido'] ?? false,
         eliminadoParaTodos: json['eliminadoParaTodos'] ?? false,
       );
     } catch (e) {
-      print('[Message] Error parseando mensaje: $e');
+      print('Error parsing message: $e');
       rethrow;
     }
   }
@@ -57,5 +62,19 @@ class Message {
       'leido': leido,
       'eliminadoParaTodos': eliminadoParaTodos,
     };
+  }
+}
+
+class MessageReaction {
+  final String usuarioId;
+  final String emoji;
+
+  MessageReaction({required this.usuarioId, required this.emoji});
+
+  factory MessageReaction.fromJson(Map<String, dynamic> json) {
+    return MessageReaction(
+      usuarioId: (json['usuario'] is Map ? json['usuario']['_id'] : json['usuario'])?.toString() ?? '',
+      emoji: json['emoji']?.toString() ?? '',
+    );
   }
 }

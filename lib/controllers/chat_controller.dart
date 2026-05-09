@@ -81,6 +81,15 @@ class ChatController extends GetxController {
       update();
     });
 
+    _socketService.on('message_updated', (data) {
+      final updatedMsg = Message.fromJson(data);
+      final index = messages.indexWhere((m) => m.id == updatedMsg.id);
+      if (index != -1) {
+        messages[index] = updatedMsg;
+        update();
+      }
+    });
+
     _socketService.on('messages_deleted', (data) {
       final List messageIds = data['messageIds'];
       final String type = data['type'];
@@ -301,10 +310,24 @@ class ChatController extends GetxController {
     update();
   }
 
+  var selectedMessageForReaction = Rxn<Message>(); // Mensaje al que se le va a reaccionar
+
+  void reactToMessage(String messageId, String emoji, String destinatarioId) {
+    _socketService.emit('react_message', {
+      'messageId': messageId,
+      'emoji': emoji,
+      'destinatarioId': destinatarioId,
+    });
+    selectedMessageForReaction.value = null;
+    clearSelection();
+  }
+
   @override
   void onClose() {
     _socketService.off('receive_message');
     _socketService.off('message_sent');
+    _socketService.off('message_updated');
+    _socketService.off('messages_deleted');
     super.onClose();
   }
 }
