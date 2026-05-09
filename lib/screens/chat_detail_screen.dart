@@ -25,6 +25,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ChatController _chatController = Get.find<ChatController>();
+  Worker? _worker;
 
   @override
   void initState() {
@@ -32,11 +33,19 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     _chatController.loadConversation(widget.contactId);
     
     // Auto-scroll to bottom when messages change
-    ever(_chatController.messages, (_) {
+    _worker = ever(_chatController.messages, (_) {
       if (mounted) {
         _scrollToBottom();
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _worker?.dispose();
+    _textController.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _scrollToBottom() {
@@ -64,6 +73,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop && _chatController.isSelectionMode.value) {
           _chatController.clearSelection();
+        } else if (didPop) {
+          _chatController.closeConversation();
         }
       },
       child: Scaffold(
@@ -72,25 +83,33 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         body: Column(
           children: [
             Expanded(
-              child: Obx(() {
-                if (_chatController.isLoading.value && _chatController.messages.isEmpty) {
-                  return const Center(child: CircularProgressIndicator(color: AppColors.accent));
-                }
+              child: GetBuilder<ChatController>(
+                builder: (controller) {
+                  final myId = controller.currentUserId.value;
+                  if (myId == null) return const Center(child: CircularProgressIndicator(color: AppColors.accent));
 
-                final messages = _chatController.messages;
+                  final messages = controller.messages.where((m) => 
+                    (m.remitenteId == widget.contactId && m.destinatarioId == myId) ||
+                    (m.remitenteId == myId && m.destinatarioId == widget.contactId)
+                  ).toList();
 
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final msg = messages[index];
-                    final bool isMe = msg.remitenteId == _chatController.currentUserId;
-                    
-                    return _buildMessageBubble(msg, isMe);
-                  },
-                );
-              }),
+                  if (controller.isMessagesLoading && messages.isEmpty) {
+                    return const Center(child: CircularProgressIndicator(color: AppColors.accent));
+                  }
+
+                  return ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final msg = messages[index];
+                      final bool isMe = msg.remitenteId == myId;
+                      final bool isSelected = controller.selectedMessageIds.contains(msg.id);
+                      return _buildMessageBubble(msg, isMe, isSelected);
+                    },
+                  );
+                },
+              ),
             ),
             _buildInput(),
           ],
@@ -145,7 +164,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   void _showDeleteDialog() {
     final bool canDeleteForEveryone = _chatController.selectedMessageIds.every((id) {
       final msg = _chatController.messages.firstWhere((m) => m.id == id);
-      return msg.remitenteId == _chatController.currentUserId && !msg.eliminadoParaTodos;
+      return msg.remitenteId == _chatController.currentUserId.value && !msg.eliminadoParaTodos;
     });
 
     Get.dialog(
@@ -183,75 +202,71 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     );
   }
 
-  Widget _buildMessageBubble(Message msg, bool isMe) {
-    return Obx(() {
-      final bool isSelected = _chatController.selectedMessageIds.contains(msg.id);
-      
-      return GestureDetector(
-        onLongPress: msg.eliminadoParaTodos ? null : () => _chatController.toggleSelection(msg.id),
-        onTap: _chatController.isSelectionMode.value && !msg.eliminadoParaTodos
-            ? () => _chatController.toggleSelection(msg.id)
-            : null,
-        child: Container(
-          width: double.infinity,
-          color: isSelected ? AppColors.accent.withOpacity(0.15) : Colors.transparent,
-          child: Align(
-            alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: msg.eliminadoParaTodos
-                    ? Colors.transparent
-                    : (isMe ? AppColors.accent : AppColors.surface),
-                border: msg.eliminadoParaTodos
-                    ? Border.all(color: AppColors.textMuted.withOpacity(0.3))
-                    : null,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(16),
-                  topRight: const Radius.circular(16),
-                  bottomLeft: Radius.circular(isMe ? 16 : 4),
-                  bottomRight: Radius.circular(isMe ? 4 : 16),
-                ),
+  Widget _buildMessageBubble(Message msg, bool isMe, bool isSelected) {
+    return GestureDetector(
+      onLongPress: msg.eliminadoParaTodos ? null : () => _chatController.toggleSelection(msg.id),
+      onTap: _chatController.isSelectionMode.value && !msg.eliminadoParaTodos
+          ? () => _chatController.toggleSelection(msg.id)
+          : null,
+      child: Container(
+        width: double.infinity,
+        color: isSelected ? AppColors.accent.withOpacity(0.15) : Colors.transparent,
+        child: Align(
+          alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: msg.eliminadoParaTodos
+                  ? Colors.transparent
+                  : (isMe ? AppColors.accent : AppColors.surface),
+              border: msg.eliminadoParaTodos
+                  ? Border.all(color: AppColors.textMuted.withOpacity(0.3))
+                  : null,
+              borderRadius: BorderRadius.only(
+                topLeft: const Radius.circular(16),
+                topRight: const Radius.circular(16),
+                bottomLeft: Radius.circular(isMe ? 16 : 4),
+                bottomRight: Radius.circular(isMe ? 4 : 16),
               ),
-              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (msg.eliminadoParaTodos)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.block, size: 14, color: AppColors.textMuted.withOpacity(0.7)),
-                        const SizedBox(width: 5),
-                        Text(
-                          msg.contenido,
-                          style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontStyle: FontStyle.italic),
-                        ),
-                      ],
-                    )
-                  else
-                    Text(
-                      msg.contenido,
-                      style: const TextStyle(color: Colors.white, fontSize: 15),
-                    ),
-                  if (!msg.eliminadoParaTodos) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      DateFormat('HH:mm').format(msg.createdAt),
-                      style: TextStyle(
-                        color: isMe ? Colors.white70 : AppColors.textMuted,
-                        fontSize: 10,
+            ),
+            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (msg.eliminadoParaTodos)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.block, size: 14, color: AppColors.textMuted.withOpacity(0.7)),
+                      const SizedBox(width: 5),
+                      Text(
+                        msg.contenido,
+                        style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontStyle: FontStyle.italic),
                       ),
+                    ],
+                  )
+                else
+                  Text(
+                    msg.contenido,
+                    style: const TextStyle(color: Colors.white, fontSize: 15),
+                  ),
+                if (!msg.eliminadoParaTodos) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat('HH:mm').format(msg.createdAt),
+                    style: TextStyle(
+                      color: isMe ? Colors.white70 : AppColors.textMuted,
+                      fontSize: 10,
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         ),
-      );
-    });
+      ),
+    );
   }
 
   Widget _buildInput() {

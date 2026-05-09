@@ -8,6 +8,7 @@ import 'screens/create_post_screen.dart';
 import 'services/auth_service.dart';
 import 'services/socket_service.dart';
 import 'package:camera/camera.dart';
+import 'controllers/chat_controller.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -25,6 +26,8 @@ void main() async {
 
   if (isLoggedIn) {
     await SocketService().connect();
+    Get.put(AuthService(), permanent: true);
+    Get.put(ChatController(), permanent: true);
   }
 
   runApp(MyApp(isLoggedIn: isLoggedIn));

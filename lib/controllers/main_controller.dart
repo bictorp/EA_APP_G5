@@ -1,9 +1,11 @@
 import 'package:get/get.dart';
 
 class MainController extends GetxController {
-  var selectedIndex = 0.obs;
+  int selectedIndex = 0;
 
   void changePage(int index) {
-    selectedIndex.value = index;
+    if (selectedIndex == index) return;
+    selectedIndex = index;
+    update();
   }
 }

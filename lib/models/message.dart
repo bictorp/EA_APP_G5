@@ -18,15 +18,20 @@ class Message {
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
-    return Message(
-      id: json['_id'] ?? '',
-      remitenteId: json['remitente'] is Map ? json['remitente']['_id'] : json['remitente'],
-      destinatarioId: json['destinatario'] is Map ? json['destinatario']['_id'] : json['destinatario'],
-      contenido: json['contenido'] ?? '',
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
-      leido: json['leido'] ?? false,
-      eliminadoParaTodos: json['eliminadoParaTodos'] ?? false,
-    );
+    try {
+      return Message(
+        id: json['_id']?.toString() ?? '',
+        remitenteId: (json['remitente'] is Map ? json['remitente']['_id'] : json['remitente'])?.toString() ?? '',
+        destinatarioId: (json['destinatario'] is Map ? json['destinatario']['_id'] : json['destinatario'])?.toString() ?? '',
+        contenido: json['contenido']?.toString() ?? '',
+        createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+        leido: json['leido'] ?? false,
+        eliminadoParaTodos: json['eliminadoParaTodos'] ?? false,
+      );
+    } catch (e) {
+      print('[Message] Error parseando mensaje: $e');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {

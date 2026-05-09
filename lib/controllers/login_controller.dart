@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
+import '../controllers/chat_controller.dart';
 
 class LoginController extends GetxController {
   final TextEditingController emailController = TextEditingController();
@@ -21,14 +22,7 @@ class LoginController extends GetxController {
       );
 
       if (user != null) {
-        Get.snackbar(
-          'Éxito',
-          'Bienvenido ${user.nombre}',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.colorScheme.primary.withOpacity(0.1),
-          colorText: Get.theme.colorScheme.primary,
-          margin: const EdgeInsets.all(16),
-        );
+        Get.put(ChatController(), permanent: true);
         Get.offAllNamed('/home');
       }
     } catch (e) {
