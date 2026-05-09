@@ -5,6 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
 import '../services/user_service.dart';
+import '../services/post_service.dart';
+import '../models/post.dart';  
+import '../widgets/post_card.dart';
 import '../widgets/user_card.dart';
 import '../widgets/filter_modal.dart';
 
@@ -17,6 +20,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final UserService _userService = UserService();
+  final PostService _postService = PostService(); // Initialize PostService
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -30,6 +34,10 @@ class _SearchScreenState extends State<SearchScreen> {
   bool hasNextPage = false;
   int page = 1;
 
+  // Discovery Posts State
+  List<Post> discoveryPosts = [];
+  bool isLoadingDiscovery = false;
+
   // Filter Data State
   List<String> selectedFilters = [];
   List<dynamic> universidades = [];
@@ -40,6 +48,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    _loadDiscoveryFeed(); // Load posts on startup
   }
 
   @override
@@ -50,20 +59,68 @@ class _SearchScreenState extends State<SearchScreen> {
     super.dispose();
   }
 
-  void _onSearchChanged(String value) {
+  // Fetch the discovery posts
+  Future<void> _loadDiscoveryFeed() async {
+    setState(() => isLoadingDiscovery = true);
+    final result = await _postService.getDiscoveryFeed(page: 1, limit: 20);
+    setState(() {
+      discoveryPosts = result['posts'] ?? [];
+      isLoadingDiscovery = false;
+    });
+  }
+
+void _onSearchChanged(String value) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
     _debounce = Timer(const Duration(milliseconds: 400), () {
-      if (value.trim().isEmpty && selectedFilters.isEmpty) {
+      final bool isSearchEmpty = value.trim().isEmpty && selectedFilters.isEmpty;
+      
+      if (isSearchEmpty) {
         setState(() {
           users = [];
-          hasTyped = false;
+          hasTyped = false; // Resetting this is key
           hasNextPage = false;
+          page = 1;
         });
+        // Optionally refresh discovery feed when returning to idle state
+        _loadDiscoveryFeed(); 
         return;
       }
+      
       performSearch(1, isNewSearch: true);
     });
+  }
+
+  // Also update the filter callback to handle empty selections
+  void _openFilters() async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => FilterModal(
+        selected: selectedFilters,
+        onApply: (ids, fetchedUnis, fetchedGrados, fetchedAsigs) {
+          setState(() {
+            selectedFilters = ids;
+            universidades = fetchedUnis;
+            grados = fetchedGrados;
+            asignaturas = fetchedAsigs;
+          });
+
+          // Check if clearing filters makes the search "empty"
+          if (_searchController.text.trim().isEmpty && ids.isEmpty) {
+            setState(() {
+              users = [];
+              hasTyped = false;
+              hasNextPage = false;
+            });
+            _loadDiscoveryFeed();
+          } else {
+            performSearch(1, isNewSearch: true);
+          }
+        },
+      ),
+    );
   }
 
   Future<void> performSearch(int pageNum, {bool isNewSearch = false}) async {
@@ -100,13 +157,8 @@ class _SearchScreenState extends State<SearchScreen> {
         });
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'No se pudo realizar la búsqueda',
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      Get.snackbar('Error', 'No se pudo realizar la búsqueda',
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
     } finally {
       setState(() {
         isLoading = false;
@@ -124,83 +176,31 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  void _openFilters() async {
-    await showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => FilterModal(
-        selected: selectedFilters,
-        onApply: (ids, fetchedUnis, fetchedGrados, fetchedAsigs) {
-          setState(() {
-            selectedFilters = ids;
-            universidades = fetchedUnis;
-            grados = fetchedGrados;
-            asignaturas = fetchedAsigs;
-          });
-          performSearch(1, isNewSearch: true);
-        },
-      ),
-    );
-  }
 
   Widget _buildSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          // Filter Toggle Button
           GestureDetector(
             onTap: _openFilters,
             child: Container(
-              height: 56,
-              width: 56,
-              decoration: BoxDecoration(
-                color: AppColors.containerBg,
-                borderRadius: BorderRadius.circular(16),
-              ),
+              height: 56, width: 56,
+              decoration: BoxDecoration(color: AppColors.containerBg, borderRadius: BorderRadius.circular(16)),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   const Icon(Icons.tune_rounded, color: Colors.white),
                   if (selectedFilters.isNotEmpty)
-                    Positioned(
-                      top: 10,
-                      right: 10,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: AppColors.textLink,
-                          shape: BoxShape.circle,
-                        ),
-                        constraints: const BoxConstraints(
-                          minWidth: 18,
-                          minHeight: 18,
-                        ),
-                        child: Center(
-                          child: Text(
-                            selectedFilters.length.toString(),
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    Positioned(top: 10, right: 10, child: CircleAvatar(radius: 9, backgroundColor: AppColors.textLink, child: Text(selectedFilters.length.toString(), style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)))),
                 ],
               ),
             ),
           ),
           const SizedBox(width: 12),
-          // Text Search Input
           Expanded(
             child: Container(
-              decoration: BoxDecoration(
-                color: AppColors.containerBg,
-                borderRadius: BorderRadius.circular(16),
-              ),
+              decoration: BoxDecoration(color: AppColors.containerBg, borderRadius: BorderRadius.circular(16)),
               child: TextField(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
@@ -220,61 +220,79 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildOnboarding() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.containerBg,
-              ),
-              child: const Icon(
-                Icons.travel_explore_rounded,
-                size: 60,
-                color: Colors.white24,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Encuentra estudiantes',
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 24,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Busca personas por universidad, grado o asignaturas.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                color: AppColors.textMuted,
-                fontSize: 15,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  // DISCOVERY GRID VIEW
+    Widget _buildDiscoveryFeed() {
+  if (isLoadingDiscovery && discoveryPosts.isEmpty) {
+    return const Center(child: CircularProgressIndicator(color: AppColors.textLink));
   }
 
-  Widget _buildResults() {
-    if (!hasTyped && selectedFilters.isEmpty) {
-      return _buildOnboarding();
-    }
-
-    if (isLoading && users.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.textLink),
+  return GridView.builder(
+    padding: const EdgeInsets.all(2),
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 3,
+      crossAxisSpacing: 2,
+      mainAxisSpacing: 2,
+    ),
+    itemCount: discoveryPosts.length,
+    itemBuilder: (context, index) {
+      final post = discoveryPosts[index];
+      
+      return GestureDetector(
+        onTap: () {
+          // Wrap the PostCard in a Scaffold for the detail view
+          Get.to(
+            () => Scaffold(
+              backgroundColor: AppColors.bg,
+              appBar: AppBar(
+                backgroundColor: AppColors.bg,
+                elevation: 0,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                  onPressed: () => Get.back(),
+                ),
+                title: Text(
+                  'Publicación',
+                  style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              body: SingleChildScrollView(
+                child: PostCard(post: post),
+              ),
+            ),
+            transition: Transition.cupertino, // Natural sliding transition
+          );
+        },
+        child: Hero(
+          tag: 'post_${post.id}', 
+          child: Image.network(
+            post.imageUrl ?? '',
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              color: AppColors.containerBg,
+              child: const Icon(Icons.broken_image, color: AppColors.textMuted),
+            ),
+          ),
+        ),
       );
+    },
+  );
+}
+
+  Widget _buildResults() {
+    // Determine if we are in "Idle/Discovery" mode
+    final bool isIdle = _searchController.text.trim().isEmpty && selectedFilters.isEmpty;
+
+    if (isIdle) {
+      return _buildDiscoveryFeed();
     }
 
-    if (users.isEmpty) {
+    // While searching/loading
+    if (isLoading && users.isEmpty) {
+      return const Center(child: CircularProgressIndicator(color: AppColors.textLink));
+    }
+
+    // Search gave 0 results
+    if (users.isEmpty && hasTyped) {
       return Center(
         child: Text(
           'No se encontraron usuarios',
@@ -283,40 +301,21 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
+    // Show User Results
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.only(top: 12, bottom: 100),
       itemCount: users.length + 1,
       itemBuilder: (context, index) {
         if (index == users.length) {
-          if (isLoadingMore) {
-            return const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(
-                child: CircularProgressIndicator(color: AppColors.textLink),
-              ),
-            );
-          }
-          if (!hasNextPage && users.isNotEmpty) {
-            return Padding(
-              padding: const EdgeInsets.all(24),
-              child: Center(
-                child: Text(
-                  'No hay más resultados',
-                  style: GoogleFonts.inter(color: AppColors.textMuted),
-                ),
-              ),
-            );
-          }
-          return const SizedBox.shrink();
+          return isLoadingMore 
+            ? const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Center(child: CircularProgressIndicator(color: AppColors.textLink)),
+              )
+            : const SizedBox.shrink();
         }
-
-        return UserCard(
-          user: users[index],
-          onTap: () {
-            // TODO: Navigate to Profile
-          },
-        );
+        return UserCard(user: users[index], onTap: () {});
       },
     );
   }
@@ -328,24 +327,14 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.bg,
         elevation: 0,
-        centerTitle: false,
-        title: Text(
-          'Explorar',
-          style: GoogleFonts.inter(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-            fontSize: 22,
-          ),
-        ),
+        title: Text('Explorar', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 22)),
       ),
       body: Column(
         children: [
           const SizedBox(height: 8),
           _buildSearchBar(),
           const SizedBox(height: 12),
-          Expanded(
-            child: _buildResults(),
-          ),
+          Expanded(child: _buildResults()),
         ],
       ),
     );

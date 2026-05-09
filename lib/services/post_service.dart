@@ -47,6 +47,45 @@ class PostService {
     }
   }
 
+    Future<Map<String, dynamic>> getDiscoveryFeed({int page = 1, int limit = 10}) async {
+    try {
+      if (kDebugMode) {
+        print('Fetching feed from: ${ApiConstants.baseUrl}/posts/discovery');
+      }
+      
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}/posts/discovery',
+        queryParameters: {'page': page, 'limit': limit},
+      );
+      
+      if (kDebugMode) {
+        print('Response status: ${response.statusCode}');
+        print('Response data length: ${response.data['docs']?.length}');
+      }
+
+      if (response.statusCode == 200) {
+        final List docs = response.data['docs'] ?? [];
+        final List<Post> posts = docs.map((json) => Post.fromJson(json)).toList();
+        
+        return {
+          'posts': posts,
+          'hasNextPage': response.data['hasNextPage'] ?? false,
+          'nextPage': response.data['nextPage'],
+        };
+      }
+      return {'posts': <Post>[], 'hasNextPage': false};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in getDiscoveryFeed: $e');
+        if (e is DioException) {
+          print('Dio error: ${e.response?.data}');
+        }
+      }
+      return {'posts': <Post>[], 'hasNextPage': false};
+    }
+  }
+
+
   Future<Post?> toggleLike(String postId) async {
     try {
       final response = await _dio.patch('${ApiConstants.baseUrl}/posts/$postId/like');
