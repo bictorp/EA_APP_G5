@@ -137,6 +137,110 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
+  void _showEditDialog(BuildContext context, HomeController controller) {
+    final TextEditingController editController = TextEditingController(text: widget.post.caption);
+
+    Get.dialog(
+      BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Dialog(
+          backgroundColor: AppColors.containerBg.withOpacity(0.9),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+            side: BorderSide(color: AppColors.accent.withOpacity(0.1), width: 1),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.edit_note_rounded, color: AppColors.accent, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      'Editar descripción',
+                      style: GoogleFonts.inter(
+                        color: AppColors.textHeader,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.border.withOpacity(0.5)),
+                  ),
+                  child: TextField(
+                    controller: editController,
+                    maxLines: 5,
+                    style: GoogleFonts.inter(color: AppColors.textHeader, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: '¿Qué estás pensando?',
+                      hintStyle: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
+                      contentPadding: const EdgeInsets.all(16),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Get.back(),
+                        child: Text(
+                          'Cancelar',
+                          style: GoogleFonts.inter(color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final newText = editController.text.trim();
+                          Get.back();
+                          if (newText != widget.post.caption) {
+                            controller.editPost(widget.post.id, newText);
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.accent,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
+                        child: Text(
+                          'Guardar cambios',
+                          style: GoogleFonts.inter(fontWeight: FontWeight.w800, fontSize: 14),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showPostOptions(BuildContext context, HomeController controller) {
     final isOwnPost = widget.post.usuario.id == controller.currentUserId.value;
 
@@ -181,7 +285,7 @@ class _PostCardState extends State<PostCard> {
                 ),
                 onTap: () {
                   Get.back();
-                  // TODO: Editar
+                  _showEditDialog(context, controller);
                 },
               ),
               ListTile(

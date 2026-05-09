@@ -138,6 +138,31 @@ class HomeController extends GetxController {
     }
   }
 
+  Future<void> editPost(String postId, String newCaption) async {
+    final updatedPost = await _postService.updatePost(postId, {'caption': newCaption});
+    if (updatedPost != null) {
+      final index = posts.indexWhere((p) => p.id == postId);
+      if (index != -1) {
+        posts[index] = updatedPost;
+      }
+      Get.snackbar(
+        'Publicación actualizada',
+        'Los cambios se han guardado.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.success.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    } else {
+      Get.snackbar(
+        'Error',
+        'No se pudo actualizar la publicación.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.error.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+    }
+  }
+
   Future<void> toggleFollow(String targetId, String nombre) async {
     final success = await _postService.toggleFollow(targetId);
     if (success) {

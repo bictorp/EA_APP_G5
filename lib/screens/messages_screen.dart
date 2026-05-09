@@ -25,6 +25,26 @@ class MessagesScreen extends StatelessWidget {
             onSelected: (value) {
               if (value == 'new_chat') {
                 _showNewChatSheet(context, Get.find<ChatController>());
+              } else if (value == 'join_group') {
+                Get.snackbar(
+                  'Próximamente',
+                  'La funcionalidad de unirse a grupos estará disponible pronto',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: const Color(0xFF1E293B),
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(15),
+                  duration: const Duration(seconds: 3),
+                );
+              } else if (value == 'create_group') {
+                Get.snackbar(
+                  'Próximamente',
+                  'La creación de grupos se implementará en una futura actualización',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: const Color(0xFF1E293B),
+                  colorText: Colors.white,
+                  margin: const EdgeInsets.all(15),
+                  duration: const Duration(seconds: 3),
+                );
               }
               print('Seleccionado: $value');
             },

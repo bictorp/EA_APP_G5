@@ -115,6 +115,19 @@ class PostService {
     }
   }
 
+  Future<Post?> updatePost(String postId, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.patch('${ApiConstants.baseUrl}/posts/$postId', data: data);
+      if (response.statusCode == 200) {
+        return Post.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('Error updating post: $e');
+      return null;
+    }
+  }
+
   Future<Post?> createPost(String imageUrl, String caption) async {
     try {
       final response = await _dio.post(
