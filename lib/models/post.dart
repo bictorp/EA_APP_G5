@@ -6,7 +6,7 @@ class Post {
   final User usuario;
   final String? imageUrl;
   final String? caption;
-  final List<String> likes;
+  final List<User> likes;
   final int commentsCount;
   final DateTime createdAt;
 
@@ -60,7 +60,8 @@ class Post {
         usuario: User.fromJson(json['usuario'] ?? {}, ''),
         imageUrl: json['imageUrl'],
         caption: json['caption'],
-        likes: List<String>.from(json['likes'] ?? []),
+        likes: (json['likes'] as List?)
+          ?.map((like) => User.fromJson(Map<String, dynamic>.from(like), '', )).toList() ?? [],
         commentsCount: (json['comments'] as List?)?.length ?? 0,
         createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
       );
