@@ -5,6 +5,7 @@ import '../constants/api_constants.dart';
 import '../models/user.dart';
 import 'storage_service.dart';
 import 'auth_interceptor.dart';
+import 'socket_service.dart';
 
 class AuthService {
   // Centralizamos la instancia de Dio
@@ -51,7 +52,10 @@ class AuthService {
         await _storageService.saveTokens(accessToken, refreshToken);
         await _storageService.saveUserData(jsonEncode(userData));
         
-        return User.fromJson(userData, accessToken);
+        final user = User.fromJson(userData, accessToken);
+        // Conectar al socket tras login exitoso
+        await SocketService().connect();
+        return user;
       }
       return null;
     } catch (e) {
@@ -114,5 +118,6 @@ class AuthService {
 
   Future<void> logout() async {
     await _storageService.clearAll();
+    SocketService().disconnect();
   }
 }

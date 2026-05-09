@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart' as getx;
 import '../services/storage_service.dart';
 import '../constants/api_constants.dart';
+import '../services/socket_service.dart';
 
 class AuthInterceptor extends Interceptor {
   final StorageService _storageService = StorageService();
@@ -47,6 +48,7 @@ class AuthInterceptor extends Interceptor {
 
       // Si llegamos aquí, el refresco falló o no había token
       await _storageService.clearAll();
+      SocketService().disconnect();
       getx.Get.offAllNamed('/login');
     }
     return handler.next(err);

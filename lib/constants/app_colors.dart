@@ -10,6 +10,7 @@ class AppColors {
   static const Color bg = Color(0xFF16171D); // Web dark bg
   static const Color containerBg = Color(0xFF1F2028); // Web code-bg / card bg
   static const Color socialBg = Color(0x802F303A); // Web social-bg
+  static const Color surface = Color(0xFF1F2028); // Alias for containerBg
 
   // Text
   static const Color textHeader = Color(0xFFF3F4F6); // Web text-h
