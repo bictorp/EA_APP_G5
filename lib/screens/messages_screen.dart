@@ -137,74 +137,129 @@ class MessagesScreen extends StatelessWidget {
   }
 
   void _showNewChatSheet(BuildContext context, ChatController controller) {
-    // Candidatos: gente que sigues (mutual) pero sin mensajes aún
-    final candidates = controller.contacts.where((c) => c['lastMessage'] == null).toList();
-
+    // Lista inicial de candidatos
+    final List<dynamic> allCandidates = controller.contacts.where((c) => c['lastMessage'] == null).toList();
+    String searchQuery = ""; // Declarada aquí para persistir entre reconstrucciones del sheet
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
+      isScrollControlled: true, 
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.textMuted.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(2),
-              ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          // Filtrar candidatos según la búsqueda actual
+          final filteredCandidates = allCandidates.where((c) {
+            final name = (c['nombre'] ?? '').toString().toLowerCase();
+            return name.contains(searchQuery.toLowerCase());
+          }).toList();
+
+          return Container(
+            padding: EdgeInsets.only(
+              top: 20,
+              left: 20,
+              right: 20,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20, // Ajuste para el teclado
             ),
-            const SizedBox(height: 20),
-            const Text(
-              'Iniciar nuevo chat',
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            if (candidates.isEmpty)
-              const Padding(
-                padding: EdgeInsets.all(40),
-                child: Text(
-                  'No hay nuevos contactos disponibles',
-                  style: TextStyle(color: AppColors.textMuted),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: AppColors.textMuted.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
-              )
-            else
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: candidates.length,
-                  itemBuilder: (context, index) {
-                    final contact = candidates[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: contact['avatarUrl'] != null 
-                            ? NetworkImage(contact['avatarUrl']) 
-                            : null,
-                        child: contact['avatarUrl'] == null ? const Icon(Icons.person) : null,
-                      ),
-                      title: Text(
-                        contact['nombre'] ?? 'Usuario',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      onTap: () {
-                        Get.back(); // Cerrar sheet
-                        Get.to(() => ChatDetailScreen(
-                          contactId: contact['_id'],
-                          contactName: contact['nombre'] ?? 'Usuario',
-                          contactAvatar: contact['avatarUrl'],
-                        ));
+                const SizedBox(height: 20),
+                const Text(
+                  'Iniciar nuevo chat',
+                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 15),
+                Divider(color: Colors.white.withOpacity(0.1), thickness: 1),
+                const SizedBox(height: 15),
+                
+                // Buscador
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.containerBg.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border.withOpacity(0.2)),
+                  ),
+                  child: TextField(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar amigos...',
+                      hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5)),
+                      prefixIcon: const Icon(Icons.search, color: AppColors.textMuted),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onChanged: (value) {
+                      setSheetState(() {
+                        searchQuery = value;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                if (filteredCandidates.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Column(
+                      children: [
+                        Icon(Icons.search_off, size: 48, color: AppColors.textMuted.withOpacity(0.3)),
+                        const SizedBox(height: 10),
+                        Text(
+                          searchQuery.isEmpty ? 'No hay nuevos contactos disponibles' : 'No se encontraron resultados',
+                          style: const TextStyle(color: AppColors.textMuted),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: filteredCandidates.length,
+                      itemBuilder: (context, index) {
+                        final contact = filteredCandidates[index];
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                          leading: CircleAvatar(
+                            backgroundImage: contact['avatarUrl'] != null 
+                                ? NetworkImage(contact['avatarUrl']) 
+                                : null,
+                            child: contact['avatarUrl'] == null ? const Icon(Icons.person) : null,
+                          ),
+                          title: Text(
+                            contact['nombre'] ?? 'Usuario',
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                          ),
+                          subtitle: const Text('Disponible para chatear', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                          trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                          onTap: () {
+                            Get.back(); // Cerrar sheet
+                            Get.to(() => ChatDetailScreen(
+                              contactId: contact['_id'],
+                              contactName: contact['nombre'] ?? 'Usuario',
+                              contactAvatar: contact['avatarUrl'],
+                            ));
+                          },
+                        );
                       },
-                    );
-                  },
-                ),
-              ),
-          ],
-        ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        }
       ),
     );
   }

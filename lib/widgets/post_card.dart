@@ -263,17 +263,6 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
             if (isOwnPost) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(
-                  'Tu publicación',
-                  style: GoogleFonts.inter(
-                    color: AppColors.textMuted,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              const Divider(color: AppColors.border),
               ListTile(
                 leading: const Icon(
                   Icons.edit_outlined,
