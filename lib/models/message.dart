@@ -28,7 +28,9 @@ class Message {
         remitenteId: (json['remitente'] is Map ? json['remitente']['_id'] : json['remitente'])?.toString() ?? '',
         destinatarioId: (json['destinatario'] is Map ? json['destinatario']['_id'] : json['destinatario'])?.toString() ?? '',
         contenido: json['contenido']?.toString() ?? '',
-        post: json['post'] != null ? Post.fromJson(json['post']) : null,
+        post: (json['post'] != null && json['post'] is Map) 
+               ? Post.fromJson(Map<String, dynamic>.from(json['post'])) 
+               : null,
         createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
         leido: json['leido'] ?? false,
         eliminadoParaTodos: json['eliminadoParaTodos'] ?? false,
