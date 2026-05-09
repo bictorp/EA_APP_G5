@@ -6,6 +6,7 @@ import '../constants/app_colors.dart';
 import '../services/post_service.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
+import'../models/user.dart';
 
 class HomeController extends GetxController {
   final PostService _postService = PostService();
@@ -75,42 +76,60 @@ class HomeController extends GetxController {
   }
 
   Future<void> toggleLike(String postId) async {
-    // Optimistic update
-    final index = posts.indexWhere((p) => p.id == postId);
-    if (index == -1) return;
+  final index = posts.indexWhere((p) => p.id == postId);
 
-    final oldPost = posts[index];
-    final bool isLiked = oldPost.likes.contains(currentUserId.value);
-    
-    // Create new list of likes for UI
-    final List<String> newLikes = List.from(oldPost.likes);
-    if (isLiked) {
-      newLikes.remove(currentUserId.value);
-    } else {
-      newLikes.add(currentUserId.value);
-    }
+  if (index == -1) return;
 
-    // Update local state immediately
-    posts[index] = Post(
-      id: oldPost.id,
-      usuario: oldPost.usuario,
-      imageUrl: oldPost.imageUrl,
-      caption: oldPost.caption,
-      likes: newLikes,
-      commentsCount: oldPost.commentsCount,
-      createdAt: oldPost.createdAt,
+  final oldPost = posts[index];
+
+  // Verificar si el usuario ya dio like
+  final bool isLiked = oldPost.likes.any(
+    (user) => user.id == currentUserId.value,
+  );
+
+  // Crear copia mutable
+  final List<User> newLikes = List<User>.from(oldPost.likes);
+
+  if (isLiked) {
+    newLikes.removeWhere(
+      (user) => user.id == currentUserId.value,
     );
+  } else {
+    // Necesitas el usuario actual completo
+    final userData = await _storageService.getUserData();
 
-    // Call API
-    final updatedPost = await _postService.toggleLike(postId);
-    if (updatedPost == null) {
-      // Revert if failed
-      posts[index] = oldPost;
-    } else {
-      // Sync with real data from server
-      posts[index] = updatedPost;
+    if (userData != null) {
+      final decoded = jsonDecode(userData);
+
+      newLikes.add(
+        User.fromJson(decoded, ''),
+      );
     }
   }
+
+  // Update optimista
+  posts[index] = Post(
+    id: oldPost.id,
+    usuario: oldPost.usuario,
+    imageUrl: oldPost.imageUrl,
+    caption: oldPost.caption,
+    likes: newLikes,
+    commentsCount: oldPost.commentsCount,
+    createdAt: oldPost.createdAt,
+  );
+
+  try {
+    final updatedPost = await _postService.toggleLike(postId);
+
+    if (updatedPost != null) {
+      posts[index] = updatedPost;
+    } else {
+      posts[index] = oldPost;
+    }
+  } catch (e) {
+    posts[index] = oldPost;
+  }
+}
 
   Future<void> logout() async {
     await _authService.logout();

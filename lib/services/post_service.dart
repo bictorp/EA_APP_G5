@@ -156,4 +156,24 @@ class PostService {
       return false;
     }
   }
+
+  Future<Map<String, dynamic>> getPostsByUserId(String userId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/posts/user/$userId');
+      
+      if (response.statusCode == 200) {
+        final List docs = response.data['docs'] ?? [];
+        final List<Post> posts = docs.map((json) => Post.fromJson(json)).toList();
+        
+        return {
+          'posts': posts,
+          'hasNextPage': response.data['hasNextPage'] ?? false,
+        };
+      }
+      return {'posts': <Post>[], 'hasNextPage': false};
+    } catch (e) {
+      if (kDebugMode) print('Error in getPostsByUserId: $e');
+      return {'posts': <Post>[], 'hasNextPage': false};
+    }
+  }
 }

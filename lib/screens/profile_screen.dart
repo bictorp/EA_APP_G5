@@ -7,11 +7,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  final String? userId;
+
+  const ProfileScreen({
+    super.key,
+    this.userId,
+  });
+
 
   @override
   Widget build(BuildContext context) {
-    final ProfileController controller = Get.put(ProfileController());
+    final ProfileController controller = Get.put(
+  ProfileController(
+    userId: userId,
+  ),
+  tag: userId ?? 'me',
+);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -149,6 +160,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             
+            if(controller.userId == null)
             // Edit Button
             ElevatedButton(
               onPressed: controller.editProfile,
