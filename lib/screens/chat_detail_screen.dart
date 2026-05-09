@@ -254,12 +254,14 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               children: [
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: msg.post != null 
+                      ? EdgeInsets.zero 
+                      : const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: msg.eliminadoParaTodos
+                    color: (msg.eliminadoParaTodos || msg.post != null)
                         ? Colors.transparent
                         : (isMe ? AppColors.accent : AppColors.surface),
-                    border: msg.eliminadoParaTodos
+                    border: (msg.eliminadoParaTodos && msg.post == null)
                         ? Border.all(color: AppColors.textMuted.withOpacity(0.3))
                         : null,
                     borderRadius: BorderRadius.only(
@@ -271,37 +273,44 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   ),
                   constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                     children: [
                       if (msg.parentMessage != null) ...[
                         GestureDetector(
                           onTap: () => _scrollToMessage(msg.parentMessage!.id),
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border(left: BorderSide(color: isMe ? Colors.white70 : AppColors.accent, width: 3)),
+                              color: Colors.black.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border(
+                                left: BorderSide(
+                                  color: isMe ? Colors.white.withOpacity(0.5) : AppColors.accent,
+                                  width: 4,
+                                ),
+                              ),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   msg.parentMessage!.remitenteId == myId ? 'Tú' : widget.contactName,
-                                  style: TextStyle(
-                                    color: isMe ? Colors.white : AppColors.accent,
-                                    fontWeight: FontWeight.bold,
+                                  style: GoogleFonts.inter(
+                                    color: isMe ? Colors.white.withOpacity(0.9) : AppColors.accent,
+                                    fontWeight: FontWeight.w800,
                                     fontSize: 11,
                                   ),
                                 ),
+                                const SizedBox(height: 2),
                                 Text(
                                   msg.parentMessage!.contenido,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: isMe ? Colors.white70 : AppColors.textMuted,
+                                  style: GoogleFonts.inter(
+                                    color: isMe ? Colors.white.withOpacity(0.6) : AppColors.textMuted,
                                     fontSize: 12,
+                                    height: 1.3,
                                   ),
                                 ),
                               ],
@@ -309,8 +318,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                           ),
                         ),
                       ],
-                      if (msg.post != null) _buildPostPreview(msg.post!, myId),
-                      if (msg.post != null && msg.contenido.isNotEmpty) const SizedBox(height: 8),
+                      if (msg.post != null) _buildPostPreview(msg.post!, myId, isMe: isMe, hasComment: msg.contenido.isNotEmpty),
+                      if (msg.post != null && msg.contenido.isNotEmpty) const SizedBox(height: 4),
                       if (msg.eliminadoParaTodos)
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -324,9 +333,25 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                           ],
                         )
                       else if (msg.contenido.isNotEmpty)
-                        Text(
-                          msg.contenido,
-                          style: const TextStyle(color: Colors.white, fontSize: 15),
+                        Container(
+                          padding: msg.post != null 
+                              ? const EdgeInsets.symmetric(horizontal: 14, vertical: 10)
+                              : EdgeInsets.zero,
+                          decoration: msg.post != null
+                              ? BoxDecoration(
+                                  color: isMe ? AppColors.accent : AppColors.surface,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: const Radius.circular(16),
+                                    topRight: const Radius.circular(16),
+                                    bottomLeft: Radius.circular(isMe ? 16 : 4),
+                                    bottomRight: Radius.circular(isMe ? 4 : 16),
+                                  ),
+                                )
+                              : null,
+                          child: Text(
+                            msg.contenido,
+                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                          ),
                         ),
                     ],
                   ),
@@ -360,7 +385,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     );
   }
 
-  Widget _buildPostPreview(dynamic post, String myId) {
+  Widget _buildPostPreview(dynamic post, String myId, {required bool isMe, bool hasComment = false}) {
     final bool isAuthorPublic = post.usuario.privado == false;
     final bool isFollowing = (post.usuario.seguidores as List?)?.contains(myId) ?? false;
     final bool isMyOwnPost = post.usuario.id == myId;
@@ -368,20 +393,26 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
 
     if (!canSeePost) {
       return Container(
+        width: 200,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.textMuted.withOpacity(0.2)),
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: Radius.circular(hasComment ? 16 : (isMe ? 16 : 4)),
+            bottomRight: Radius.circular(hasComment ? 16 : (isMe ? 4 : 16)),
+          ),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
         ),
         child: Row(
           children: [
-            const Icon(Icons.lock_outline, color: AppColors.textMuted, size: 20),
-            const SizedBox(width: 10),
+            Icon(Icons.lock_outline, color: Colors.white.withOpacity(0.5), size: 16),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Publicación privada',
-                style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
+                style: GoogleFonts.inter(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.w500),
               ),
             ),
           ],
@@ -392,32 +423,52 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     return GestureDetector(
       onTap: () => Get.to(() => PostDetailScreen(post: post)),
       child: Container(
+        width: 220,
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(12),
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: Radius.circular(hasComment ? 16 : (isMe ? 16 : 4)),
+            bottomRight: Radius.circular(hasComment ? 16 : (isMe ? 4 : 16)),
+          ),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (post.imageUrl != null && post.imageUrl.isNotEmpty)
-              AspectRatio(
-                aspectRatio: 1,
-                child: Image.network(post.imageUrl, fit: BoxFit.cover),
-              ),
+            // Header del Autor
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
                   CircleAvatar(
-                    radius: 10,
-                    backgroundImage: NetworkImage(post.usuario.avatarUrl ?? ''),
+                    radius: 9,
+                    backgroundColor: Colors.white10,
+                    backgroundImage: (post.usuario.avatarUrl != null && post.usuario.avatarUrl.isNotEmpty)
+                        ? NetworkImage(post.usuario.avatarUrl)
+                        : null,
+                    child: (post.usuario.avatarUrl == null || post.usuario.avatarUrl.isEmpty)
+                        ? const Icon(Icons.person, size: 10, color: Colors.white)
+                        : null,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       post.usuario.nombre ?? 'Usuario',
-                      style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -425,6 +476,29 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 ],
               ),
             ),
+
+            // Imagen de la publicación
+            if (post.imageUrl != null && post.imageUrl.isNotEmpty)
+              AspectRatio(
+                aspectRatio: 1,
+                child: Image.network(post.imageUrl, fit: BoxFit.cover),
+              ),
+              
+            // Pie de la publicación (Caption)
+            if (post.caption != null && post.caption.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                child: Text(
+                  post.caption,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 11,
+                    height: 1.3,
+                  ),
+                ),
+              ),
           ],
         ),
       ),

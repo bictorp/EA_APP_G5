@@ -167,6 +167,15 @@ void _onSearchChanged(String value) {
     }
   }
 
+  Future<void> _handleRefresh() async {
+    final bool isIdle = _searchController.text.trim().isEmpty && selectedFilters.isEmpty;
+    if (isIdle) {
+      await _loadDiscoveryFeed();
+    } else {
+      await performSearch(1, isNewSearch: true);
+    }
+  }
+
   void _onScroll() {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 300 &&
@@ -226,55 +235,60 @@ void _onSearchChanged(String value) {
     return const Center(child: CircularProgressIndicator(color: AppColors.textLink));
   }
 
-  return GridView.builder(
-    padding: const EdgeInsets.all(2),
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 3,
-      crossAxisSpacing: 2,
-      mainAxisSpacing: 2,
-    ),
-    itemCount: discoveryPosts.length,
-    itemBuilder: (context, index) {
-      final post = discoveryPosts[index];
-      
-      return GestureDetector(
-        onTap: () {
-          // Wrap the PostCard in a Scaffold for the detail view
-          Get.to(
-            () => Scaffold(
-              backgroundColor: AppColors.bg,
-              appBar: AppBar(
+  return RefreshIndicator(
+    onRefresh: _handleRefresh,
+    color: AppColors.textLink,
+    backgroundColor: AppColors.bg,
+    child: GridView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(2),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 2,
+        mainAxisSpacing: 2,
+      ),
+      itemCount: discoveryPosts.length,
+      itemBuilder: (context, index) {
+        final post = discoveryPosts[index];
+        
+        return GestureDetector(
+          onTap: () {
+            Get.to(
+              () => Scaffold(
                 backgroundColor: AppColors.bg,
-                elevation: 0,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
-                  onPressed: () => Get.back(),
+                appBar: AppBar(
+                  backgroundColor: AppColors.bg,
+                  elevation: 0,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                    onPressed: () => Get.back(),
+                  ),
+                  title: Text(
+                    'Publicación',
+                    style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
-                title: Text(
-                  'Publicación',
-                  style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                body: SingleChildScrollView(
+                  child: PostCard(post: post),
                 ),
               ),
-              body: SingleChildScrollView(
-                child: PostCard(post: post),
+              transition: Transition.cupertino,
+            );
+          },
+          child: Hero(
+            tag: 'post_${post.id}', 
+            child: Image.network(
+              post.imageUrl ?? '',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: AppColors.containerBg,
+                child: const Icon(Icons.broken_image, color: AppColors.textMuted),
               ),
-            ),
-            transition: Transition.cupertino, // Natural sliding transition
-          );
-        },
-        child: Hero(
-          tag: 'post_${post.id}', 
-          child: Image.network(
-            post.imageUrl ?? '',
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: AppColors.containerBg,
-              child: const Icon(Icons.broken_image, color: AppColors.textMuted),
             ),
           ),
-        ),
-      );
-    },
+        );
+      },
+    ),
   );
 }
 
@@ -293,17 +307,33 @@ void _onSearchChanged(String value) {
 
     // Search gave 0 results
     if (users.isEmpty && hasTyped) {
-      return Center(
-        child: Text(
-          'No se encontraron usuarios',
-          style: GoogleFonts.inter(color: Colors.white70, fontSize: 16),
+      return RefreshIndicator(
+        onRefresh: _handleRefresh,
+        color: AppColors.textLink,
+        backgroundColor: AppColors.bg,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+            Center(
+              child: Text(
+                'No se encontraron usuarios',
+                style: GoogleFonts.inter(color: Colors.white70, fontSize: 16),
+              ),
+            ),
+          ],
         ),
       );
     }
 
     // Show User Results
-    return ListView.builder(
-      controller: _scrollController,
+    return RefreshIndicator(
+      onRefresh: _handleRefresh,
+      color: AppColors.textLink,
+      backgroundColor: AppColors.bg,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
+        controller: _scrollController,
       padding: const EdgeInsets.only(top: 12, bottom: 100),
       itemCount: users.length + 1,
       itemBuilder: (context, index) {
@@ -317,7 +347,8 @@ void _onSearchChanged(String value) {
         }
         return UserCard(user: users[index], onTap: () {});
       },
-    );
+    ),
+  );
   }
 
   @override

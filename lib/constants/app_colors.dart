@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Brand / Primary (Atenea)
-  static const Color accent = Color(0xFFC084FC); // Purple from Web
-  static const Color accentBg = Color(0x26C084FC); // 15% opacity
-  static const Color accentBorder = Color(0x80C084FC); // 50% opacity
+  static const Color accent = Color(0xFF8A2BE2); // New BlueViolet #8A2BE2
+  static const Color accentBg = Color(0x268A2BE2); // 15% opacity
+  static const Color accentBorder = Color(0x808A2BE2); // 50% opacity
 
   // Backgrounds
   static const Color bg = Color(0xFF16171D); // Web dark bg
@@ -15,7 +15,7 @@ class AppColors {
   // Text
   static const Color textHeader = Color(0xFFF3F4F6); // Web text-h
   static const Color textMuted = Color(0xFF9CA3AF); // Web text
-  static const Color textLink = Color(0xFFC084FC); // Same as accent
+  static const Color textLink = Color(0xFF8A2BE2); // Same as accent
 
   // Borders
   static const Color border = Color(0xFF2E303A); // Web border
@@ -37,9 +37,9 @@ class AppColors {
   static const Color inputFocus = accent;
   
   static const Color btnStart = accent;
-  static const Color btnEnd = Color(0xFF8B5CF6);
+  static const Color btnEnd = Color(0xFF8A2BE2);
 
   // Gradients
-  static const Color titleStart = Color(0xFFC084FC);
-  static const Color titleEnd = Color(0xFF8B5CF6);
+  static const Color titleStart = Color(0xFF8A2BE2);
+  static const Color titleEnd = Color(0xFF7C3AED); // Slightly darker version for gradient depth
 }

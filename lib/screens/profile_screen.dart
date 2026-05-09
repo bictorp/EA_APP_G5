@@ -32,7 +32,7 @@ class ProfileScreen extends StatelessWidget {
             center: Alignment.topRight,
             radius: 1.5,
             colors: [
-              Color(0xFF1E1B4B),
+              Color(0xFF2D0E4D),
               Color(0xFF0F172A),
               Color(0xFF000000),
             ],
@@ -49,15 +49,20 @@ class ProfileScreen extends StatelessWidget {
               return const Center(child: Text('No user data found', style: TextStyle(color: Colors.white)));
             }
 
-            return CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                _buildAppBar(user, controller),
-                _buildProfileHeader(user, controller),
-                _buildAcademicInfo(user),
-                _buildSectionDivider(),
-                _buildPhotoGrid(controller),
-              ],
+            return RefreshIndicator(
+              onRefresh: () => controller.loadUserData(),
+              color: AppColors.accent,
+              backgroundColor: AppColors.bg,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                slivers: [
+                  _buildAppBar(user, controller),
+                  _buildProfileHeader(user, controller),
+                  _buildAcademicInfo(user),
+                  _buildSectionDivider(),
+                  _buildPhotoGrid(controller),
+                ],
+              ),
             );
           }),
         ),

@@ -67,17 +67,22 @@ class MessagesScreen extends StatelessWidget {
           final activeContacts = controller.contacts.where((c) => c['lastMessage'] != null).toList();
 
           if (activeContacts.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            return RefreshIndicator(
+              onRefresh: () => controller.fetchContacts(),
+              color: AppColors.accent,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                   Icon(Icons.chat_bubble_outline, size: 80, color: AppColors.textMuted.withOpacity(0.2)),
                   const SizedBox(height: 20),
-                  const Text('No tienes conversaciones activas', style: TextStyle(color: AppColors.textMuted, fontSize: 16)),
+                  const Center(child: Text('No tienes conversaciones activas', style: TextStyle(color: AppColors.textMuted, fontSize: 16))),
                   const SizedBox(height: 10),
-                  TextButton(
-                    onPressed: () => _showNewChatSheet(context, controller),
-                    child: const Text('Iniciar una nueva', style: TextStyle(color: AppColors.accent)),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => _showNewChatSheet(context, controller),
+                      child: const Text('Iniciar una nueva', style: TextStyle(color: AppColors.accent)),
+                    ),
                   ),
                 ],
               ),
