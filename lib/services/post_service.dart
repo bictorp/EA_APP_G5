@@ -215,4 +215,21 @@ class PostService {
       return {'posts': <Post>[], 'hasNextPage': false};
     }
   }
+
+  Future<dynamic> toggleCommentLike(String commentId) async {
+    try {
+      final response = await _dio.patch('${ApiConstants.baseUrl}/comments/$commentId/like');
+      if (response.statusCode == 200) {
+        if (response.data is Map) {
+          final map = (response.data as Map).cast<String, dynamic>();
+          return Comment.fromJson(map);
+        }
+        return true;
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('Error toggling comment like: $e');
+      return null;
+    }
+  }
 }

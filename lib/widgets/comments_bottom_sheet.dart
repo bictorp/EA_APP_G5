@@ -6,6 +6,7 @@ import '../controllers/comments_controller.dart';
 import '../controllers/home_controller.dart';
 import '../constants/app_colors.dart';
 import '../screens/report_screen.dart';
+import '../widgets/heart_anim_button.dart';
 
 class CommentsBottomSheet extends StatefulWidget {
   final String postId;
@@ -18,6 +19,15 @@ class CommentsBottomSheet extends StatefulWidget {
 
 class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
   String? _selectedCommentId;
+  late CommentsController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Buscamos o creamos el controlador y forzamos el refresco
+    controller = Get.put(CommentsController(widget.postId), tag: widget.postId);
+    controller.fetchComments();
+  }
 
   void _showReportScreen(BuildContext context, String commentId) {
     Get.to(
@@ -194,7 +204,6 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CommentsController(widget.postId), tag: widget.postId);
     final homeController = Get.find<HomeController>();
 
     return Container(
@@ -301,6 +310,33 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                                     fontSize: 11,
                                   ),
                                 ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                HeartAnimButton(
+                                  isLiked: comment.likes.contains(homeController.currentUserId.value),
+                                  onTap: () => controller.toggleLike(comment.id),
+                                  size: 16,
+                                  color: comment.likes.contains(homeController.currentUserId.value)
+                                      ? Colors.red
+                                      : AppColors.textMuted,
+                                ),
+                                if (comment.likes.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${comment.likes.length}',
+                                    style: GoogleFonts.inter(
+                                      color: AppColors.textMuted,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
