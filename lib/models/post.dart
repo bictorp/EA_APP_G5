@@ -60,7 +60,10 @@ class Post {
         usuario: User.fromJson(json['usuario'] ?? {}, ''),
         imageUrl: json['imageUrl'],
         caption: json['caption'],
-        likes: List<String>.from(json['likes'] ?? []),
+        likes: (json['likes'] as List?)?.map((item) {
+          if (item is Map) return (item['_id'] ?? '').toString();
+          return item.toString();
+        }).toList() ?? [],
         commentsCount: (json['comments'] as List?)?.length ?? 0,
         createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
       );

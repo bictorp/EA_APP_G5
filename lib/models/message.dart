@@ -1,8 +1,11 @@
+import 'post.dart';
+
 class Message {
   final String id;
   final String remitenteId;
   final String destinatarioId;
   final String contenido;
+  final Post? post; // Nuevo campo
   final DateTime createdAt;
   final bool leido;
   final bool eliminadoParaTodos;
@@ -12,6 +15,7 @@ class Message {
     required this.remitenteId,
     required this.destinatarioId,
     required this.contenido,
+    this.post,
     required this.createdAt,
     this.leido = false,
     this.eliminadoParaTodos = false,
@@ -24,6 +28,7 @@ class Message {
         remitenteId: (json['remitente'] is Map ? json['remitente']['_id'] : json['remitente'])?.toString() ?? '',
         destinatarioId: (json['destinatario'] is Map ? json['destinatario']['_id'] : json['destinatario'])?.toString() ?? '',
         contenido: json['contenido']?.toString() ?? '',
+        post: json['post'] != null ? Post.fromJson(json['post']) : null,
         createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
         leido: json['leido'] ?? false,
         eliminadoParaTodos: json['eliminadoParaTodos'] ?? false,
@@ -40,6 +45,7 @@ class Message {
       'remitente': remitenteId,
       'destinatario': destinatarioId,
       'contenido': contenido,
+      'post': post?.id,
       'createdAt': createdAt.toIso8601String(),
       'leido': leido,
       'eliminadoParaTodos': eliminadoParaTodos,

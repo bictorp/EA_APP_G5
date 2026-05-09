@@ -113,7 +113,13 @@ class ChatController extends GetxController {
     
     if (contactIndex != -1) {
       final updatedContact = Map<String, dynamic>.from(contacts[contactIndex]);
-      updatedContact['lastMessage'] = message.contenido;
+      if (message.eliminadoParaTodos) {
+        updatedContact['lastMessage'] = 'El mensaje ha sido eliminado';
+      } else if (message.post != null) {
+        updatedContact['lastMessage'] = 'Envió una publicación';
+      } else {
+        updatedContact['lastMessage'] = message.contenido;
+      }
       
       // Mover el contacto al principio de la lista (como WhatsApp)
       contacts.removeAt(contactIndex);
@@ -231,13 +237,20 @@ class ChatController extends GetxController {
     activeChatId = null;
   }
 
-  void sendMessage(String destinatarioId, String contenido) {
-    if (contenido.trim().isEmpty) return;
+  void sendMessage(String destinatarioId, String contenido, {String? postId}) {
+    if (contenido.trim().isEmpty && postId == null) return;
     
     _socketService.emit('send_message', {
       'destinatarioId': destinatarioId,
       'contenido': contenido,
+      'postId': postId,
     });
+  }
+
+  Future<void> sharePost(String postId, List<String> contactIds, String comment) async {
+    for (var contactId in contactIds) {
+      sendMessage(contactId, comment, postId: postId);
+    }
   }
 
   // Métodos de selección y eliminación

@@ -4,6 +4,8 @@ import '../controllers/chat_controller.dart';
 import '../models/message.dart';
 import '../constants/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'post_detail_screen.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final String contactId;
@@ -102,11 +104,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
-                      final msg = messages[index];
-                      final bool isMe = msg.remitenteId == myId;
-                      final bool isSelected = controller.selectedMessageIds.contains(msg.id);
-                      return _buildMessageBubble(msg, isMe, isSelected);
-                    },
+                        final msg = messages[index];
+                        final bool isMe = msg.remitenteId == myId;
+                        final bool isSelected = controller.selectedMessageIds.contains(msg.id);
+                        return _buildMessageBubble(msg, isMe, isSelected, myId);
+                      },
                   );
                 },
               ),
@@ -202,7 +204,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     );
   }
 
-  Widget _buildMessageBubble(Message msg, bool isMe, bool isSelected) {
+  Widget _buildMessageBubble(Message msg, bool isMe, bool isSelected, String myId) {
     return GestureDetector(
       onLongPress: msg.eliminadoParaTodos ? null : () => _chatController.toggleSelection(msg.id),
       onTap: _chatController.isSelectionMode.value && !msg.eliminadoParaTodos
@@ -234,6 +236,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (msg.post != null) _buildPostPreview(msg.post!, myId),
+                if (msg.post != null && msg.contenido.isNotEmpty) const SizedBox(height: 8),
                 if (msg.eliminadoParaTodos)
                   Row(
                     mainAxisSize: MainAxisSize.min,
@@ -246,7 +250,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       ),
                     ],
                   )
-                else
+                else if (msg.contenido.isNotEmpty)
                   Text(
                     msg.contenido,
                     style: const TextStyle(color: Colors.white, fontSize: 15),
@@ -264,6 +268,90 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPostPreview(dynamic post, String myId) {
+    // Lógica de privacidad
+    final bool isAuthorPublic = post.usuario.privado == false;
+    final bool isFollowing = (post.usuario.seguidores as List?)?.contains(myId) ?? false;
+    final bool isMyOwnPost = post.usuario.id == myId;
+
+    final bool canSeePost = isAuthorPublic || isFollowing || isMyOwnPost;
+
+    if (!canSeePost) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.textMuted.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.lock_outline, color: AppColors.textMuted, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Publicación privada',
+                style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () {
+        Get.to(() => PostDetailScreen(post: post));
+      },
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Imagen del post
+            if (post.imageUrl != null && post.imageUrl.isNotEmpty)
+              AspectRatio(
+                aspectRatio: 1,
+                child: Image.network(
+                  post.imageUrl,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            // Info del autor
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 10,
+                    backgroundImage: NetworkImage(post.usuario.avatarUrl ?? ''),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      post.usuario.nombre ?? 'Usuario',
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

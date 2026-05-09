@@ -8,6 +8,7 @@ import '../widgets/heart_anim_button.dart';
 import '../widgets/comments_bottom_sheet.dart';
 import '../controllers/home_controller.dart';
 import '../screens/report_screen.dart';
+import '../widgets/share_post_bottom_sheet.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -552,10 +553,18 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                const Icon(
-                  Icons.send_rounded,
-                  color: AppColors.textHeader,
-                  size: 26,
+                GestureDetector(
+                  onTap: () {
+                    Get.bottomSheet(
+                      SharePostBottomSheet(post: widget.post),
+                      isScrollControlled: true,
+                    );
+                  },
+                  child: const Icon(
+                    Icons.send_rounded,
+                    color: AppColors.textHeader,
+                    size: 26,
+                  ),
                 ),
               ],
             ),
