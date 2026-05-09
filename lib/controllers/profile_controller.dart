@@ -75,20 +75,28 @@ class ProfileController extends GetxController {
       if (freshData != null) {
         user.value = User.fromJson(freshData, token);
         
-        // Verificar si el usuario actual está en la lista de seguidores
-        if (freshData['seguidores'] != null && freshData['seguidores'] is List) {
-          final List seguidores = freshData['seguidores'];
-          isFollowing.value = seguidores.any((s) {
-            final id = (s is String ? s : (s is Map ? s['_id'] : ''));
-            return id == currentId;
-          });
+        // Aseguramos tener el ID actual
+        if (currentId.isEmpty) {
+          await homeController.loadUser(); // Intentar cargar si está vacío
+          currentId = homeController.currentUserId.value;
+        }
+
+        // Priorizar el followStatus que devuelve el backend específicamente para el usuario actual
+        if (freshData['followStatus'] != null) {
+          isFollowing.value = freshData['followStatus'] == 'ACCEPTED';
         }
       }
 
       final followers = await _userService.getFollowers(targetUserId);
       final following = await _userService.getFollowing(targetUserId);
+      
       followersCount.value = followers.length;
       followingCount.value = following.length;
+
+      // Si no tenemos followStatus, usamos la lista como fallback
+      if (freshData?['followStatus'] == null) {
+        isFollowing.value = followers.contains(currentId);
+      }
 
       final result = await _postService.getPostsByUserId(targetUserId);
       userPosts.assignAll(result['posts']);

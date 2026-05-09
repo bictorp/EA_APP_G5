@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 import '../controllers/home_controller.dart';
 import '../controllers/create_post_controller.dart';
+import '../controllers/notification_controller.dart';
 import '../widgets/post_card.dart';
+import 'notifications_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,6 +15,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Aseguramos que el controlador esté disponible
     final HomeController controller = Get.put(HomeController());
+    final NotificationController notificationController = Get.put(NotificationController());
 
     return Scaffold(
       backgroundColor: AppColors.bg,
@@ -42,10 +45,14 @@ class HomeScreen extends StatelessWidget {
             },
             icon: const Icon(Icons.add_box_outlined, color: AppColors.textHeader),
           ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textHeader),
-          ),
+          Obx(() => IconButton(
+            onPressed: () => Get.to(() => const NotificationsScreen()),
+            icon: Badge(
+              isLabelVisible: notificationController.hasUnread.value,
+              backgroundColor: AppColors.accent,
+              child: const Icon(Icons.favorite_border_rounded, color: AppColors.textHeader),
+            ),
+          )),
         ],
       ),
       body: Obx(() {

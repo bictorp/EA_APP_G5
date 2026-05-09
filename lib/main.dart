@@ -6,6 +6,7 @@ import 'screens/register_screen.dart';
 import 'screens/main_screen.dart';
 import 'screens/create_post_screen.dart';
 import 'screens/edit_profile_screen.dart';
+import 'screens/post_detail_screen.dart';
 import 'services/auth_service.dart';
 import 'services/socket_service.dart';
 import 'package:camera/camera.dart';
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/home', page: () => const MainScreen()),
         GetPage(name: '/create-post', page: () => const CreatePostScreen()),
         GetPage(name: '/profile/edit', page: () => const EditProfileScreen()),
+        GetPage(name: '/post-detail', page: () => const PostDetailScreen()),
       ],
       debugShowCheckedModeBanner: false,
     );

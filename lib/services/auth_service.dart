@@ -123,4 +123,8 @@ class AuthService {
     await _storageService.clearAll();
     SocketService().disconnect();
   }
+
+  Future<String?> getToken() async {
+    return await _storageService.getAccessToken();
+  }
 }

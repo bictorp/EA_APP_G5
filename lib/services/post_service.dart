@@ -115,6 +115,19 @@ class PostService {
     }
   }
 
+  Future<Post?> getPostById(String postId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/posts/$postId');
+      if (response.statusCode == 200) {
+        return Post.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('Error fetching post by id: $e');
+      return null;
+    }
+  }
+
   Future<Comment?> addComment(String postId, String texto) async {
     try {
       final response = await _dio.post(

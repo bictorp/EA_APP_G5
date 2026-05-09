@@ -24,7 +24,7 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadUser();
+    loadUser();
     fetchPosts();
     
     scrollController.addListener(() {
@@ -34,7 +34,7 @@ class HomeController extends GetxController {
     });
   }
 
-  Future<void> _loadUser() async {
+  Future<void> loadUser() async {
     final userData = await _storageService.getUserData();
     if (userData != null) {
       final user = jsonDecode(userData);
