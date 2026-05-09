@@ -31,6 +31,7 @@ class ChatController extends GetxController {
   var totalUnreadCount = 0.obs;
 
   String? activeChatId; // Para saber qué chat está abierto actualmente
+  var replyingTo = Rxn<Message>(); // Mensaje al que estamos respondiendo
 
   @override
   void onInit() {
@@ -60,7 +61,7 @@ class ChatController extends GetxController {
       final message = Message.fromJson(data);
       
       if (activeChatId == message.remitenteId) {
-        messages.add(message);
+        messages.insert(0, message); // Insertar al principio para reverse: true
         update();
       } else {
         unreadCounts[message.remitenteId] = (unreadCounts[message.remitenteId] ?? 0) + 1;
@@ -73,7 +74,7 @@ class ChatController extends GetxController {
     _socketService.on('message_sent', (data) {
       final message = Message.fromJson(data);
       if (!messages.any((m) => m.id == message.id)) {
-        messages.add(message);
+        messages.insert(0, message); // Insertar al principio para reverse: true
       }
       
       _updateContactLastMessage(message);
@@ -220,7 +221,8 @@ class ChatController extends GetxController {
 
       if (response.data != null && response.data is List) {
         final List data = response.data;
-        messages.assignAll(data.map((m) => Message.fromJson(m)).toList());
+        final List<Message> fetchedMessages = data.map((m) => Message.fromJson(m)).toList();
+        messages.assignAll(fetchedMessages.reversed.toList());
         print('[Chat] Carga exitosa: ${messages.length} mensajes');
       } else {
         print('[Chat] Respuesta sin mensajes');
@@ -244,7 +246,10 @@ class ChatController extends GetxController {
       'destinatarioId': destinatarioId,
       'contenido': contenido,
       'postId': postId,
+      'parentMessageId': replyingTo.value?.id,
     });
+
+    replyingTo.value = null;
   }
 
   Future<void> sharePost(String postId, List<String> contactIds, String comment) async {

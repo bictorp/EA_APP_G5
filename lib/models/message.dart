@@ -5,7 +5,8 @@ class Message {
   final String remitenteId;
   final String destinatarioId;
   final String contenido;
-  final Post? post; // Nuevo campo
+  final Post? post; 
+  final Message? parentMessage; // Referencia al mensaje citado
   final DateTime createdAt;
   final bool leido;
   final bool eliminadoParaTodos;
@@ -16,6 +17,7 @@ class Message {
     required this.destinatarioId,
     required this.contenido,
     this.post,
+    this.parentMessage,
     required this.createdAt,
     this.leido = false,
     this.eliminadoParaTodos = false,
@@ -30,6 +32,9 @@ class Message {
         contenido: json['contenido']?.toString() ?? '',
         post: (json['post'] != null && json['post'] is Map) 
                ? Post.fromJson(Map<String, dynamic>.from(json['post'])) 
+               : null,
+        parentMessage: (json['parentMessage'] != null && json['parentMessage'] is Map)
+               ? Message.fromJson(Map<String, dynamic>.from(json['parentMessage']))
                : null,
         createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
         leido: json['leido'] ?? false,

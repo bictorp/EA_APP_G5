@@ -205,7 +205,6 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
       ),
       child: Column(
         children: [
-          // Handle
           Container(
             margin: const EdgeInsets.symmetric(vertical: 12),
             width: 40,
@@ -215,7 +214,6 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
           Text(
             'Comentarios',
             style: GoogleFonts.inter(
@@ -224,16 +222,12 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
               fontSize: 16,
             ),
           ),
-          
           const Divider(color: AppColors.border, height: 24),
-          
-          // Comments List
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
                 return const Center(child: CircularProgressIndicator(color: AppColors.accent));
               }
-              
               if (controller.comments.isEmpty) {
                 return Center(
                   child: Column(
@@ -249,7 +243,6 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                   ),
                 );
               }
-              
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 0),
                 itemCount: controller.comments.length,
@@ -319,8 +312,6 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
               );
             }),
           ),
-          
-          // Input Area
           Container(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom + 16,
