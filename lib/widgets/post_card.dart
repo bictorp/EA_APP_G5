@@ -9,6 +9,7 @@ import '../widgets/comments_bottom_sheet.dart';
 import '../controllers/home_controller.dart';
 import '../screens/report_screen.dart';
 import '../widgets/share_post_bottom_sheet.dart';
+import '../screens/profile_screen.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -324,7 +325,7 @@ class _PostCardState extends State<PostCard> {
                 ),
                 onTap: () {
                   Get.back();
-                  // TODO: Navegar al perfil
+                  Get.to(() => ProfileScreen(userId: widget.post.usuario.id));
                 },
               ),
               ListTile(
@@ -392,20 +393,29 @@ class _PostCardState extends State<PostCard> {
             padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundImage: NetworkImage(
-                    widget.post.usuario.avatarUrl?.replaceAll('/svg', '/png') ??
-                        'https://api.dicebear.com/7.x/avataaars/png?seed=${widget.post.usuario.nombre}',
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  widget.post.usuario.nombre,
-                  style: GoogleFonts.inter(
-                    color: AppColors.textHeader,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                Expanded(
+                  child: InkWell(
+                    onTap: () => Get.to(() => ProfileScreen(userId: widget.post.usuario.id)),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 18,
+                          backgroundImage: NetworkImage(
+                            widget.post.usuario.avatarUrl?.replaceAll('/svg', '/png') ??
+                                'https://api.dicebear.com/7.x/avataaars/png?seed=${widget.post.usuario.nombre}',
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          widget.post.usuario.nombre,
+                          style: GoogleFonts.inter(
+                            color: AppColors.textHeader,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const Spacer(),
