@@ -13,11 +13,13 @@ class ChatController extends GetxController {
 
   var messages = <Message>[].obs;
   var contacts = <Map<String, dynamic>>[].obs;
-  var isContactsLoading = false.obs;
   var currentUserId = Rxn<String>();
 
-  // Estado de carga de mensajes - plain bool para GetBuilder
+  // Estados de carga - plain bool para GetBuilder
+  bool _isLoadingContacts = false;
   bool _isLoadingMessages = false;
+  
+  bool get isContactsLoading => _isLoadingContacts;
   bool get isMessagesLoading => _isLoadingMessages;
 
   // Selección de mensajes
@@ -57,33 +59,25 @@ class ChatController extends GetxController {
     _socketService.on('receive_message', (data) {
       final message = Message.fromJson(data);
       
-      // Si el chat abierto es el del remitente, se marca como leído (o ya lo gestiona el backend al cargar/socket)
       if (activeChatId == message.remitenteId) {
         messages.add(message);
         update();
       } else {
-        // Incrementar contador de no leídos
         unreadCounts[message.remitenteId] = (unreadCounts[message.remitenteId] ?? 0) + 1;
         _updateTotalUnreadCount();
       }
 
-      // Actualizar previsualización del último mensaje en la lista
-      final contactIndex = contacts.indexWhere((c) => c['_id'] == message.remitenteId || c['_id'] == message.destinatarioId);
-      if (contactIndex != -1) {
-        final updatedContact = Map<String, dynamic>.from(contacts[contactIndex]);
-        updatedContact['lastMessage'] = message.contenido;
-        // Mover el contacto al principio de la lista (como WhatsApp)
-        contacts.removeAt(contactIndex);
-        contacts.insert(0, updatedContact);
-      }
+      _updateContactLastMessage(message);
     });
 
     _socketService.on('message_sent', (data) {
       final message = Message.fromJson(data);
       if (!messages.any((m) => m.id == message.id)) {
         messages.add(message);
-        update();
       }
+      
+      _updateContactLastMessage(message);
+      update();
     });
 
     _socketService.on('messages_deleted', (data) {
@@ -112,8 +106,24 @@ class ChatController extends GetxController {
     });
   }
 
+  void _updateContactLastMessage(Message message) {
+    final contactIndex = contacts.indexWhere((c) => 
+      c['_id'] == message.remitenteId || c['_id'] == message.destinatarioId
+    );
+    
+    if (contactIndex != -1) {
+      final updatedContact = Map<String, dynamic>.from(contacts[contactIndex]);
+      updatedContact['lastMessage'] = message.contenido;
+      
+      // Mover el contacto al principio de la lista (como WhatsApp)
+      contacts.removeAt(contactIndex);
+      contacts.insert(0, updatedContact);
+      update();
+    }
+  }
+
   Future<void> fetchContacts() async {
-    isContactsLoading.value = true;
+    _isLoadingContacts = true;
     update();
     try {
       print('[Chat] Fetching contacts from: ${ApiConstants.baseUrl}/chat/contacts');
@@ -134,7 +144,7 @@ class ChatController extends GetxController {
     } catch (e) {
       print('[Chat] Error buscando contactos: $e');
     } finally {
-      isContactsLoading.value = false;
+      _isLoadingContacts = false;
       update();
     }
   }
