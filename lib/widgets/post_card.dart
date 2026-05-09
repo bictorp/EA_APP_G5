@@ -365,7 +365,7 @@ class _PostCardState extends State<PostCard> {
   }
 
   void _handleDoubleTap(HomeController controller) {
-    final isLiked = widget.post.likes.contains(controller.currentUserId.value);
+    final isLiked = widget.post.likes.any((u) => u.id == controller.currentUserId.value);
     if (!isLiked) {
       controller.toggleLike(widget.post.id);
     }
@@ -479,18 +479,19 @@ class _PostCardState extends State<PostCard> {
                         tween: Tween(begin: 0.0, end: 1.0),
                         curve: Curves.elasticOut,
                         builder: (context, value, child) {
-                          return Opacity(
-                            opacity: value.clamp(0.0, 1.0),
-                            child: Transform.scale(
-                              scale: value,
-                              child: Icon(
-                                Icons.favorite_rounded,
-                                color: AppColors.textHeader.withOpacity(0.5),
-                                size: 200,
-                                shadows: const [
-                                  Shadow(color: Colors.black26, blurRadius: 20),
-                                ],
-                              ),
+                          return Transform.scale(
+                            scale: value,
+                            child: Icon(
+                              Icons.favorite_rounded,
+                              color: Colors.white.withOpacity(value.clamp(0.0, 0.9)),
+                              size: 100,
+                              shadows: const [
+                                Shadow(
+                                  color: Colors.black26,
+                                  blurRadius: 20,
+                                  offset: Offset(0, 10),
+                                ),
+                              ],
                             ),
                           );
                         },
@@ -511,8 +512,8 @@ class _PostCardState extends State<PostCard> {
                 // Likes
                 GetX<HomeController>(
                   builder: (controller) {
-                    final isLiked = widget.post.likes.contains(
-                      controller.currentUserId.value,
+                    final isLiked = widget.post.likes.any(
+                      (user) => user.id == controller.currentUserId.value,
                     );
                     return Row(
                       children: [
