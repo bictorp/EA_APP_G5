@@ -52,9 +52,25 @@ class UserService {
     }
   }
 
-  Future<Map<String, dynamic>?> updateUser(String userId, Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>?> updateUser(Map<String, dynamic> data) async {
     try {
-      final response = await _dio.patch('${ApiConstants.baseUrl}/usuarios/$userId', data: data);
+      final response = await _dio.patch('${ApiConstants.baseUrl}/auth/me', data: data);
+      if (response.statusCode == 200) {
+        // If the response wraps the user in a 'usuario' key, extract it
+        if (response.data is Map && response.data.containsKey('usuario')) {
+          return response.data['usuario'];
+        }
+        return response.data;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getMe() async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/auth/me');
       if (response.statusCode == 200) {
         return response.data;
       }

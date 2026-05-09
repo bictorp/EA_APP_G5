@@ -34,8 +34,22 @@ class EditProfileController extends GetxController {
   }
 
   void _loadInitialData() async {
-    final ProfileController profileController = Get.find<ProfileController>();
-    final user = profileController.user.value;
+    User? user;
+    
+    // Try to get user from ProfileController if it exists
+    if (Get.isRegistered<ProfileController>()) {
+      final ProfileController profileController = Get.find<ProfileController>();
+      user = profileController.user.value;
+    }
+    
+    // Fallback: Try to get user from storage if ProfileController is missing or has no user
+    if (user == null) {
+      final userDataStr = await _storageService.getUserData();
+      final token = await _storageService.getAccessToken();
+      if (userDataStr != null && token != null) {
+        user = User.fromJson(jsonDecode(userDataStr), token);
+      }
+    }
     
     if (user != null) {
       nameController.text = user.nombre;
@@ -52,11 +66,6 @@ class EditProfileController extends GetxController {
     try {
       isLoading.value = true;
       
-      final ProfileController profileController = Get.find<ProfileController>();
-      final currentUser = profileController.user.value;
-      
-      if (currentUser == null) return;
-
       final Map<String, dynamic> updateData = {
         'nombre': nameController.text.trim(),
         'email': emailController.text.trim(),
@@ -64,36 +73,50 @@ class EditProfileController extends GetxController {
         'descripcion': bioController.text.trim(),
       };
 
-      final updatedData = await _userService.updateUser(currentUser.id, updateData);
+      final updateResult = await _userService.updateUser(updateData);
       
-      if (updatedData != null) {
+      if (updateResult != null) {
+        // Fetch full fresh data from /auth/me (GET) to ensure everything is in sync
+        final freshData = await _userService.getMe();
+        final finalUserData = freshData ?? updateResult;
+
         // Update local storage
         final token = await _storageService.getAccessToken();
         if (token != null) {
-          final newUser = User.fromJson(updatedData, token);
-          await _storageService.saveUserData(jsonEncode(updatedData));
+          final newUser = User.fromJson(finalUserData, token);
+          await _storageService.saveUserData(jsonEncode(finalUserData));
           
-          // Update profile controller
-          profileController.user.value = newUser;
+          // Update profile controller if it's active
+          if (Get.isRegistered<ProfileController>()) {
+            Get.find<ProfileController>().user.value = newUser;
+          }
           
           Get.back();
           Get.snackbar(
             'Éxito',
             'Perfil actualizado correctamente',
             snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green.withOpacity(0.1),
+            backgroundColor: Colors.green.withOpacity(0.8),
             colorText: Colors.white,
           );
         }
       } else {
         Get.snackbar(
           'Error',
-          'No se pudo actualizar el perfil',
+          'No se pudo actualizar el perfil. Verifica los datos.',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.1),
+          backgroundColor: Colors.red.withOpacity(0.8),
           colorText: Colors.white,
         );
       }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Ocurrió un error inesperado',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.8),
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
