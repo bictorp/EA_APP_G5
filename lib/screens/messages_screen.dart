@@ -98,10 +98,16 @@ class MessagesScreen extends StatelessWidget {
                 final String? avatarUrl = contact['avatarUrl'];
 
                 return ListTile(
-                  onTap: () => Get.to(() => ChatDetailScreen(contactId: contactId, contactName: name)),
+                  onTap: () => Get.to(() => ChatDetailScreen(
+                        contactId: contactId, 
+                        contactName: name,
+                        contactAvatar: avatarUrl,
+                      )),
                   leading: CircleAvatar(
                     backgroundColor: AppColors.surface,
-                    backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                    backgroundImage: avatarUrl != null 
+                        ? NetworkImage(avatarUrl.replaceAll('/svg', '/png')) 
+                        : null,
                     child: avatarUrl == null ? const Icon(Icons.person, color: Colors.white70) : null,
                   ),
                   title: Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),

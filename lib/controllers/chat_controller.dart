@@ -283,6 +283,19 @@ class ChatController extends GetxController {
     clearSelection();
   }
 
+  void clearChat(String contactId) {
+    if (messages.isEmpty) return;
+    
+    _socketService.emit('delete_messages', {
+      'messageIds': messages.map((m) => m.id).toList(),
+      'type': 'me',
+      'destinatarioId': contactId,
+    });
+    
+    messages.clear();
+    update();
+  }
+
   @override
   void onClose() {
     _socketService.off('receive_message');

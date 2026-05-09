@@ -6,6 +6,7 @@ import '../constants/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'post_detail_screen.dart';
+import 'profile_screen.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final String contactId;
@@ -141,7 +142,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           children: [
             CircleAvatar(
               radius: 16,
-              backgroundImage: widget.contactAvatar != null ? NetworkImage(widget.contactAvatar!) : null,
+              backgroundImage: widget.contactAvatar != null 
+                  ? NetworkImage(widget.contactAvatar!.replaceAll('/svg', '/png')) 
+                  : null,
               child: widget.contactAvatar == null ? const Icon(Icons.person, size: 20) : null,
             ),
             const SizedBox(width: 10),
@@ -159,6 +162,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           }
           return const SizedBox.shrink();
         }),
+        IconButton(
+          icon: const Icon(Icons.more_vert, color: Colors.white),
+          onPressed: () => _showChatOptionsSheet(),
+        ),
       ],
     );
   }
@@ -392,6 +399,90 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showChatOptionsSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.person_outline, color: Colors.white),
+              title: const Text('Ver perfil', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Get.back();
+                Get.to(() => ProfileScreen(userId: widget.contactId));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_sweep_outlined, color: Colors.redAccent),
+              title: const Text('Vaciar chat', style: TextStyle(color: Colors.redAccent)),
+              onTap: () {
+                Get.back();
+                _confirmClearChat();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.report_gmailerrorred_outlined, color: Colors.white),
+              title: const Text('Reportar', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Get.back();
+                Get.snackbar('Reportar', 'Función no disponible por ahora',
+                    colorText: Colors.white, backgroundColor: Colors.black45);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.close, color: AppColors.textMuted),
+              title: const Text('Cancelar', style: TextStyle(color: AppColors.textMuted)),
+              onTap: () => Get.back(),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmClearChat() {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('¿Vaciar chat?', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Se eliminarán todos los mensajes de esta conversación para ti. Esta acción no se puede deshacer.',
+          style: TextStyle(color: AppColors.textMuted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              _chatController.clearChat(widget.contactId);
+            },
+            child: const Text('Vaciar', style: TextStyle(color: Colors.redAccent)),
+          ),
+        ],
       ),
     );
   }
