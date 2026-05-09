@@ -34,16 +34,18 @@ class UserCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.containerBg,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
         ),
         child: Row(
           children: [
+            // Avatar con fallback
             CircleAvatar(
               radius: 28,
-              backgroundImage: user['avatarUrl'] != null
+              backgroundImage: (user['avatarUrl'] != null && user['avatarUrl'].toString().isNotEmpty)
                   ? NetworkImage(user['avatarUrl'])
                   : null,
               backgroundColor: Colors.white10,
-              child: user['avatarUrl'] == null
+              child: (user['avatarUrl'] == null || user['avatarUrl'].toString().isEmpty)
                   ? const Icon(
                       Icons.person,
                       color: Colors.white54,
@@ -59,6 +61,8 @@ class UserCard extends StatelessWidget {
                 children: [
                   Text(
                     user['nombre'] ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -66,60 +70,53 @@ class UserCard extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
 
-                  Row(
+                  // Usamos Wrap en lugar de Row para evitar overflows masivos
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
-                      if (user['universidad'] != null)
-                        Flexible(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.textLink.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              user['universidad'] is Map
-                                  ? user['universidad']['nombre'] ?? ''
-                                  : '',
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
-                                color: AppColors.textLink,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
+                      if (user['universidad'] != null && user['universidad'] is Map)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.textLink.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            user['universidad']['nombre'] ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: AppColors.textLink,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
 
-                      if (user['universidad'] != null &&
-                          user['grado'] != null)
-                        const SizedBox(width: 8),
-
-                      if (user['grado'] != null)
-                        Flexible(
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.06),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              user['grado'] is Map
-                                  ? user['grado']['nombre'] ?? ''
-                                  : '',
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.inter(
-                                color: Colors.white70,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
+                      if (user['grado'] != null && user['grado'] is Map)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            user['grado']['nombre'] ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: Colors.white70,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
@@ -127,6 +124,11 @@ class UserCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.white.withOpacity(0.2),
             ),
           ],
         ),

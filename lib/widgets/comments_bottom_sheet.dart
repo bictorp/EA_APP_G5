@@ -362,10 +362,17 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage('https://api.dicebear.com/7.x/avataaars/png?seed=me'),
-                ),
+                Obx(() {
+                  final userData = homeController.currentUserId.value;
+                  // Aquí podríamos buscar el avatarUrl si HomeController lo tuviera accesible, 
+                  // pero por ahora usemos un placeholder dinámico basado en el ID o nombre si está disponible.
+                  // Idealmente HomeController debería exponer el objeto User completo.
+                  return const CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.white10,
+                    child: Icon(Icons.person, color: Colors.white54, size: 20),
+                  );
+                }),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Container(

@@ -11,6 +11,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Aseguramos que el controlador esté disponible
     final HomeController controller = Get.put(HomeController());
 
     return Scaffold(
@@ -45,41 +46,36 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {},
             icon: const Icon(Icons.favorite_border_rounded, color: AppColors.textHeader),
           ),
-
         ],
       ),
       body: Obx(() {
-        if (controller.isLoading.value) {
+        // Estado de carga inicial
+        if (controller.isLoading.value && controller.posts.isEmpty) {
           return const Center(child: CircularProgressIndicator(color: AppColors.textLink));
         }
 
+        // Estado vacío
         if (controller.posts.isEmpty) {
           return RefreshIndicator(
             onRefresh: controller.fetchPosts,
             color: AppColors.textLink,
             child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.3),
-                const Icon(Icons.feed_outlined, color: Colors.white24, size: 80),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                const Icon(Icons.feed_outlined, color: Colors.white10, size: 80),
                 const SizedBox(height: 16),
                 Center(
                   child: Text(
                     'No hay publicaciones',
-                    style: GoogleFonts.inter(
-                      color: Colors.white70,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: GoogleFonts.inter(color: Colors.white70, fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Center(
                   child: Text(
-                    'Sigue a algunos usuarios para ver sus posts aquí.',
-                    style: GoogleFonts.inter(
-                      color: AppColors.textMuted,
-                      fontSize: 14,
-                    ),
+                    'Sigue a gente para ver su contenido.',
+                    style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
                   ),
                 ),
               ],
@@ -87,14 +83,15 @@ class HomeScreen extends StatelessWidget {
           );
         }
 
+        // Lista de Posts
         return RefreshIndicator(
           onRefresh: controller.fetchPosts,
           color: AppColors.textLink,
           backgroundColor: AppColors.containerBg,
           child: CustomScrollView(
             controller: controller.scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              // Feed
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -104,15 +101,15 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               
-              // Loading More Indicator
-              Obx(() => SliverToBoxAdapter(
-                child: controller.isLoadingMore.value
-                    ? const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24.0),
-                        child: Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textLink)),
-                      )
-                    : const SizedBox(height: 50),
-              )),
+              // Indicador de carga inferior (sin Obx anidado)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32.0),
+                  child: controller.isLoadingMore.value
+                      ? const Center(child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textLink))
+                      : const SizedBox(height: 20),
+                ),
+              ),
             ],
           ),
         );

@@ -197,6 +197,9 @@ class PostService {
   }
 
   Future<Map<String, dynamic>> getPostsByUserId(String userId) async {
+    if (userId.isEmpty || userId == 'null') {
+      return {'posts': <Post>[], 'hasNextPage': false};
+    }
     try {
       final response = await _dio.get('${ApiConstants.baseUrl}/posts/user/$userId');
       

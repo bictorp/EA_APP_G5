@@ -5,6 +5,7 @@ import '../models/user.dart';
 import '../services/storage_service.dart';
 import '../services/post_service.dart';
 import '../services/user_service.dart';
+import 'home_controller.dart';
 
 class ProfileController extends GetxController {
   final StorageService _storageService = StorageService();
@@ -23,55 +24,96 @@ class ProfileController extends GetxController {
   var followersCount = 0.obs;
   var followingCount = 0.obs;
   var postCount = 0.obs;
-
+  var isFollowing = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadUserData();
-  }
-
- Future<void> loadUserData() async {
-  try {
-    isLoading.value = true;
-    final token = await _storageService.getAccessToken();
-    if (token == null) return;
-
-    String targetUserId;
-    bool isMe = false;
-
-    if (userId != null) {
-      targetUserId = userId!;
+    
+    // Si es mi perfil, podemos reaccionar cuando el ID esté disponible
+    if (userId == null || userId!.isEmpty) {
+      final homeController = Get.find<HomeController>();
+      
+      // Escuchar cambios por si se carga después de inicializar este controlador
+      ever(homeController.currentUserId, (String id) {
+        if (id.isNotEmpty && user.value == null) {
+          loadUserData();
+        }
+      });
+      
+      if (homeController.currentUserId.value.isNotEmpty) {
+        loadUserData();
+      }
     } else {
-      // Get current user ID from local storage
-      final userDataStr = await _storageService.getUserData();
-      if (userDataStr == null) return;
-      final Map<String, dynamic> userData = jsonDecode(userDataStr);
-      targetUserId = userData['_id'] ?? '';
-      isMe = true;
+      loadUserData();
     }
-
-    final freshData = await _userService.getUserById(targetUserId);
-    if (freshData != null) {
-      user.value = User.fromJson(freshData, token);
-    }
-
-    final followers = await _userService.getFollowers(targetUserId);
-    final following = await _userService.getFollowing(targetUserId);
-    followersCount.value = followers.length;
-    followingCount.value = following.length;
-
-    final result = await _postService.getPostsByUserId(targetUserId);
-
-    userPosts.assignAll(result['posts']);
-    postCount.value = userPosts.length;
-
-  } catch (e) {
-    print("Error loading profile: $e");
-  } finally {
-    isLoading.value = false;
   }
-}
+
+  bool get isMe {
+    final homeController = Get.find<HomeController>();
+    final currentId = homeController.currentUserId.value;
+    return userId == null || userId == currentId || userId == '';
+  }
+
+  Future<void> loadUserData() async {
+    try {
+      isLoading.value = true;
+      final token = await _storageService.getAccessToken();
+      if (token == null) return;
+
+      final homeController = Get.find<HomeController>();
+      String currentId = homeController.currentUserId.value;
+
+      String targetUserId = (userId == null || userId!.isEmpty) ? currentId : userId!;
+      
+      if (targetUserId.isEmpty) {
+        print("Waiting for targetUserId to be populated...");
+        return;
+      }
+
+      final freshData = await _userService.getUserById(targetUserId);
+      if (freshData != null) {
+        user.value = User.fromJson(freshData, token);
+        
+        // Verificar si el usuario actual está en la lista de seguidores
+        if (freshData['seguidores'] != null && freshData['seguidores'] is List) {
+          final List seguidores = freshData['seguidores'];
+          isFollowing.value = seguidores.any((s) {
+            final id = (s is String ? s : (s is Map ? s['_id'] : ''));
+            return id == currentId;
+          });
+        }
+      }
+
+      final followers = await _userService.getFollowers(targetUserId);
+      final following = await _userService.getFollowing(targetUserId);
+      followersCount.value = followers.length;
+      followingCount.value = following.length;
+
+      final result = await _postService.getPostsByUserId(targetUserId);
+      userPosts.assignAll(result['posts']);
+      postCount.value = userPosts.length;
+
+    } catch (e) {
+      print("Error loading profile: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> toggleFollow() async {
+    if (userId == null || userId!.isEmpty || isMe) return;
+
+    final success = await _postService.toggleFollow(userId!);
+    if (success) {
+      isFollowing.value = !isFollowing.value;
+      if (isFollowing.value) {
+        followersCount.value++;
+      } else {
+        followersCount.value--;
+      }
+    }
+  }
 
   void editProfile() {
     Get.toNamed('/profile/edit');
