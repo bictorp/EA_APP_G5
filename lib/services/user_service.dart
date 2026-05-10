@@ -45,7 +45,7 @@ class UserService {
 
   Future<bool> toggleFollow(String userId) async {
     try {
-      final response = await _dio.patch('${ApiConstants.baseUrl}/usuarios/$userId/follow');
+      final response = await _dio.post('${ApiConstants.baseUrl}/usuarios/follow/$userId');
       return response.statusCode == 200;
     } catch (e) {
       return false;

@@ -49,16 +49,45 @@ class NotificationController extends GetxController {
         hasUnread.value = true;
         
         Get.snackbar(
-          'Nueva interacción',
-          'Alguien ha interactuado con tu contenido',
+          _getSnackbarTitle(newNotification.type),
+          '${newNotification.sender.nombre} ${_getSnackbarMessage(newNotification.type)}',
           snackPosition: SnackPosition.TOP,
           backgroundColor: AppColors.accent.withOpacity(0.9),
           colorText: Colors.white,
           duration: const Duration(seconds: 4),
-          icon: const Icon(Icons.favorite, color: Colors.white),
+          icon: Icon(_getSnackbarIcon(newNotification.type), color: Colors.white),
         );
       }
     });
+  }
+
+  String _getSnackbarTitle(NotificationType type) {
+    switch (type) {
+      case NotificationType.like: return '¡Nuevo Me gusta!';
+      case NotificationType.follow: return 'Nuevo seguidor';
+      case NotificationType.comment: return 'Nuevo comentario';
+      case NotificationType.followRequest: return 'Solicitud de seguimiento';
+      case NotificationType.followAccepted: return 'Solicitud aceptada';
+    }
+  }
+
+  String _getSnackbarMessage(NotificationType type) {
+    switch (type) {
+      case NotificationType.like: return 'le ha dado me gusta a tu post.';
+      case NotificationType.follow: return 'ha comenzado a seguirte.';
+      case NotificationType.comment: return 'ha comentado en tu post.';
+      case NotificationType.followRequest: return 'quiere seguirte.';
+      case NotificationType.followAccepted: return 'ha aceptado tu solicitud.';
+    }
+  }
+
+  IconData _getSnackbarIcon(NotificationType type) {
+    switch (type) {
+      case NotificationType.like: return Icons.favorite;
+      case NotificationType.follow: return Icons.person_add;
+      case NotificationType.comment: return Icons.comment;
+      default: return Icons.notifications;
+    }
   }
 
   @override
@@ -86,11 +115,22 @@ class NotificationController extends GetxController {
   Future<void> toggleFollow(String userId) async {
     final success = await _userService.toggleFollow(userId);
     if (success) {
+      bool nowFollowing = false;
       if (myFollowing.contains(userId)) {
         myFollowing.remove(userId);
+        nowFollowing = false;
       } else {
         myFollowing.add(userId);
+        nowFollowing = true;
       }
+      
+      Get.snackbar(
+        nowFollowing ? 'Siguiendo' : 'Ya no sigues a este usuario',
+        nowFollowing ? 'Ahora verás sus publicaciones en tu feed.' : 'Has dejado de seguir a este usuario.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.accent.withOpacity(0.8),
+        colorText: Colors.white,
+      );
     }
   }
 
