@@ -1,22 +1,32 @@
-# 1. Usamos una versión ligera de Node.js
-FROM node:20-alpine
+# Stage 1: Build the Flutter web app
+FROM debian:latest AS build-env
 
-# 2. Creamos la carpeta donde vivirá el código en el contenedor
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    unzip \
+    xz-utils \
+    zip \
+    libglu1-mesa \
+    openjdk-17-jdk-headless
+
+# Install Flutter
+RUN git clone https://github.com/flutter/flutter.git /usr/local/flutter
+ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+
+# Run flutter doctor and enable web
+RUN flutter doctor -v
+RUN flutter config --enable-web
+
+# Copy project files and build
 WORKDIR /app
-
-# 3. Copiamos los archivos de dependencias y el código fuente a la vez
-COPY package*.json ./
-COPY tsconfig.json ./
 COPY . .
+RUN flutter pub get
+RUN flutter build web
 
-# 4. Instalamos todas las dependencias (ahora TypeScript sí encontrará la carpeta src/)
-RUN npm install
-
-# 5. Compilamos usando vite directamente para saltar errores de tsc
-RUN npx vite build
-
-# 6. Exponemos el puerto de preview
-EXPOSE 5173
-
-# 7. Arrancamos el servidor de preview de vite
-CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "5173"]
+# Stage 2: Serve the app with Nginx
+FROM nginx:alpine
+COPY --from=build-env /app/build/web /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
