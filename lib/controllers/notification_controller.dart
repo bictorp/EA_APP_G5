@@ -18,6 +18,7 @@ class NotificationController extends GetxController {
   var myFollowing = <String>[].obs;
   var isLoading = true.obs;
   var hasUnread = false.obs;
+  var pendingRequestsCount = 0.obs;
   var currentPage = 1;
   var hasNextPage = true.obs;
 
@@ -134,6 +135,24 @@ class NotificationController extends GetxController {
     }
   }
 
+  Future<void> respondToFollowRequest(String followerId, bool accept) async {
+    final success = accept 
+      ? await _userService.acceptFollowRequest(followerId)
+      : await _userService.rejectFollowRequest(followerId);
+
+    if (success) {
+      Get.snackbar(
+        accept ? 'Solicitud aceptada' : 'Solicitud rechazada',
+        accept ? 'Ahora este usuario te sigue.' : 'Has rechazado la solicitud.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.accent.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+      // Actualizar la lista para quitar la solicitud
+      fetchNotifications();
+    }
+  }
+
   Future<void> fetchNotifications() async {
     try {
       if (notifications.isEmpty) isLoading.value = true;
@@ -165,6 +184,7 @@ class NotificationController extends GetxController {
 
   void _checkUnread() {
     hasUnread.value = notifications.any((n) => !n.isRead);
+    pendingRequestsCount.value = notifications.where((n) => n.type == NotificationType.followRequest).length;
   }
 
   Future<void> markAllRead() async {

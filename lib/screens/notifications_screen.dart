@@ -36,16 +36,43 @@ class NotificationsScreen extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        actions: const [
-          SizedBox(width: 48), // Placeholder para centrar si es necesario, o dejar vacío
+        actions: [
+          Obx(() => Stack(
+            alignment: Alignment.center,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.person_add_alt_1_rounded, color: Colors.white, size: 24),
+                onPressed: () => _showFollowRequestsBottomSheet(context, controller),
+              ),
+              if (controller.pendingRequestsCount.value > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: AppColors.accent,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 10,
+                      minHeight: 10,
+                    ),
+                  ),
+                ),
+            ],
+          )),
+          const SizedBox(width: 8),
         ],
       ),
       body: Obx(() {
-        if (controller.isLoading.value && controller.notifications.isEmpty) {
+        final mainNotifications = controller.notifications.where((n) => n.type != NotificationType.followRequest).toList();
+
+        if (controller.isLoading.value && mainNotifications.isEmpty) {
           return const Center(child: CircularProgressIndicator(color: AppColors.accent));
         }
 
-        if (controller.notifications.isEmpty) {
+        if (mainNotifications.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -66,11 +93,129 @@ class NotificationsScreen extends StatelessWidget {
           color: AppColors.accent,
           backgroundColor: AppColors.containerBg,
           child: ListView.builder(
-            itemCount: controller.notifications.length,
+            itemCount: mainNotifications.length,
             itemBuilder: (context, index) {
-              final notification = controller.notifications[index];
+              final notification = mainNotifications[index];
               return _NotificationItem(notification: notification);
             },
+          ),
+        );
+      }),
+    );
+  }
+  void _showFollowRequestsBottomSheet(BuildContext context, NotificationController controller) {
+    Get.bottomSheet(
+      Obx(() {
+        final requests = controller.notifications.where((n) => n.type == NotificationType.followRequest).toList();
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Handle
+              Container(
+                width: 40, height: 4,
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              
+              Text(
+                'Solicitudes de seguimiento (${requests.length})',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              if (requests.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.person_off_rounded, size: 60, color: Colors.white.withOpacity(0.1)),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No tienes solicitudes pendientes',
+                        style: GoogleFonts.inter(color: Colors.white54, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: requests.length,
+                    separatorBuilder: (context, index) => const Divider(color: Colors.white10, height: 24),
+                    itemBuilder: (context, index) {
+                      final req = requests[index];
+                      return Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 20,
+                            backgroundImage: req.sender.avatarUrl != null && req.sender.avatarUrl!.isNotEmpty
+                                ? NetworkImage(req.sender.avatarUrl!)
+                                : null,
+                            child: req.sender.avatarUrl == null || req.sender.avatarUrl!.isEmpty
+                                ? const Icon(Icons.person, color: Colors.white)
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              req.sender.nombre,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () => controller.respondToFollowRequest(req.sender.id, true),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.accent,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text('Aceptar', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () => controller.respondToFollowRequest(req.sender.id, false),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.white24),
+                                  ),
+                                  child: const Text('Rechazar', style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              const SizedBox(height: 20),
+            ],
           ),
         );
       }),
@@ -236,7 +381,47 @@ class _NotificationItem extends StatelessWidget {
             }),
             
           if (notification.type == NotificationType.followRequest)
-            const Icon(Icons.person_add_alt_1_rounded, color: AppColors.accent, size: 20),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    final controller = Get.find<NotificationController>();
+                    controller.respondToFollowRequest(notification.sender.id, true);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      'Aceptar',
+                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () {
+                    final controller = Get.find<NotificationController>();
+                    controller.respondToFollowRequest(notification.sender.id, false);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                    ),
+                    child: const Text(
+                      'Rechazar',
+                      style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -269,102 +454,103 @@ class _NotificationItem extends StatelessWidget {
       case NotificationType.followAccepted: return "ha aceptado tu solicitud.";
     }
   }
+}
 
-  void _showUnfollowBottomSheet(BuildContext context, NotificationController controller, String userId, String nombre) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle
-            Container(
-              width: 40, height: 4,
-              margin: const EdgeInsets.only(bottom: 24),
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            
-            Text(
-              '¿Dejar de seguir a $nombre?',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Si dejas de seguir a este usuario, dejarás de ver sus publicaciones en tu feed principal.',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                color: AppColors.textMuted,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 32),
-            
-            // Acciones
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                onPressed: () {
-                  Get.back();
-                  controller.toggleFollow(userId);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.error.withOpacity(0.1),
-                  foregroundColor: AppColors.error,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(color: AppColors.error, width: 1.5),
-                  ),
-                ),
-                child: Text(
-                  'Dejar de seguir',
-                  style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: TextButton(
-                onPressed: () => Get.back(),
-                child: Text(
-                  'Cancelar',
-                  style: GoogleFonts.inter(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-          ],
-        ),
+// Helpers top-level para que ambas clases los vean
+void _showUnfollowBottomSheet(BuildContext context, NotificationController controller, String userId, String nombre) {
+  Get.bottomSheet(
+    Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-    );
-  }
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle
+          Container(
+            width: 40, height: 4,
+            margin: const EdgeInsets.only(bottom: 24),
+            decoration: BoxDecoration(
+              color: Colors.white24,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          
+          Text(
+            '¿Dejar de seguir a $nombre?',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Si dejas de seguir a este usuario, dejarás de ver sus publicaciones en tu feed principal.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              color: AppColors.textMuted,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 32),
+          
+          // Acciones
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton(
+              onPressed: () {
+                Get.back();
+                controller.toggleFollow(userId);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error.withOpacity(0.1),
+                foregroundColor: AppColors.error,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: const BorderSide(color: AppColors.error, width: 1.5),
+                ),
+              ),
+              child: Text(
+                'Dejar de seguir',
+                style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: TextButton(
+              onPressed: () => Get.back(),
+              child: Text(
+                'Cancelar',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    ),
+  );
+}
 
-  String _formatTime(DateTime time) {
-    final now = DateTime.now();
-    final difference = now.difference(time);
-    
-    if (difference.inDays > 0) return 'hace ${difference.inDays} días';
-    if (difference.inHours > 0) return 'hace aproximadamente ${difference.inHours} horas';
-    if (difference.inMinutes > 0) return 'hace ${difference.inMinutes} minutos';
-    return 'hace un momento';
-  }
+String _formatTime(DateTime time) {
+  final now = DateTime.now();
+  final difference = now.difference(time);
+  
+  if (difference.inDays > 0) return 'hace ${difference.inDays} días';
+  if (difference.inHours > 0) return 'hace aproximadamente ${difference.inHours} horas';
+  if (difference.inMinutes > 0) return 'hace ${difference.inMinutes} minutos';
+  return 'hace un momento';
 }

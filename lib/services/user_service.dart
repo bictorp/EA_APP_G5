@@ -52,6 +52,24 @@ class UserService {
     }
   }
 
+  Future<bool> acceptFollowRequest(String followerId) async {
+    try {
+      final response = await _dio.post('${ApiConstants.baseUrl}/usuarios/requests/accept/$followerId');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> rejectFollowRequest(String followerId) async {
+    try {
+      final response = await _dio.post('${ApiConstants.baseUrl}/usuarios/requests/reject/$followerId');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<Map<String, dynamic>?> updateUser(Map<String, dynamic> data) async {
     try {
       final response = await _dio.patch('${ApiConstants.baseUrl}/auth/me', data: data);
