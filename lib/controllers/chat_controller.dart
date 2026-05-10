@@ -1,3 +1,6 @@
+import '../screens/chat_detail_screen.dart';
+import 'package:flutter/material.dart';
+import '../constants/app_colors.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import '../models/message.dart';
@@ -66,6 +69,29 @@ class ChatController extends GetxController {
       } else {
         unreadCounts[message.remitenteId] = (unreadCounts[message.remitenteId] ?? 0) + 1;
         _updateTotalUnreadCount();
+
+        // Mostrar notificación si no estamos en el chat
+        final contact = contacts.firstWhereOrNull((c) => c['_id'] == message.remitenteId);
+        final senderName = contact?['nombre'] ?? 'Alguien';
+        
+        Get.snackbar(
+          'Mensaje de $senderName',
+          message.post != null ? 'Envió una publicación' : message.contenido,
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: AppColors.accent.withOpacity(0.9),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          icon: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+          onTap: (snack) {
+            if (contact != null) {
+              Get.to(() => ChatDetailScreen(
+                contactId: contact['_id'],
+                contactName: contact['nombre'] ?? 'Usuario',
+                contactAvatar: contact['avatarUrl'],
+              ));
+            }
+          },
+        );
       }
 
       _updateContactLastMessage(message);
