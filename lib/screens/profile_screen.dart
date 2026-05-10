@@ -82,6 +82,17 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings_outlined, color: Colors.white),
             onPressed: () => Get.to(() => const SettingsScreen()),
+          )
+        else
+          IconButton(
+            icon: const Icon(Icons.report_problem_outlined, color: Colors.white),
+            onPressed: () {
+              UIUtils.showReportBottomSheet(
+                targetId: controller.userId!,
+                tipo: 'user',
+                title: 'este perfil',
+              );
+            },
           ),
       ],
     );

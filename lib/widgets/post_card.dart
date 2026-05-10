@@ -8,7 +8,6 @@ import '../widgets/large_heart_anim.dart';
 import '../widgets/comments_bottom_sheet.dart';
 import '../controllers/home_controller.dart';
 import '../screens/profile_screen.dart';
-import '../screens/report_screen.dart';
 import '../widgets/share_post_bottom_sheet.dart';
 import '../utils/ui_utils.dart';
 
@@ -129,10 +128,10 @@ class _PostCardState extends State<PostCard> {
                 title: const Text('Reportar publicación', style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
-                  Get.to(
-                    () => ReportScreen(tipo: 'post', objetivoId: widget.post.id),
-                    fullscreenDialog: true,
-                    transition: Transition.downToUp,
+                  UIUtils.showReportBottomSheet(
+                    targetId: widget.post.id,
+                    tipo: 'post',
+                    title: 'esta publicación',
                   );
                 },
               ),

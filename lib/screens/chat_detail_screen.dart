@@ -7,6 +7,7 @@ import '../models/message.dart';
 import '../constants/app_colors.dart';
 import 'post_detail_screen.dart';
 import 'profile_screen.dart';
+import '../utils/ui_utils.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final String contactId;
@@ -622,7 +623,20 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               title: const Text('Reportar', style: TextStyle(color: Colors.white)),
               onTap: () {
                 Get.back();
-                Get.snackbar('Reportar', 'Función no disponible por ahora', colorText: Colors.white, backgroundColor: Colors.black45);
+                final lastMsg = _chatController.messages.isNotEmpty ? _chatController.messages.first : null;
+                if (lastMsg != null) {
+                  UIUtils.showReportBottomSheet(
+                    targetId: lastMsg.id,
+                    tipo: 'chat',
+                    title: 'conversación con ${widget.contactName}',
+                  );
+                } else {
+                  UIUtils.showReportBottomSheet(
+                    targetId: widget.contactId,
+                    tipo: 'user',
+                    title: 'usuario ${widget.contactName}',
+                  );
+                }
               },
             ),
             ListTile(
@@ -741,6 +755,22 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     ),
                   ),
                 ],
+                const Divider(color: Colors.white10, height: 32, thickness: 1),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ListTile(
+                    leading: const Icon(Icons.report_gmailerrorred_outlined, color: Colors.white70),
+                    title: const Text('Reportar mensaje', style: TextStyle(color: Colors.white70)),
+                    onTap: () {
+                      Get.back();
+                      UIUtils.showReportBottomSheet(
+                        targetId: messageId,
+                        tipo: 'chat',
+                        title: 'mensaje',
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           );

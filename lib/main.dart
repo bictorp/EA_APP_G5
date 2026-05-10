@@ -11,6 +11,7 @@ import 'services/auth_service.dart';
 import 'services/socket_service.dart';
 import 'package:camera/camera.dart';
 import 'controllers/chat_controller.dart';
+import 'services/report_service.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -26,9 +27,12 @@ void main() async {
   final AuthService authService = AuthService();
   final bool isLoggedIn = await authService.checkSession();
 
+  // Inyectamos servicios básicos siempre
+  Get.put(AuthService(), permanent: true);
+  Get.put(ReportService(), permanent: true);
+
   if (isLoggedIn) {
     await SocketService().connect();
-    Get.put(AuthService(), permanent: true);
     Get.put(ChatController(), permanent: true);
   }
 
