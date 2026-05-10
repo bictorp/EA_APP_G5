@@ -42,7 +42,7 @@ class NotificationsScreen extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.person_add_alt_1_rounded, color: Colors.white, size: 24),
-                onPressed: () => _showFollowRequestsBottomSheet(context, controller),
+                onPressed: () => showFollowRequestsBottomSheet(),
               ),
               if (controller.pendingRequestsCount.value > 0)
                 Positioned(
@@ -103,7 +103,12 @@ class NotificationsScreen extends StatelessWidget {
       }),
     );
   }
-  void _showFollowRequestsBottomSheet(BuildContext context, NotificationController controller) {
+  static void showFollowRequestsBottomSheet() {
+    final context = Get.context;
+    if (context == null) return;
+    
+    final controller = Get.find<NotificationController>();
+
     Get.bottomSheet(
       Obx(() {
         final requests = controller.notifications.where((n) => n.type == NotificationType.followRequest).toList();
