@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import '../utils/ui_utils.dart';
 import '../constants/app_colors.dart';
 import '../controllers/notification_controller.dart';
 import '../models/notification.dart';
@@ -348,7 +349,11 @@ class _NotificationItem extends StatelessWidget {
               return GestureDetector(
                 onTap: () {
                   if (following) {
-                    _showUnfollowBottomSheet(context, controller, notification.sender.id, notification.sender.nombre);
+                    UIUtils.showUnfollowBottomSheet(
+                      userId: notification.sender.id,
+                      nombre: notification.sender.nombre,
+                      onConfirm: () => controller.toggleFollow(notification.sender.id),
+                    );
                   } else {
                     controller.toggleFollow(notification.sender.id);
                   }
@@ -462,94 +467,6 @@ class _NotificationItem extends StatelessWidget {
 }
 
 // Helpers top-level para que ambas clases los vean
-void _showUnfollowBottomSheet(BuildContext context, NotificationController controller, String userId, String nombre) {
-  Get.bottomSheet(
-    Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Handle
-          Container(
-            width: 40, height: 4,
-            margin: const EdgeInsets.only(bottom: 24),
-            decoration: BoxDecoration(
-              color: Colors.white24,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          
-          Text(
-            '¿Dejar de seguir a $nombre?',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Si dejas de seguir a este usuario, dejarás de ver sus publicaciones en tu feed principal.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
-              color: AppColors.textMuted,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 32),
-          
-          // Acciones
-          SizedBox(
-            width: double.infinity,
-            height: 55,
-            child: ElevatedButton(
-              onPressed: () {
-                Get.back();
-                controller.toggleFollow(userId);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error.withOpacity(0.1),
-                foregroundColor: AppColors.error,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: const BorderSide(color: AppColors.error, width: 1.5),
-                ),
-              ),
-              child: Text(
-                'Dejar de seguir',
-                style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 55,
-            child: TextButton(
-              onPressed: () => Get.back(),
-              child: Text(
-                'Cancelar',
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-        ],
-      ),
-    ),
-  );
-}
-
 String _formatTime(DateTime time) {
   final now = DateTime.now();
   final difference = now.difference(time);

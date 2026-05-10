@@ -10,6 +10,7 @@ import '../controllers/home_controller.dart';
 import '../screens/profile_screen.dart';
 import '../screens/report_screen.dart';
 import '../widgets/share_post_bottom_sheet.dart';
+import '../utils/ui_utils.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -242,22 +243,10 @@ class _PostCardState extends State<PostCard> {
   }
 
   void _confirmUnfollow(BuildContext context, HomeController ctrl) {
-    Get.dialog(
-      AlertDialog(
-        backgroundColor: AppColors.containerBg,
-        title: Text('¿Dejar de seguir a ${widget.post.usuario.nombre}?', 
-          style: const TextStyle(color: Colors.white, fontSize: 16)),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
-          TextButton(
-            onPressed: () {
-              Get.back();
-              ctrl.toggleFollow(widget.post.usuario.id, widget.post.usuario.nombre);
-            },
-            child: const Text('Dejar de seguir', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
+    UIUtils.showUnfollowBottomSheet(
+      userId: widget.post.usuario.id,
+      nombre: widget.post.usuario.nombre,
+      onConfirm: () => ctrl.toggleFollow(widget.post.usuario.id, widget.post.usuario.nombre),
     );
   }
 

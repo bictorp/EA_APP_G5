@@ -5,6 +5,7 @@ import '../controllers/profile_controller.dart';
 import '../constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'settings_screen.dart';
+import '../utils/ui_utils.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String? userId;
@@ -212,7 +213,19 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildActionButton(ProfileController controller) {
     return ElevatedButton(
-      onPressed: controller.isMe ? controller.editProfile : controller.toggleFollow,
+      onPressed: () {
+        if (controller.isMe) {
+          controller.editProfile();
+        } else if (controller.isFollowing.value) {
+          UIUtils.showUnfollowBottomSheet(
+            userId: controller.userId!,
+            nombre: controller.user.value?.nombre ?? 'este usuario',
+            onConfirm: () => controller.toggleFollow(),
+          );
+        } else {
+          controller.toggleFollow();
+        }
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: controller.isMe 
             ? Colors.white.withOpacity(0.05)
