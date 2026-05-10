@@ -4,9 +4,11 @@ import 'package:get/get.dart';
 import '../models/post.dart';
 import '../constants/app_colors.dart';
 import '../widgets/heart_anim_button.dart';
+import '../widgets/large_heart_anim.dart';
 import '../widgets/comments_bottom_sheet.dart';
 import '../controllers/home_controller.dart';
 import '../screens/profile_screen.dart';
+import '../screens/report_screen.dart';
 import '../widgets/share_post_bottom_sheet.dart';
 
 class PostCard extends StatefulWidget {
@@ -21,14 +23,12 @@ class PostCard extends StatefulWidget {
 class _PostCardState extends State<PostCard> {
   bool _showLargeHeart = false;
 
-  // Getter seguro: si HomeController no está registrado, devuelve null
   HomeController? get _ctrl {
     if (Get.isRegistered<HomeController>()) return Get.find<HomeController>();
     return null;
   }
 
   String get _myId => _ctrl?.currentUserId.value ?? '';
-
   bool get _isLiked => widget.post.likes.any((u) => u.id == _myId);
 
   void _toggleLike() {
@@ -38,9 +38,6 @@ class _PostCardState extends State<PostCard> {
   void _handleDoubleTap() {
     if (!_isLiked) _toggleLike();
     setState(() => _showLargeHeart = true);
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _showLargeHeart = false);
-    });
   }
 
   void _showComments(BuildContext context) {
@@ -63,6 +60,8 @@ class _PostCardState extends State<PostCard> {
 
   void _showOptions(BuildContext context) {
     final ctrl = _ctrl;
+    final bool isOwnPost = widget.post.usuario.id == _myId;
+
     Get.bottomSheet(
       Container(
         decoration: const BoxDecoration(
@@ -78,24 +77,206 @@ class _PostCardState extends State<PostCard> {
               decoration: BoxDecoration(
                 color: AppColors.border, borderRadius: BorderRadius.circular(2)),
             ),
-            if (ctrl != null && widget.post.usuario.id == _myId)
+            
+            // Ver Perfil
+            ListTile(
+              leading: const Icon(Icons.account_circle_outlined, color: Colors.white),
+              title: const Text('Ver perfil', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Get.back();
+                Get.to(() => ProfileScreen(userId: widget.post.usuario.id));
+              },
+            ),
+
+            // Compartir
+            ListTile(
+              leading: const Icon(Icons.send_outlined, color: Colors.white),
+              title: const Text('Compartir', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Get.back();
+                _showShareSheet(context);
+              },
+            ),
+
+            // Editar (Si es mío)
+            if (isOwnPost && ctrl != null)
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: AppColors.error),
-                title: const Text('Eliminar', style: TextStyle(color: AppColors.error)),
-                onTap: () { Get.back(); ctrl.deletePost(widget.post.id); },
-              )
-            else
-              ListTile(
-                leading: const Icon(Icons.account_circle_outlined, color: Colors.white),
-                title: const Text('Ver perfil', style: TextStyle(color: Colors.white)),
+                leading: const Icon(Icons.edit_outlined, color: Colors.white),
+                title: const Text('Editar publicación', style: TextStyle(color: Colors.white)),
                 onTap: () {
                   Get.back();
-                  Get.to(() => ProfileScreen(userId: widget.post.usuario.id));
+                  _showEditDialog(context, ctrl);
                 },
               ),
+
+            // Dejar de seguir (Si no es mío)
+            if (!isOwnPost && ctrl != null)
+              ListTile(
+                leading: const Icon(Icons.person_remove_outlined, color: AppColors.error),
+                title: Text('Dejar de seguir a ${widget.post.usuario.nombre}', 
+                  style: const TextStyle(color: AppColors.error)),
+                onTap: () {
+                  Get.back();
+                  _confirmUnfollow(context, ctrl);
+                },
+              ),
+
+            // Reportar (Si no es mío)
+            if (!isOwnPost)
+              ListTile(
+                leading: const Icon(Icons.report_problem_outlined, color: AppColors.error),
+                title: const Text('Reportar publicación', style: TextStyle(color: AppColors.error)),
+                onTap: () {
+                  Get.back();
+                  Get.to(
+                    () => ReportScreen(tipo: 'post', objetivoId: widget.post.id),
+                    fullscreenDialog: true,
+                    transition: Transition.downToUp,
+                  );
+                },
+              ),
+
+            // Eliminar (Si es mío)
+            if (isOwnPost && ctrl != null)
+              ListTile(
+                leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                title: const Text('Eliminar publicación', style: TextStyle(color: AppColors.error)),
+                onTap: () {
+                  Get.back();
+                  _confirmDelete(context, ctrl);
+                },
+              ),
+
             const SizedBox(height: 20),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showEditDialog(BuildContext context, HomeController ctrl) {
+    final TextEditingController editCtrl = TextEditingController(text: widget.post.caption);
+    
+    Get.bottomSheet(
+      isScrollControlled: true,
+      Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          left: 20,
+          right: 20,
+          top: 10,
+        ),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.textMuted.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Editar descripción',
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                    ctrl.editPost(widget.post.id, editCtrl.text.trim());
+                  },
+                  child: Text(
+                    'Guardar',
+                    style: GoogleFonts.inter(
+                      color: AppColors.accent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(color: AppColors.border, height: 24),
+            
+            // Input Field
+            TextField(
+              controller: editCtrl,
+              maxLines: 5,
+              style: GoogleFonts.inter(color: Colors.white),
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: '¿Qué estás pensando?',
+                hintStyle: GoogleFonts.inter(color: Colors.white24),
+                filled: true,
+                fillColor: AppColors.containerBg.withOpacity(0.5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.all(20),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _confirmUnfollow(BuildContext context, HomeController ctrl) {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: AppColors.containerBg,
+        title: Text('¿Dejar de seguir a ${widget.post.usuario.nombre}?', 
+          style: const TextStyle(color: Colors.white, fontSize: 16)),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              ctrl.toggleFollow(widget.post.usuario.id, widget.post.usuario.nombre);
+            },
+            child: const Text('Dejar de seguir', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, HomeController ctrl) {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: AppColors.containerBg,
+        title: const Text('¿Eliminar publicación?', style: TextStyle(color: Colors.white)),
+        content: const Text('Esta acción no se puede deshacer.', style: TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              ctrl.deletePost(widget.post.id);
+            },
+            child: const Text('Eliminar', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
       ),
     );
   }
@@ -113,7 +294,7 @@ class _PostCardState extends State<PostCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ── HEADER ───────────────────────────────────────────────
+          // HEADER
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
             child: Row(
@@ -151,7 +332,7 @@ class _PostCardState extends State<PostCard> {
             ),
           ),
 
-          // ── MEDIA ────────────────────────────────────────────────
+          // MEDIA
           if (widget.post.imageUrl?.isNotEmpty ?? false)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -171,8 +352,10 @@ class _PostCardState extends State<PostCard> {
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Container(color: Colors.white10),
                         ),
-                        if (_showLargeHeart)
-                          const Icon(Icons.favorite, color: Colors.white, size: 80),
+                        LargeHeartAnim(
+                          isVisible: _showLargeHeart,
+                          onFinished: () => setState(() => _showLargeHeart = false),
+                        ),
                       ],
                     ),
                   ),
@@ -180,13 +363,12 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
 
-          // ── ACTION BAR ──────────────────────────────────────────
+          // ACTION BAR
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Botón Like + Contador
                 GestureDetector(
                   onTap: _toggleLike,
                   child: Row(
@@ -210,8 +392,6 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                
-                // Botón Comentarios + Contador
                 GestureDetector(
                   onTap: () => _showComments(context),
                   child: Row(
@@ -231,19 +411,16 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                
-                // Botón Enviar
                 GestureDetector(
                   onTap: () => _showShareSheet(context),
                   child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
                 ),
-                
                 const Spacer(),
               ],
             ),
           ),
 
-          // ── CAPTION ──────────────────────────────────────────────
+          // CAPTION
           if (widget.post.caption?.isNotEmpty ?? false)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
@@ -267,7 +444,7 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
 
-          // ── FOOTER ───────────────────────────────────────────────
+          // FOOTER
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
             child: Text(
