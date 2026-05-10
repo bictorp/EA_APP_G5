@@ -263,7 +263,7 @@ class _FilterModalState extends State<FilterModal> {
                           Border.all(color: Colors.white10),
                     ),
                     child: const Icon(
-                      Icons.restart_alt_rounded,
+                      Icons.cleaning_services_outlined,
                       color: AppColors.textLink,
                       size: 26,
                     ),

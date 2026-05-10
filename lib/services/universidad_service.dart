@@ -7,7 +7,9 @@ class UniversidadService {
 
   Future<List<dynamic>> getAllUniversidades() async {
     try {
-      final response = await _dio.get('${ApiConstants.baseUrl}/universidades');
+      final response = await _dio.get('${ApiConstants.baseUrl}/universidades',
+        queryParameters: { 'limit': 100, },
+      );
       
       if (response.statusCode == 200) {
         return response.data is List ? response.data : (response.data['docs'] ?? []);
