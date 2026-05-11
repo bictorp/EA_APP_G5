@@ -250,22 +250,8 @@ class _PostCardState extends State<PostCard> {
   }
 
   void _confirmDelete(BuildContext context, HomeController ctrl) {
-    Get.dialog(
-      AlertDialog(
-        backgroundColor: AppColors.containerBg,
-        title: const Text('¿Eliminar publicación?', style: TextStyle(color: Colors.white)),
-        content: const Text('Esta acción no se puede deshacer.', style: TextStyle(color: Colors.white70)),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
-          TextButton(
-            onPressed: () {
-              Get.back();
-              ctrl.deletePost(widget.post.id);
-            },
-            child: const Text('Eliminar', style: TextStyle(color: AppColors.error)),
-          ),
-        ],
-      ),
+    UIUtils.showDeletePostBottomSheet(
+      onConfirm: () => ctrl.deletePost(widget.post.id),
     );
   }
 
