@@ -19,7 +19,7 @@ class UserService {
 
   Future<List<String>> getFollowers(String userId) async {
     try {
-      final response = await _dio.get('${ApiConstants.baseUrl}/usuarios/$userId/seguidores');
+      final response = await _dio.get('${ApiConstants.baseUrl}/usuarios/followers/$userId');
       if (response.statusCode == 200) {
         final List data = response.data['seguidores'] ?? [];
         return data.map((f) => (f is String) ? f : f['_id'].toString()).toList();
@@ -32,7 +32,7 @@ class UserService {
 
   Future<List<String>> getFollowing(String userId) async {
     try {
-      final response = await _dio.get('${ApiConstants.baseUrl}/usuarios/$userId/seguidos');
+      final response = await _dio.get('${ApiConstants.baseUrl}/usuarios/following/$userId');
       if (response.statusCode == 200) {
         final List data = response.data['seguidos'] ?? [];
         return data.map((f) => (f is String) ? f : f['_id'].toString()).toList();
@@ -45,7 +45,25 @@ class UserService {
 
   Future<bool> toggleFollow(String userId) async {
     try {
-      final response = await _dio.patch('${ApiConstants.baseUrl}/usuarios/$userId/follow');
+      final response = await _dio.post('${ApiConstants.baseUrl}/usuarios/follow/$userId');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> acceptFollowRequest(String followerId) async {
+    try {
+      final response = await _dio.post('${ApiConstants.baseUrl}/usuarios/requests/accept/$followerId');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> rejectFollowRequest(String followerId) async {
+    try {
+      final response = await _dio.post('${ApiConstants.baseUrl}/usuarios/requests/reject/$followerId');
       return response.statusCode == 200;
     } catch (e) {
       return false;
@@ -79,4 +97,40 @@ class UserService {
       return null;
     }
   }
+
+  
+  Future<Map<String, dynamic>?> searchUsers({
+      String query = '',
+      List<String> allIds = const [],
+      List<dynamic> allUnis = const [],
+      List<dynamic> allGrados = const [],
+      List<dynamic> allAsignaturas = const [],
+      int page = 1,
+    }) async {
+    try {
+      final unis = allIds.where((id) => allUnis.any((u) => (u['_id'] ?? u['id']) == id)).toList();
+      final grads = allIds.where((id) => allGrados.any((g) => (g['_id'] ?? g['id']) == id)).toList();
+      final asigs = allIds.where((id) => allAsignaturas.any((a) => (a['_id'] ?? a['id']) == id)).toList();
+
+      final queryParams = {
+        'search': query.isNotEmpty ? query : null,
+        'universidades': unis.isNotEmpty ? unis.join(',') : null,
+        'grados': grads.isNotEmpty ? grads.join(',') : null,
+        'asignaturas': asigs.isNotEmpty ? asigs.join(',') : null,
+        'page': page,
+        'limit': 10,
+
+        }..removeWhere((key, value) => value == null);
+        
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}/usuarios', 
+        queryParameters: queryParams,
+      );
+
+      return response.statusCode == 200 ? response.data : null;
+    } catch (e) {
+      return null;
+    }
+  }
 }
+

@@ -4,14 +4,37 @@ import 'theme/app_theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/main_screen.dart';
+import 'screens/create_post_screen.dart';
 import 'screens/edit_profile_screen.dart';
+import 'screens/post_detail_screen.dart';
 import 'services/auth_service.dart';
+import 'services/socket_service.dart';
+import 'package:camera/camera.dart';
+import 'controllers/chat_controller.dart';
+import 'services/report_service.dart';
+
+List<CameraDescription> cameras = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  try {
+    cameras = await availableCameras();
+  } catch (e) {
+    print("Error inicializando cámaras: $e");
+  }
+  
   final AuthService authService = AuthService();
   final bool isLoggedIn = await authService.checkSession();
+
+  // Inyectamos servicios básicos siempre
+  Get.put(AuthService(), permanent: true);
+  Get.put(ReportService(), permanent: true);
+
+  if (isLoggedIn) {
+    await SocketService().connect();
+    Get.put(ChatController(), permanent: true);
+  }
 
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
@@ -33,7 +56,9 @@ class MyApp extends StatelessWidget {
         GetPage(name: '/login', page: () => const LoginScreen()),
         GetPage(name: '/register', page: () => const RegisterScreen()),
         GetPage(name: '/home', page: () => const MainScreen()),
+        GetPage(name: '/create-post', page: () => const CreatePostScreen()),
         GetPage(name: '/profile/edit', page: () => const EditProfileScreen()),
+        GetPage(name: '/post-detail', page: () => const PostDetailScreen()),
       ],
       debugShowCheckedModeBanner: false,
     );

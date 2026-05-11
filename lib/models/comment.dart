@@ -4,12 +4,14 @@ class Comment {
   final String id;
   final String texto;
   final User usuario;
+  final List<String> likes;
   final DateTime createdAt;
 
   Comment({
     required this.id,
     required this.texto,
     required this.usuario,
+    required this.likes,
     required this.createdAt,
   });
 
@@ -39,7 +41,10 @@ class Comment {
     return Comment(
       id: json['_id'] ?? '',
       texto: json['texto'] ?? '',
-      usuario: User.fromJson(json['usuario'] ?? {}, ''),
+      usuario: json['usuario'] is Map
+          ? User.fromJson((json['usuario'] as Map).cast<String, dynamic>(), '')
+          : User(id: json['usuario']?.toString() ?? '', nombre: '...', avatarUrl: '', email: '', accessToken: ''),
+      likes: (json['likes'] as List?)?.map((id) => id.toString()).toList() ?? [],
       createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
     );
   }

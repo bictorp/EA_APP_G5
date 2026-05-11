@@ -9,6 +9,8 @@ class User {
   final dynamic universidad; // Can be ID or Object
   final dynamic grado; // Can be ID or Object
   final List<dynamic> asignaturas;
+  final bool? privado;
+  final List<dynamic>? seguidores;
 
   User({
     required this.id,
@@ -21,6 +23,8 @@ class User {
     this.universidad,
     this.grado,
     this.asignaturas = const [],
+    this.privado,
+    this.seguidores,
   });
 
   factory User.fromJson(Map<String, dynamic> json, String token) {
@@ -35,6 +39,8 @@ class User {
       universidad: json['universidad'],
       grado: json['grado'],
       asignaturas: json['asignaturas'] ?? [],
+      privado: json['privado'],
+      seguidores: json['seguidores'],
     );
   }
 }

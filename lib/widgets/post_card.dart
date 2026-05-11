@@ -1,13 +1,15 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import '../models/post.dart';
 import '../constants/app_colors.dart';
 import '../widgets/heart_anim_button.dart';
+import '../widgets/large_heart_anim.dart';
 import '../widgets/comments_bottom_sheet.dart';
 import '../controllers/home_controller.dart';
-import '../screens/report_screen.dart';
+import '../screens/profile_screen.dart';
+import '../widgets/share_post_bottom_sheet.dart';
+import '../utils/ui_utils.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -21,124 +23,44 @@ class PostCard extends StatefulWidget {
 class _PostCardState extends State<PostCard> {
   bool _showLargeHeart = false;
 
-  void _showReportScreen(BuildContext context) {
-    Get.to(
-      () => ReportScreen(tipo: 'post', objetivoId: widget.post.id),
-      fullscreenDialog: true,
-      transition: Transition.downToUp,
+  HomeController? get _ctrl {
+    if (Get.isRegistered<HomeController>()) return Get.find<HomeController>();
+    return null;
+  }
+
+  String get _myId => _ctrl?.currentUserId.value ?? '';
+  bool get _isLiked => widget.post.likes.any((u) => u.id == _myId);
+
+  void _toggleLike() {
+    _ctrl?.toggleLike(widget.post.id);
+  }
+
+  void _handleDoubleTap() {
+    if (!_isLiked) _toggleLike();
+    setState(() => _showLargeHeart = true);
+  }
+
+  void _showComments(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => CommentsBottomSheet(postId: widget.post.id),
     );
   }
 
-  void _confirmDelete(BuildContext context, HomeController controller) {
-    Get.dialog(
-      BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: Dialog(
-          backgroundColor: AppColors.containerBg.withOpacity(0.9),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-            side: BorderSide(color: AppColors.error.withOpacity(0.2), width: 1),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Glowing Icon
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.error.withOpacity(0.2),
-                        blurRadius: 20,
-                        spreadRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.delete_sweep_rounded,
-                    color: AppColors.error,
-                    size: 40,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  '¿Eliminar publicación?',
-                  style: GoogleFonts.inter(
-                    color: AppColors.textHeader,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 20,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Esta acción borrará permanentemente tu publicación y no podrás recuperarla.',
-                  style: GoogleFonts.inter(
-                    color: AppColors.textMuted,
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 32),
-                Column(
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Get.back();
-                          controller.deletePost(widget.post.id);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.error,
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          'Eliminar permanentemente',
-                          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: TextButton(
-                        onPressed: () => Get.back(),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.textHeader,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          'Cancelar',
-                          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+  void _showShareSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SharePostBottomSheet(post: widget.post),
     );
   }
 
-  void _showPostOptions(BuildContext context, HomeController controller) {
-    final isOwnPost = widget.post.usuario.id == controller.currentUserId.value;
+  void _showOptions(BuildContext context) {
+    final ctrl = _ctrl;
+    final bool isOwnPost = widget.post.usuario.id == _myId;
 
     Get.bottomSheet(
       Container(
@@ -151,108 +73,80 @@ class _PostCardState extends State<PostCard> {
           children: [
             Container(
               margin: const EdgeInsets.symmetric(vertical: 12),
-              width: 40,
-              height: 4,
+              width: 40, height: 4,
               decoration: BoxDecoration(
-                color: AppColors.border,
-                borderRadius: BorderRadius.circular(2),
-              ),
+                color: AppColors.border, borderRadius: BorderRadius.circular(2)),
             ),
-            if (isOwnPost) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Text(
-                  'Tu publicación',
-                  style: GoogleFonts.inter(
-                    color: AppColors.textMuted,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              const Divider(color: AppColors.border),
+            
+            // Ver Perfil
+            ListTile(
+              leading: const Icon(Icons.account_circle_outlined, color: Colors.white),
+              title: const Text('Ver perfil', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Get.back();
+                Get.to(() => ProfileScreen(userId: widget.post.usuario.id));
+              },
+            ),
+
+            // Compartir
+            ListTile(
+              leading: const Icon(Icons.send_outlined, color: Colors.white),
+              title: const Text('Compartir', style: TextStyle(color: Colors.white)),
+              onTap: () {
+                Get.back();
+                _showShareSheet(context);
+              },
+            ),
+
+            // Editar (Si es mío)
+            if (isOwnPost && ctrl != null)
               ListTile(
-                leading: const Icon(
-                  Icons.edit_outlined,
-                  color: AppColors.textHeader,
-                ),
-                title: Text(
-                  'Editar publicación',
-                  style: GoogleFonts.inter(color: AppColors.textHeader),
-                ),
+                leading: const Icon(Icons.edit_outlined, color: Colors.white),
+                title: const Text('Editar publicación', style: TextStyle(color: Colors.white)),
                 onTap: () {
                   Get.back();
-                  // TODO: Editar
+                  _showEditDialog(context, ctrl);
                 },
               ),
+
+            // Dejar de seguir (Si no es mío)
+            if (!isOwnPost && ctrl != null)
               ListTile(
-                leading: const Icon(
-                  Icons.delete_outline,
-                  color: AppColors.error,
-                ),
-                title: Text(
-                  'Eliminar',
-                  style: GoogleFonts.inter(color: AppColors.error),
-                ),
+                leading: const Icon(Icons.person_remove_outlined, color: AppColors.error),
+                title: Text('Dejar de seguir a ${widget.post.usuario.nombre}', 
+                  style: const TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
-                  _confirmDelete(context, controller);
+                  _confirmUnfollow(context, ctrl);
                 },
               ),
-            ] else ...[
+
+            // Reportar (Si no es mío)
+            if (!isOwnPost)
               ListTile(
-                leading: const Icon(
-                  Icons.person_remove_outlined,
-                  color: AppColors.error,
-                ),
-                title: Text(
-                  'Dejar de seguir',
-                  style: GoogleFonts.inter(
-                    color: AppColors.error,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                leading: const Icon(Icons.report_problem_outlined, color: AppColors.error),
+                title: const Text('Reportar publicación', style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
-                  controller.toggleFollow(
-                    widget.post.usuario.id,
-                    widget.post.usuario.nombre,
+                  UIUtils.showReportBottomSheet(
+                    targetId: widget.post.id,
+                    tipo: 'post',
+                    title: 'esta publicación',
                   );
                 },
               ),
+
+            // Eliminar (Si es mío)
+            if (isOwnPost && ctrl != null)
               ListTile(
-                leading: const Icon(
-                  Icons.account_circle_outlined,
-                  color: AppColors.textHeader,
-                ),
-                title: Text(
-                  'Ver perfil',
-                  style: GoogleFonts.inter(color: AppColors.textHeader),
-                ),
+                leading: const Icon(Icons.delete_outline, color: AppColors.error),
+                title: const Text('Eliminar publicación', style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
-                  // TODO: Navegar al perfil
+                  _confirmDelete(context, ctrl);
                 },
               ),
-              ListTile(
-                leading: const Icon(
-                  Icons.report_problem_outlined,
-                  color: AppColors.error,
-                ),
-                title: Text(
-                  'Reportar',
-                  style: GoogleFonts.inter(color: AppColors.error),
-                ),
-                onTap: () {
-                  Get.back();
-                  _showReportScreen(context);
-                },
-              ),
-            ],
-            ListTile(
-              leading: const Icon(Icons.close, color: AppColors.textHeader),
-              title: const Text('Cancelar'),
-              onTap: () => Get.back(),
-            ),
+
             const SizedBox(height: 20),
           ],
         ),
@@ -260,260 +154,292 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  void _showComments(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
+  void _showEditDialog(BuildContext context, HomeController ctrl) {
+    final TextEditingController editCtrl = TextEditingController(text: widget.post.caption);
+    
+    Get.bottomSheet(
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => CommentsBottomSheet(postId: widget.post.id),
+      Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+          left: 20,
+          right: 20,
+          top: 10,
+        ),
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Handle
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.textMuted.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Editar descripción',
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                    ctrl.editPost(widget.post.id, editCtrl.text.trim());
+                  },
+                  child: Text(
+                    'Guardar',
+                    style: GoogleFonts.inter(
+                      color: AppColors.accent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(color: AppColors.border, height: 24),
+            
+            // Input Field
+            TextField(
+              controller: editCtrl,
+              maxLines: 5,
+              style: GoogleFonts.inter(color: Colors.white),
+              autofocus: true,
+              decoration: InputDecoration(
+                hintText: '¿Qué estás pensando?',
+                hintStyle: GoogleFonts.inter(color: Colors.white24),
+                filled: true,
+                fillColor: AppColors.containerBg.withOpacity(0.5),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.all(20),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
     );
   }
 
-  void _handleDoubleTap(HomeController controller) {
-    final isLiked = widget.post.likes.contains(controller.currentUserId.value);
-    if (!isLiked) {
-      controller.toggleLike(widget.post.id);
-    }
+  void _confirmUnfollow(BuildContext context, HomeController ctrl) {
+    UIUtils.showUnfollowBottomSheet(
+      userId: widget.post.usuario.id,
+      nombre: widget.post.usuario.nombre,
+      onConfirm: () => ctrl.toggleFollow(widget.post.usuario.id, widget.post.usuario.nombre),
+    );
+  }
 
-    // Siempre mostramos la animación al hacer doble tap, estilo Instagram
-    setState(() => _showLargeHeart = true);
-    Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) setState(() => _showLargeHeart = false);
-    });
+  void _confirmDelete(BuildContext context, HomeController ctrl) {
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: AppColors.containerBg,
+        title: const Text('¿Eliminar publicación?', style: TextStyle(color: Colors.white)),
+        content: const Text('Esta acción no se puede deshacer.', style: TextStyle(color: Colors.white70)),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () {
+              Get.back();
+              ctrl.deletePost(widget.post.id);
+            },
+            child: const Text('Eliminar', style: TextStyle(color: AppColors.error)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<HomeController>();
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
+      width: screenWidth,
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
+          // HEADER
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+            padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundImage: NetworkImage(
-                    widget.post.usuario.avatarUrl?.replaceAll('/svg', '/png') ??
-                        'https://api.dicebear.com/7.x/avataaars/png?seed=${widget.post.usuario.nombre}',
+                GestureDetector(
+                  onTap: () => Get.to(() => ProfileScreen(userId: widget.post.usuario.id)),
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white10,
+                    backgroundImage: (widget.post.usuario.avatarUrl?.isNotEmpty ?? false)
+                        ? NetworkImage(widget.post.usuario.avatarUrl!)
+                        : null,
                   ),
                 ),
                 const SizedBox(width: 10),
-                Text(
-                  widget.post.usuario.nombre,
-                  style: GoogleFonts.inter(
-                    color: AppColors.textHeader,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Get.to(() => ProfileScreen(userId: widget.post.usuario.id)),
+                    child: Text(
+                      widget.post.usuario.nombre,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
+                    ),
                   ),
                 ),
-                const Spacer(),
                 IconButton(
-                  icon: const Icon(
-                    Icons.more_horiz,
-                    color: AppColors.textMuted,
-                  ),
-                  onPressed: () => _showPostOptions(context, controller),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
+                  onPressed: () => _showOptions(context),
                 ),
               ],
             ),
           ),
 
-          // Post Image with Double Tap
-          if (widget.post.imageUrl != null && widget.post.imageUrl!.isNotEmpty)
+          // MEDIA
+          if (widget.post.imageUrl?.isNotEmpty ?? false)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               child: GestureDetector(
-                onDoubleTap: () => _handleDoubleTap(controller),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: Image.network(
+                onDoubleTap: _handleDoubleTap,
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Image.network(
                           widget.post.imageUrl!,
+                          width: double.infinity,
+                          height: double.infinity,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            width: double.infinity,
-                            color: AppColors.bg,
-                            child: const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.broken_image_outlined,
-                                  color: AppColors.textMuted,
-                                  size: 40,
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'Imagen no disponible',
-                                  style: TextStyle(
-                                    color: AppColors.textMuted,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          errorBuilder: (_, __, ___) => Container(color: Colors.white10),
                         ),
-                      ),
+                        LargeHeartAnim(
+                          isVisible: _showLargeHeart,
+                          onFinished: () => setState(() => _showLargeHeart = false),
+                        ),
+                      ],
                     ),
-
-                    // Large Heart Animation
-                    if (_showLargeHeart)
-                      TweenAnimationBuilder<double>(
-                        duration: const Duration(milliseconds: 400),
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        curve: Curves.elasticOut,
-                        builder: (context, value, child) {
-                          return Opacity(
-                            opacity: value.clamp(0.0, 1.0),
-                            child: Transform.scale(
-                              scale: value,
-                              child: Icon(
-                                Icons.favorite_rounded,
-                                color: AppColors.textHeader.withOpacity(0.5),
-                                size: 200,
-                                shadows: const [
-                                  Shadow(color: Colors.black26, blurRadius: 20),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                  ],
+                  ),
                 ),
               ),
             ),
 
-          // Action Bar
+          // ACTION BAR
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12.0,
-              vertical: 10.0,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Likes
-                GetX<HomeController>(
-                  builder: (controller) {
-                    final isLiked = widget.post.likes.contains(
-                      controller.currentUserId.value,
-                    );
-                    return Row(
-                      children: [
-                        HeartAnimButton(
-                          isLiked: isLiked,
-                          onTap: () => controller.toggleLike(widget.post.id),
-                        ),
-                        if (widget.post.likes.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 6.0),
-                            child: Text(
-                              Post.formatCount(widget.post.likes.length),
-                              style: GoogleFonts.inter(
-                                color: AppColors.textHeader,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  },
-                ),
-                const SizedBox(width: 16),
-                // Comments
                 GestureDetector(
-                  onTap: () => _showComments(context),
+                  onTap: _toggleLike,
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.chat_bubble_outline_rounded,
-                        color: AppColors.textHeader,
-                        size: 26,
+                      HeartAnimButton(
+                        isLiked: _isLiked,
+                        size: 24,
+                        onTap: _toggleLike,
                       ),
-                      if (widget.post.commentsCount > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 6.0),
-                          child: Text(
-                            Post.formatCount(widget.post.commentsCount),
-                            style: GoogleFonts.inter(
-                              color: AppColors.textHeader,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                            ),
-                          ),
+                      const SizedBox(width: 6),
+                      Text(
+                        Post.formatCount(widget.post.likes.length),
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
                         ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
-                const Icon(
-                  Icons.send_rounded,
-                  color: AppColors.textHeader,
-                  size: 26,
+                const SizedBox(width: 20),
+                GestureDetector(
+                  onTap: () => _showComments(context),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 22),
+                      const SizedBox(width: 6),
+                      Text(
+                        Post.formatCount(widget.post.commentsCount),
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 20),
+                GestureDetector(
+                  onTap: () => _showShareSheet(context),
+                  child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                ),
+                const Spacer(),
               ],
             ),
           ),
 
-          // Caption
-          if (widget.post.caption != null && widget.post.caption!.isNotEmpty)
+          // CAPTION
+          if (widget.post.caption?.isNotEmpty ?? false)
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 14.0,
-                vertical: 2.0,
-              ),
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '${widget.post.usuario.nombre} ',
-                      style: GoogleFonts.inter(
-                        color: AppColors.textHeader,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${widget.post.usuario.nombre} ',
+                    style: GoogleFonts.inter(
+                      fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+                  ),
+                  Expanded(
+                    child: Text(
+                      widget.post.caption!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(color: Colors.white70, fontSize: 13),
                     ),
-                    TextSpan(
-                      text: widget.post.caption,
-                      style: GoogleFonts.inter(
-                        color: AppColors.textHeader,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
 
-          // Time Ago
+          // FOOTER
           Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 14.0,
-              vertical: 8.0,
-            ),
+            padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
             child: Text(
               widget.post.timeAgo,
-              style: GoogleFonts.inter(
-                color: AppColors.textMuted,
-                fontSize: 11,
-              ),
+              style: const TextStyle(color: Colors.white30, fontSize: 11),
             ),
           ),
-          
-          const SizedBox(height: 8),
         ],
       ),
     );

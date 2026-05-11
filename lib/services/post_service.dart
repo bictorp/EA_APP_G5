@@ -47,6 +47,45 @@ class PostService {
     }
   }
 
+    Future<Map<String, dynamic>> getDiscoveryFeed({int page = 1, int limit = 10}) async {
+    try {
+      if (kDebugMode) {
+        print('Fetching feed from: ${ApiConstants.baseUrl}/posts/discovery');
+      }
+      
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}/posts/discovery',
+        queryParameters: {'page': page, 'limit': limit},
+      );
+      
+      if (kDebugMode) {
+        print('Response status: ${response.statusCode}');
+        print('Response data length: ${response.data['docs']?.length}');
+      }
+
+      if (response.statusCode == 200) {
+        final List docs = response.data['docs'] ?? [];
+        final List<Post> posts = docs.map((json) => Post.fromJson(json)).toList();
+        
+        return {
+          'posts': posts,
+          'hasNextPage': response.data['hasNextPage'] ?? false,
+          'nextPage': response.data['nextPage'],
+        };
+      }
+      return {'posts': <Post>[], 'hasNextPage': false};
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in getDiscoveryFeed: $e');
+        if (e is DioException) {
+          print('Dio error: ${e.response?.data}');
+        }
+      }
+      return {'posts': <Post>[], 'hasNextPage': false};
+    }
+  }
+
+
   Future<Post?> toggleLike(String postId) async {
     try {
       final response = await _dio.patch('${ApiConstants.baseUrl}/posts/$postId/like');
@@ -73,6 +112,19 @@ class PostService {
     } catch (e) {
       if (kDebugMode) print('Error fetching comments: $e');
       return [];
+    }
+  }
+
+  Future<Post?> getPostById(String postId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/posts/$postId');
+      if (response.statusCode == 200) {
+        return Post.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('Error fetching post by id: $e');
+      return null;
     }
   }
 
@@ -115,6 +167,38 @@ class PostService {
     }
   }
 
+  Future<Post?> updatePost(String postId, Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.patch('${ApiConstants.baseUrl}/posts/$postId', data: data);
+      if (response.statusCode == 200) {
+        return Post.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('Error updating post: $e');
+      return null;
+    }
+  }
+
+  Future<Post?> createPost(String imageUrl, String caption) async {
+    try {
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}/posts',
+        data: {
+          'imageUrl': imageUrl,
+          'caption': caption,
+        },
+      );
+      if (response.statusCode == 201) {
+        return Post.fromJson(response.data);
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('Error creating post: $e');
+      return null;
+    }
+  }
+
   Future<bool> toggleFollow(String targetId) async {
     try {
       final response = await _dio.post('${ApiConstants.baseUrl}/usuarios/follow/$targetId');
@@ -122,6 +206,46 @@ class PostService {
     } catch (e) {
       if (kDebugMode) print('Error toggling follow: $e');
       return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> getPostsByUserId(String userId) async {
+    if (userId.isEmpty || userId == 'null') {
+      return {'posts': <Post>[], 'hasNextPage': false};
+    }
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/posts/user/$userId');
+      
+      if (response.statusCode == 200) {
+        final List docs = response.data['docs'] ?? [];
+        final List<Post> posts = docs.map((json) => Post.fromJson(json)).toList();
+        
+        return {
+          'posts': posts,
+          'hasNextPage': response.data['hasNextPage'] ?? false,
+        };
+      }
+      return {'posts': <Post>[], 'hasNextPage': false};
+    } catch (e) {
+      if (kDebugMode) print('Error in getPostsByUserId: $e');
+      return {'posts': <Post>[], 'hasNextPage': false};
+    }
+  }
+
+  Future<dynamic> toggleCommentLike(String commentId) async {
+    try {
+      final response = await _dio.patch('${ApiConstants.baseUrl}/comments/$commentId/like');
+      if (response.statusCode == 200) {
+        if (response.data is Map) {
+          final map = (response.data as Map).cast<String, dynamic>();
+          return Comment.fromJson(map);
+        }
+        return true;
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('Error toggling comment like: $e');
+      return null;
     }
   }
 }

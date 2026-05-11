@@ -6,11 +6,28 @@ import '../controllers/comments_controller.dart';
 import '../controllers/home_controller.dart';
 import '../constants/app_colors.dart';
 import '../screens/report_screen.dart';
+import '../widgets/heart_anim_button.dart';
 
-class CommentsBottomSheet extends StatelessWidget {
+class CommentsBottomSheet extends StatefulWidget {
   final String postId;
 
   const CommentsBottomSheet({super.key, required this.postId});
+
+  @override
+  State<CommentsBottomSheet> createState() => _CommentsBottomSheetState();
+}
+
+class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
+  String? _selectedCommentId;
+  late CommentsController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // Buscamos o creamos el controlador y forzamos el refresco
+    controller = Get.put(CommentsController(widget.postId), tag: widget.postId);
+    controller.fetchComments();
+  }
 
   void _showReportScreen(BuildContext context, String commentId) {
     Get.to(
@@ -122,8 +139,12 @@ class CommentsBottomSheet extends StatelessWidget {
     );
   }
 
-  void _showCommentOptions(BuildContext context, CommentsController controller, String commentId, bool isOwnComment) {
-    Get.bottomSheet(
+  void _showCommentOptions(BuildContext context, CommentsController controller, String commentId, bool isOwnComment) async {
+    setState(() {
+      _selectedCommentId = commentId;
+    });
+
+    await Get.bottomSheet(
       Container(
         decoration: const BoxDecoration(
           color: AppColors.containerBg,
@@ -173,11 +194,16 @@ class CommentsBottomSheet extends StatelessWidget {
         ),
       ),
     );
+
+    if (mounted) {
+      setState(() {
+        _selectedCommentId = null;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(CommentsController(postId), tag: postId);
     final homeController = Get.find<HomeController>();
 
     return Container(
@@ -188,7 +214,6 @@ class CommentsBottomSheet extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Handle
           Container(
             margin: const EdgeInsets.symmetric(vertical: 12),
             width: 40,
@@ -198,7 +223,6 @@ class CommentsBottomSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
           Text(
             'Comentarios',
             style: GoogleFonts.inter(
@@ -207,16 +231,12 @@ class CommentsBottomSheet extends StatelessWidget {
               fontSize: 16,
             ),
           ),
-          
           const Divider(color: AppColors.border, height: 24),
-          
-          // Comments List
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
                 return const Center(child: CircularProgressIndicator(color: AppColors.accent));
               }
-              
               if (controller.comments.isEmpty) {
                 return Center(
                   child: Column(
@@ -232,76 +252,102 @@ class CommentsBottomSheet extends StatelessWidget {
                   ),
                 );
               }
-              
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 0),
                 itemCount: controller.comments.length,
                 itemBuilder: (context, index) {
                   final comment = controller.comments[index];
                   final isOwnComment = comment.usuario.id == homeController.currentUserId.value;
+                  final isSelected = _selectedCommentId == comment.id;
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        CircleAvatar(
-                          radius: 16,
-                          backgroundImage: NetworkImage(comment.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${comment.usuario.nombre}'),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: '${comment.usuario.nombre} ',
-                                      style: GoogleFonts.inter(
-                                        color: AppColors.textHeader,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: comment.texto,
-                                      style: GoogleFonts.inter(
-                                        color: AppColors.textHeader,
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                comment.timeAgo,
-                                style: GoogleFonts.inter(
-                                  color: AppColors.textMuted,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
+                  return GestureDetector(
+                    onLongPress: () => _showCommentOptions(context, controller, comment.id, isOwnComment),
+                    behavior: HitTestBehavior.opaque,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.white.withOpacity(0.05) : Colors.transparent,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundImage: NetworkImage(comment.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${comment.usuario.nombre}'),
                           ),
-                        ),
-                        IconButton(
-                          onPressed: () => _showCommentOptions(context, controller, comment.id, isOwnComment),
-                          icon: const Icon(Icons.more_horiz, color: AppColors.textMuted, size: 20),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          visualDensity: VisualDensity.compact,
-                        ),
-                      ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: '${comment.usuario.nombre} ',
+                                        style: GoogleFonts.inter(
+                                          color: AppColors.textHeader,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: comment.texto,
+                                        style: GoogleFonts.inter(
+                                          color: AppColors.textHeader,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  comment.timeAgo,
+                                  style: GoogleFonts.inter(
+                                    color: AppColors.textMuted,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                HeartAnimButton(
+                                  isLiked: comment.likes.contains(homeController.currentUserId.value),
+                                  onTap: () => controller.toggleLike(comment.id),
+                                  size: 16,
+                                  color: comment.likes.contains(homeController.currentUserId.value)
+                                      ? Colors.red
+                                      : AppColors.textMuted,
+                                ),
+                                if (comment.likes.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${comment.likes.length}',
+                                    style: GoogleFonts.inter(
+                                      color: AppColors.textMuted,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
               );
             }),
           ),
-          
-          // Input Area
           Container(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom + 16,
@@ -316,10 +362,17 @@ class CommentsBottomSheet extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const CircleAvatar(
-                  radius: 20,
-                  backgroundImage: NetworkImage('https://api.dicebear.com/7.x/avataaars/png?seed=me'),
-                ),
+                Obx(() {
+                  final userData = homeController.currentUserId.value;
+                  // Aquí podríamos buscar el avatarUrl si HomeController lo tuviera accesible, 
+                  // pero por ahora usemos un placeholder dinámico basado en el ID o nombre si está disponible.
+                  // Idealmente HomeController debería exponer el objeto User completo.
+                  return const CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.white10,
+                    child: Icon(Icons.person, color: Colors.white54, size: 20),
+                  );
+                }),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Container(
