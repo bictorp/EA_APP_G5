@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -76,47 +77,64 @@ class EditProfileScreen extends StatelessWidget {
                           children: [
                             // Avatar section
                             Center(
-                              child: Stack(
-                                children: [
-                                  Obx(() {
-                                    final avatarUrl = controller.previewAvatarUrl.value;
-                                    return CircleAvatar(
-                                      radius: 50,
-                                      backgroundColor: AppColors.accent,
-                                      backgroundImage: avatarUrl.isNotEmpty 
-                                          ? NetworkImage(avatarUrl) 
-                                          : null,
-                                      child: avatarUrl.isEmpty 
-                                          ? Text(
-                                              controller.previewName.value.isNotEmpty 
-                                                  ? controller.previewName.value[0].toUpperCase() 
-                                                  : '?',
-                                              style: const TextStyle(
-                                                fontSize: 40, 
-                                                fontWeight: FontWeight.bold, 
-                                                color: Colors.white
-                                              ),
-                                            )
-                                          : null,
-                                    );
-                                  }),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: const BoxDecoration(
-                                        color: AppColors.accent,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.camera_alt_rounded,
-                                        color: Colors.white,
-                                        size: 18,
+                              child: GestureDetector(
+                                onTap: () => controller.pickImage(),
+                                child: Stack(
+                                  children: [
+                                    Obx(() {
+                                      final avatarUrl = controller.previewAvatarUrl.value;
+                                      final selectedXFile = controller.selectedXFile.value;
+                                      final selectedBytes = controller.selectedImageBytes.value;
+                                      
+                                      ImageProvider? imageProvider;
+                                      if (selectedXFile != null) {
+                                        if (kIsWeb && selectedBytes != null) {
+                                          imageProvider = MemoryImage(selectedBytes);
+                                        } else {
+                                          // En móvil usamos FileImage a través del path de XFile
+                                          // En web sin bytes, XFile.path es un Blob URL
+                                          imageProvider = NetworkImage(selectedXFile.path);
+                                        }
+                                      } else if (avatarUrl.isNotEmpty) {
+                                        imageProvider = NetworkImage(avatarUrl);
+                                      }
+
+                                      return CircleAvatar(
+                                        radius: 50,
+                                        backgroundColor: AppColors.accent,
+                                        backgroundImage: imageProvider,
+                                        child: imageProvider == null
+                                            ? Text(
+                                                controller.previewName.value.isNotEmpty 
+                                                    ? controller.previewName.value[0].toUpperCase() 
+                                                    : '?',
+                                                style: const TextStyle(
+                                                  fontSize: 40, 
+                                                  fontWeight: FontWeight.bold, 
+                                                  color: Colors.white
+                                                ),
+                                              )
+                                            : null,
+                                      );
+                                    }),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(
+                                          color: AppColors.accent,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.camera_alt_rounded,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                             const SizedBox(height: 32),
@@ -136,12 +154,6 @@ class EditProfileScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 24),
 
-                            CustomTextField(
-                              label: 'URL del Avatar',
-                              controller: controller.avatarUrlController,
-                              prefixIcon: const Icon(Icons.link_rounded),
-                            ),
-                            const SizedBox(height: 24),
 
                             // Bio Field (Textarea style)
                             Column(

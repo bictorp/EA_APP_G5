@@ -52,7 +52,7 @@ class UserService {
     }
   }
 
-  Future<Map<String, dynamic>?> updateUser(Map<String, dynamic> data) async {
+  Future<Map<String, dynamic>?> updateUser(dynamic data) async {
     try {
       final response = await _dio.patch('${ApiConstants.baseUrl}/auth/me', data: data);
       if (response.statusCode == 200) {

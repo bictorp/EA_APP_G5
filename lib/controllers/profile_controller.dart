@@ -35,8 +35,8 @@ class ProfileController extends GetxController {
         final Map<String, dynamic> userData = jsonDecode(userDataStr);
         final String userId = userData['_id'] ?? '';
         
-        // Fetch fresh user data from API
-        final freshData = await _userService.getUserById(userId);
+        // Fetch fresh user data from API using getMe() for own profile
+        final freshData = await _userService.getMe();
         if (freshData != null) {
           user.value = User.fromJson(freshData, token);
         } else {
