@@ -77,9 +77,7 @@ class EditProfileController extends GetxController {
       
       if (image != null) {
         selectedXFile.value = image;
-        if (kIsWeb) {
-          selectedImageBytes.value = await image.readAsBytes();
-        }
+        selectedImageBytes.value = await image.readAsBytes();
       }
     } catch (e) {
       Get.snackbar('Error', 'No se pudo seleccionar la imagen');
@@ -138,8 +136,16 @@ class EditProfileController extends GetxController {
           await _storageService.saveUserData(jsonEncode(finalUserData));
           
           // Update profile controller if it's active
-          if (Get.isRegistered<ProfileController>()) {
-            Get.find<ProfileController>().loadUserData();
+          if (Get.isRegistered<ProfileController>(tag: 'me')) {
+            final profileController = Get.find<ProfileController>(tag: 'me');
+            profileController.user.value = User.fromJson(finalUserData, token);
+            profileController.user.refresh();
+            profileController.loadUserData();
+          } else if (Get.isRegistered<ProfileController>()) {
+            final profileController = Get.find<ProfileController>();
+            profileController.user.value = User.fromJson(finalUserData, token);
+            profileController.user.refresh();
+            profileController.loadUserData();
           }
           
           Get.back();

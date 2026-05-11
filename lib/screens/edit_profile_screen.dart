@@ -111,7 +111,7 @@ class EditProfileScreen extends StatelessWidget {
                                                 style: const TextStyle(
                                                   fontSize: 40, 
                                                   fontWeight: FontWeight.bold, 
-                                                  color: Colors.white
+                                                  color: Colors.white,
                                                 ),
                                               )
                                             : null,
@@ -153,7 +153,6 @@ class EditProfileScreen extends StatelessWidget {
                               prefixIcon: const Icon(Icons.email_outlined),
                             ),
                             const SizedBox(height: 24),
-
 
                             // Bio Field (Textarea style)
                             Column(
