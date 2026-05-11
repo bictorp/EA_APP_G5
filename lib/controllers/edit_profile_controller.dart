@@ -139,11 +139,13 @@ class EditProfileController extends GetxController {
           if (Get.isRegistered<ProfileController>(tag: 'me')) {
             final profileController = Get.find<ProfileController>(tag: 'me');
             profileController.user.value = User.fromJson(finalUserData, token);
+            profileController.avatarTimestamp.value = DateTime.now().millisecondsSinceEpoch;
             profileController.user.refresh();
             profileController.loadUserData();
           } else if (Get.isRegistered<ProfileController>()) {
             final profileController = Get.find<ProfileController>();
             profileController.user.value = User.fromJson(finalUserData, token);
+            profileController.avatarTimestamp.value = DateTime.now().millisecondsSinceEpoch;
             profileController.user.refresh();
             profileController.loadUserData();
           }

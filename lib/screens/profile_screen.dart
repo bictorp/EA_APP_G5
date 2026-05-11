@@ -106,7 +106,7 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildAvatar(user),
+            _buildAvatar(user, controller),
             const SizedBox(height: 24),
             
             // Username con restricción de ancho
@@ -178,7 +178,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAvatar(dynamic user) {
+  Widget _buildAvatar(dynamic user, ProfileController controller) {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -205,7 +205,11 @@ class ProfileScreen extends StatelessWidget {
           radius: 60,
           backgroundColor: const Color(0xFF0F172A),
           backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-              ? NetworkImage(user.avatarUrl!) 
+              ? NetworkImage(
+                  user.avatarUrl!.contains('?') 
+                    ? '${user.avatarUrl!}&t=${controller.avatarTimestamp.value}' 
+                    : '${user.avatarUrl!}?t=${controller.avatarTimestamp.value}'
+                ) 
               : null,
           child: (user.avatarUrl == null || user.avatarUrl!.isEmpty)
               ? Text(

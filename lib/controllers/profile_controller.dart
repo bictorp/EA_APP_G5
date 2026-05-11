@@ -25,6 +25,7 @@ class ProfileController extends GetxController {
   var followingCount = 0.obs;
   var postCount = 0.obs;
   var isFollowing = false.obs;
+  var avatarTimestamp = DateTime.now().millisecondsSinceEpoch.obs;
 
   @override
   void onInit() {
@@ -102,6 +103,7 @@ class ProfileController extends GetxController {
       final result = await _postService.getPostsByUserId(targetUserId);
       userPosts.assignAll(result['posts']);
       postCount.value = userPosts.length;
+      avatarTimestamp.value = DateTime.now().millisecondsSinceEpoch;
 
     } catch (e) {
       print("Error loading profile: $e");

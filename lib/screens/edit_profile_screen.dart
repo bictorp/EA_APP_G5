@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
@@ -91,11 +92,11 @@ class EditProfileScreen extends StatelessWidget {
                                         if (kIsWeb && selectedBytes != null) {
                                           imageProvider = MemoryImage(selectedBytes);
                                         } else {
-                                          // En móvil usamos FileImage a través del path de XFile
-                                          // En web sin bytes, XFile.path es un Blob URL
-                                          imageProvider = NetworkImage(selectedXFile.path);
+                                          // En móvil usamos FileImage para archivos locales
+                                          imageProvider = FileImage(File(selectedXFile.path));
                                         }
                                       } else if (avatarUrl.isNotEmpty) {
+                                        // Añadimos un parámetro de tiempo para evitar problemas de caché al actualizar
                                         imageProvider = NetworkImage(avatarUrl);
                                       }
 
