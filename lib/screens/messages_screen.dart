@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/chat_controller.dart';
 import '../constants/app_colors.dart';
 import 'chat_detail_screen.dart';
+import 'assistant_screen.dart';
 
 class MessagesScreen extends StatelessWidget {
   const MessagesScreen({super.key});
@@ -17,6 +18,10 @@ class MessagesScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: false,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.smart_toy_outlined, color: Colors.white, size: 26),
+            onPressed: () => Get.to(() => const AssistantScreen()),
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.add, color: Colors.white, size: 28),
             color: AppColors.surface,

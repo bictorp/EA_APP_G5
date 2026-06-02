@@ -4,7 +4,7 @@ import 'auth_service.dart';
 
 class NotificationService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://192.168.1.24:1337', // Ajustar según entorno
+    baseUrl: 'http://localhost:1337', // Ajustar según entorno
     connectTimeout: const Duration(seconds: 5),
   ));
   
