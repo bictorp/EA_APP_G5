@@ -87,6 +87,14 @@ class ProfileScreen extends StatelessWidget {
       pinned: true,
       centerTitle: true,
       iconTheme: IconThemeData(color: AppColors.textHeader),
+      flexibleSpace: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          child: Container(
+            color: AppColors.bg.withOpacity(0.7),
+          ),
+        ),
+      ),
       actions: [
         if (controller.isMe)
           IconButton(

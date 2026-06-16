@@ -57,6 +57,7 @@ class MyApp extends StatelessWidget {
       themeMode: themeController.themeMode,
       initialRoute: isLoggedIn ? '/home' : '/login',
       getPages: [
+        GetPage(name: '/', page: () => isLoggedIn ? MainScreen() : LoginScreen()),
         GetPage(name: '/login', page: () => LoginScreen()),
         GetPage(name: '/register', page: () => RegisterScreen()),
         GetPage(name: '/home', page: () => MainScreen()),
