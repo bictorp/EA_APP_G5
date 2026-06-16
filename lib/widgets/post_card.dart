@@ -10,6 +10,7 @@ import '../controllers/home_controller.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/share_post_bottom_sheet.dart';
 import '../utils/ui_utils.dart';
+import 'safe_circle_avatar.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -275,12 +276,10 @@ class _PostCardState extends State<PostCard> {
               children: [
                 GestureDetector(
                   onTap: () => Get.to(() => ProfileScreen(userId: widget.post.usuario.id)),
-                  child: CircleAvatar(
+                  child: SafeCircleAvatar(
                     radius: 18,
-                    backgroundColor: Colors.white10,
-                    backgroundImage: (widget.post.usuario.avatarUrl?.isNotEmpty ?? false)
-                        ? NetworkImage(widget.post.usuario.avatarUrl!)
-                        : null,
+                    url: widget.post.usuario.avatarUrl,
+                    name: widget.post.usuario.nombre,
                   ),
                 ),
                 SizedBox(width: 10),

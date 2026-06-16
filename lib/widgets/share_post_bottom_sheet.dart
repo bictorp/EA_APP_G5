@@ -5,6 +5,7 @@ import '../controllers/chat_controller.dart';
 import '../controllers/theme_controller.dart';
 import '../models/post.dart';
 import '../constants/app_colors.dart';
+import 'safe_circle_avatar.dart';
 
 class SharePostBottomSheet extends StatefulWidget {
   final Post post;
@@ -140,14 +141,10 @@ class _SharePostBottomSheetState extends State<SharePostBottomSheet> {
                             }
                           });
                         },
-                        leading: CircleAvatar(
+                        leading: SafeCircleAvatar(
                           radius: 20,
-                          backgroundImage: contact['avatarUrl'] != null 
-                            ? NetworkImage(contact['avatarUrl']) 
-                            : null,
-                          child: contact['avatarUrl'] == null 
-                            ? Icon(Icons.person, color: AppColors.textHeader) 
-                            : null,
+                          url: contact['avatarUrl'],
+                          name: contact['nombre'] ?? 'Usuario',
                         ),
                         title: Text(
                           contact['nombre'] ?? 'Usuario',

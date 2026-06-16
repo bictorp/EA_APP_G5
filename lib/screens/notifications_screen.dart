@@ -8,6 +8,7 @@ import '../controllers/notification_controller.dart';
 import '../controllers/theme_controller.dart';
 import '../models/notification.dart';
 import 'profile_screen.dart';
+import '../widgets/safe_circle_avatar.dart';
 
 class NotificationsScreen extends StatelessWidget {
   NotificationsScreen({super.key});
@@ -179,14 +180,10 @@ class NotificationsScreen extends StatelessWidget {
                       final req = requests[index];
                       return Row(
                         children: [
-                          CircleAvatar(
+                          SafeCircleAvatar(
                             radius: 20,
-                            backgroundImage: req.sender.avatarUrl != null && req.sender.avatarUrl!.isNotEmpty
-                                ? NetworkImage(req.sender.avatarUrl!)
-                                : null,
-                            child: req.sender.avatarUrl == null || req.sender.avatarUrl!.isEmpty
-                                ? Icon(Icons.person, color: AppColors.textHeader)
-                                : null,
+                            url: req.sender.avatarUrl,
+                            name: req.sender.nombre,
                           ),
                           SizedBox(width: 12),
                           Expanded(
@@ -269,10 +266,10 @@ class _NotificationItem extends StatelessWidget {
               onTap: () => Get.to(() => ProfileScreen(userId: notification.sender.id)),
               child: Stack(
                 children: [
-                  CircleAvatar(
+                  SafeCircleAvatar(
                     radius: 24,
-                    backgroundImage: NetworkImage(notification.sender.avatarUrl ?? ''),
-                    backgroundColor: AppColors.surface,
+                    url: notification.sender.avatarUrl,
+                    name: notification.sender.nombre,
                   ),
                   Positioned(
                     bottom: 0,

@@ -28,8 +28,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     if (widget.post != null) {
       _post = widget.post;
       _isLoading = false;
+    } else if (Get.arguments is Post) {
+      _post = Get.arguments as Post;
+      _isLoading = false;
     } else if (widget.postId != null || Get.arguments != null) {
-      _fetchPost(widget.postId ?? Get.arguments);
+      _fetchPost(widget.postId ?? Get.arguments.toString());
     }
   }
 

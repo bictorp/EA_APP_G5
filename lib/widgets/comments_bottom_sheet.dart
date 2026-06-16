@@ -7,6 +7,7 @@ import '../controllers/home_controller.dart';
 import '../constants/app_colors.dart';
 import '../screens/report_screen.dart';
 import '../widgets/heart_anim_button.dart';
+import 'safe_circle_avatar.dart';
 
 class CommentsBottomSheet extends StatefulWidget {
   final String postId;
@@ -272,9 +273,10 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(
+                          SafeCircleAvatar(
                             radius: 16,
-                            backgroundImage: NetworkImage(comment.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${comment.usuario.nombre}'),
+                            url: comment.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${comment.usuario.nombre}',
+                            name: comment.usuario.nombre,
                           ),
                           SizedBox(width: 12),
                           Expanded(

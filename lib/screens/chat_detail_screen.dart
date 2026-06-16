@@ -9,6 +9,7 @@ import '../constants/app_colors.dart';
 import 'post_detail_screen.dart';
 import 'profile_screen.dart';
 import '../utils/ui_utils.dart';
+import '../widgets/safe_circle_avatar.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final String contactId;
@@ -159,12 +160,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         }
         return Row(
           children: [
-            CircleAvatar(
+            SafeCircleAvatar(
               radius: 16,
-              backgroundImage: widget.contactAvatar != null 
-                  ? NetworkImage(widget.contactAvatar!.replaceAll('/svg', '/png')) 
-                  : null,
-              child: widget.contactAvatar == null ? Icon(Icons.person, size: 20) : null,
+              url: widget.contactAvatar?.replaceAll('/svg', '/png'),
+              name: widget.contactName,
             ),
             SizedBox(width: 10),
             Text(widget.contactName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textHeader)),
@@ -456,15 +455,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                  CircleAvatar(
+                  SafeCircleAvatar(
                     radius: 9,
-                    backgroundColor: Colors.white10,
-                    backgroundImage: (post.usuario.avatarUrl != null && post.usuario.avatarUrl.isNotEmpty)
-                        ? NetworkImage(post.usuario.avatarUrl)
-                        : null,
-                    child: (post.usuario.avatarUrl == null || post.usuario.avatarUrl.isEmpty)
-                        ? Icon(Icons.person, size: 10, color: Colors.white)
-                        : null,
+                    url: post.usuario.avatarUrl,
+                    name: post.usuario.nombre ?? 'Usuario',
                   ),
                   SizedBox(width: 8),
                   Expanded(

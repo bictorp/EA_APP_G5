@@ -92,35 +92,31 @@ class EditProfileScreen extends StatelessWidget {
                                         final selectedXFile = controller.selectedXFile.value;
                                         final selectedBytes = controller.selectedImageBytes.value;
                                         
-                                        ImageProvider? imageProvider;
+                                        Widget childWidget;
                                         if (selectedXFile != null) {
                                           if (kIsWeb && selectedBytes != null) {
-                                            imageProvider = MemoryImage(selectedBytes);
+                                            childWidget = Image.memory(selectedBytes, fit: BoxFit.cover, width: 100, height: 100);
                                           } else {
-                                            // En móvil usamos FileImage para archivos locales
-                                            imageProvider = FileImage(File(selectedXFile.path));
+                                            childWidget = Image.file(File(selectedXFile.path), fit: BoxFit.cover, width: 100, height: 100);
                                           }
                                         } else if (avatarUrl.isNotEmpty) {
-                                          // Añadimos un parámetro de tiempo para evitar problemas de caché al actualizar
-                                          imageProvider = NetworkImage(avatarUrl);
+                                          childWidget = Image.network(
+                                            avatarUrl,
+                                            fit: BoxFit.cover,
+                                            width: 100,
+                                            height: 100,
+                                            errorBuilder: (context, error, stackTrace) => _buildFallbackWidget(controller.previewName.value),
+                                          );
+                                        } else {
+                                          childWidget = _buildFallbackWidget(controller.previewName.value);
                                         }
 
                                         return CircleAvatar(
                                           radius: 50,
                                           backgroundColor: AppColors.accent,
-                                          backgroundImage: imageProvider,
-                                          child: imageProvider == null
-                                              ? Text(
-                                                  controller.previewName.value.isNotEmpty 
-                                                      ? controller.previewName.value[0].toUpperCase() 
-                                                      : '?',
-                                                  style: TextStyle(
-                                                    fontSize: 40, 
-                                                    fontWeight: FontWeight.bold, 
-                                                    color: Colors.white,
-                                                  ),
-                                                )
-                                              : null,
+                                          child: ClipOval(
+                                            child: childWidget,
+                                          ),
                                         );
                                       }),
                                       Positioned(
@@ -329,5 +325,23 @@ class EditProfileScreen extends StatelessWidget {
         ),
       );
     });
+  }
+
+  Widget _buildFallbackWidget(String name) {
+    final initial = name.isNotEmpty ? name[0].toUpperCase() : '?';
+    return Container(
+      alignment: Alignment.center,
+      color: AppColors.accent,
+      width: 100,
+      height: 100,
+      child: Text(
+        initial,
+        style: const TextStyle(
+          fontSize: 40,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 }

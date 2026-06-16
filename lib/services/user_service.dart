@@ -132,5 +132,29 @@ class UserService {
       return null;
     }
   }
+
+  Future<List<dynamic>> getFollowersList(String userId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/usuarios/followers/$userId');
+      if (response.statusCode == 200) {
+        return response.data['seguidores'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<dynamic>> getFollowingList(String userId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/usuarios/following/$userId');
+      if (response.statusCode == 200) {
+        return response.data['seguidos'] ?? [];
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
 }
 

@@ -5,6 +5,7 @@ import '../controllers/theme_controller.dart';
 import '../constants/app_colors.dart';
 import 'chat_detail_screen.dart';
 import 'assistant_screen.dart';
+import '../widgets/safe_circle_avatar.dart';
 
 class MessagesScreen extends StatelessWidget {
   MessagesScreen({super.key});
@@ -117,12 +118,10 @@ class MessagesScreen extends StatelessWidget {
                           contactName: name,
                           contactAvatar: avatarUrl,
                         )),
-                    leading: CircleAvatar(
-                      backgroundColor: AppColors.surface,
-                      backgroundImage: avatarUrl != null 
-                      ? NetworkImage(avatarUrl.replaceAll('/svg', '/png')) 
-                      : null,
-                      child: avatarUrl == null ? Icon(Icons.person, color: AppColors.textMuted) : null,
+                    leading: SafeCircleAvatar(
+                      radius: 20,
+                      url: avatarUrl?.replaceAll('/svg', '/png'),
+                      name: name,
                     ),
                     title: Text(name, style: TextStyle(color: AppColors.textHeader, fontWeight: FontWeight.w600)),
                     subtitle: Text(
@@ -253,11 +252,10 @@ class MessagesScreen extends StatelessWidget {
                         final contact = filteredCandidates[index];
                         return ListTile(
                           contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-                          leading: CircleAvatar(
-                            backgroundImage: contact['avatarUrl'] != null 
-                                ? NetworkImage(contact['avatarUrl']) 
-                                : null,
-                            child: contact['avatarUrl'] == null ? Icon(Icons.person) : null,
+                          leading: SafeCircleAvatar(
+                            radius: 20,
+                            url: contact['avatarUrl'],
+                            name: contact['nombre'] ?? 'Usuario',
                           ),
                           title: Text(
                             contact['nombre'] ?? 'Usuario',

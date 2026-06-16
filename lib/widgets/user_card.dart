@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
 import '../screens/profile_screen.dart';
+import '../widgets/safe_circle_avatar.dart';
 
 class UserCard extends StatelessWidget {
   final dynamic user;
@@ -18,13 +19,7 @@ class UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Get.to(
-          () => ProfileScreen(
-            userId: user['_id'],
-          ),
-        );
-      },
+      onTap: onTap ?? () => Get.to(() => ProfileScreen(userId: user['_id'] ?? user['id'])),
       child: Container(
         margin: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -39,18 +34,10 @@ class UserCard extends StatelessWidget {
         child: Row(
           children: [
             // Avatar con fallback
-            CircleAvatar(
+            SafeCircleAvatar(
               radius: 28,
-              backgroundImage: (user['avatarUrl'] != null && user['avatarUrl'].toString().isNotEmpty)
-                  ? NetworkImage(user['avatarUrl'])
-                  : null,
-              backgroundColor: Colors.white10,
-              child: (user['avatarUrl'] == null || user['avatarUrl'].toString().isEmpty)
-                  ? Icon(
-                      Icons.person,
-                      color: AppColors.textMuted,
-                    )
-                  : null,
+              url: user['avatarUrl'],
+              name: user['nombre'],
             ),
 
             SizedBox(width: 14),

@@ -5,9 +5,11 @@ import '../controllers/profile_controller.dart';
 import '../constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'settings_screen.dart';
-import 'post_detail_screen.dart';
 import '../utils/ui_utils.dart';
 import '../controllers/theme_controller.dart';
+import '../controllers/home_controller.dart';
+import '../services/user_service.dart';
+import '../widgets/safe_circle_avatar.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String? userId;
@@ -159,9 +161,41 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 _buildStatItem(controller.postCount.value.toString(), 'Posts'),
                 SizedBox(width: 25),
-                _buildStatItem(controller.followersCount.value.toString(), 'Followers'),
+                GestureDetector(
+                  onTap: () {
+                    final targetId = (controller.userId == null || controller.userId!.isEmpty)
+                        ? Get.find<HomeController>().currentUserId.value
+                        : controller.userId!;
+                    if (targetId.isNotEmpty) {
+                      Get.bottomSheet(
+                        _UserListBottomSheet(
+                          title: 'Seguidores',
+                          userId: targetId,
+                          isFollowers: true,
+                        ),
+                      );
+                    }
+                  },
+                  child: _buildStatItem(controller.followersCount.value.toString(), 'Followers'),
+                ),
                 SizedBox(width: 25),
-                _buildStatItem(controller.followingCount.value.toString(), 'Following'),
+                GestureDetector(
+                  onTap: () {
+                    final targetId = (controller.userId == null || controller.userId!.isEmpty)
+                        ? Get.find<HomeController>().currentUserId.value
+                        : controller.userId!;
+                    if (targetId.isNotEmpty) {
+                      Get.bottomSheet(
+                        _UserListBottomSheet(
+                          title: 'Seguidos',
+                          userId: targetId,
+                          isFollowers: false,
+                        ),
+                      );
+                    }
+                  },
+                  child: _buildStatItem(controller.followingCount.value.toString(), 'Following'),
+                ),
               ],
             ),
             SizedBox(height: 24),
@@ -226,26 +260,14 @@ class ProfileScreen extends StatelessWidget {
           color: bgCol,
           shape: BoxShape.circle,
         ),
-        child: CircleAvatar(
+        child: SafeCircleAvatar(
           radius: 60,
-          backgroundColor: bgCol,
-          backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-              ? NetworkImage(
-                  user.avatarUrl!.contains('?') 
-                    ? '${user.avatarUrl!}&t=${controller.avatarTimestamp.value}' 
-                    : '${user.avatarUrl!}?t=${controller.avatarTimestamp.value}'
-                ) 
+          url: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+              ? (user.avatarUrl!.contains('?') 
+                ? '${user.avatarUrl!}&t=${controller.avatarTimestamp.value}' 
+                : '${user.avatarUrl!}?t=${controller.avatarTimestamp.value}')
               : null,
-          child: (user.avatarUrl == null || user.avatarUrl!.isEmpty)
-              ? Text(
-                  user.nombre.isNotEmpty ? user.nombre[0].toUpperCase() : '?',
-                  style: GoogleFonts.inter(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textHeader,
-                  ),
-                )
-              : null,
+          name: user.nombre,
         ),
       ),
     );
@@ -447,7 +469,7 @@ class ProfileScreen extends StatelessWidget {
             final post = controller.userPosts[index];
             return GestureDetector(
               onTap: () {
-                Get.to(() => PostDetailScreen(post: post));
+                Get.toNamed('/post-detail', arguments: post);
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -471,5 +493,215 @@ class ProfileScreen extends StatelessWidget {
     if (obj is String) return obj;
     if (obj is Map) return obj['nombre'];
     return null;
+  }
+}
+
+class _UserListBottomSheet extends StatefulWidget {
+  final String title;
+  final String userId;
+  final bool isFollowers;
+
+  _UserListBottomSheet({
+    required this.title,
+    required this.userId,
+    required this.isFollowers,
+  });
+
+  @override
+  State<_UserListBottomSheet> createState() => _UserListBottomSheetState();
+}
+
+class _UserListBottomSheetState extends State<_UserListBottomSheet> {
+  final UserService _userService = UserService();
+  final TextEditingController _searchController = TextEditingController();
+  List<dynamic> _users = [];
+  bool _isLoading = true;
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsers();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadUsers() async {
+    try {
+      final result = widget.isFollowers
+          ? await _userService.getFollowersList(widget.userId)
+          : await _userService.getFollowingList(widget.userId);
+      if (mounted) {
+        setState(() {
+          _users = result;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeController = Get.find<ThemeController>();
+    return Obx(() {
+      final isDark = themeController.isDarkMode.value;
+      
+      final filteredUsers = _users.where((u) {
+        final name = (u['nombre'] ?? '').toString().toLowerCase();
+        final email = (u['email'] ?? '').toString().toLowerCase();
+        final q = _searchQuery.toLowerCase();
+        return name.contains(q) || email.contains(q);
+      }).toList();
+
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.75),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white24 : Colors.black26,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Text(
+              widget.title,
+              style: GoogleFonts.inter(
+                color: AppColors.textHeader,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            SizedBox(height: 16),
+            
+            // Search Bar
+            Container(
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border.withOpacity(0.3)),
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (val) {
+                  setState(() {
+                    _searchQuery = val;
+                  });
+                },
+                style: GoogleFonts.inter(color: AppColors.textHeader, fontSize: 14),
+                decoration: InputDecoration(
+                  hintText: 'Buscar...',
+                  hintStyle: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
+                  prefixIcon: Icon(Icons.search, color: AppColors.textMuted, size: 20),
+                  suffixIcon: _searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear, color: AppColors.textMuted, size: 18),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+
+            if (_isLoading)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: CircularProgressIndicator(color: AppColors.accent),
+              )
+            else if (filteredUsers.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.people_outline_rounded, size: 60, color: AppColors.textMuted.withOpacity(0.15)),
+                    SizedBox(height: 16),
+                    Text(
+                      _searchQuery.isNotEmpty 
+                          ? 'No se encontraron usuarios para tu búsqueda'
+                          : 'No hay usuarios para mostrar',
+                      style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: filteredUsers.length,
+                  separatorBuilder: (context, index) => Divider(color: AppColors.border, height: 16),
+                  itemBuilder: (context, index) {
+                    final u = filteredUsers[index];
+                    final String uid = u['_id'] ?? u['id'] ?? '';
+                    final String name = u['nombre'] ?? '';
+                    final String email = u['email'] ?? '';
+                    final String? avatarUrl = u['avatarUrl'];
+
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: SafeCircleAvatar(
+                        radius: 20,
+                        url: avatarUrl,
+                        name: name,
+                      ),
+                      title: Text(
+                        name,
+                        style: GoogleFonts.inter(
+                          color: AppColors.textHeader,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(
+                        email,
+                        style: GoogleFonts.inter(
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                        ),
+                      ),
+                      onTap: () {
+                        Get.back(); // Cierra el bottom sheet
+                        if (uid.isNotEmpty) {
+                          // Navegar al perfil del usuario clicked
+                          Get.to(() => ProfileScreen(userId: uid));
+                        }
+                      },
+                    );
+                  },
+                ),
+              ),
+            SizedBox(height: 20),
+          ],
+        ),
+      );
+    });
   }
 }
