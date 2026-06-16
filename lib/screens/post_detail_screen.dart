@@ -5,6 +5,7 @@ import '../widgets/post_card.dart';
 import '../constants/app_colors.dart';
 import '../services/post_service.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../controllers/theme_controller.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Post? post;
@@ -57,28 +58,35 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
+    final themeController = Get.find<ThemeController>();
+    return Obx(() {
+      final isDark = themeController.isDarkMode.value;
+      return Scaffold(
         backgroundColor: AppColors.bg,
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
-        title: Text(
-          'Publicación',
-          style: GoogleFonts.inter(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
+        appBar: AppBar(
+          backgroundColor: AppColors.bg,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textHeader),
+            onPressed: () => Get.back(),
+          ),
+          title: Text(
+            'Publicación',
+            style: GoogleFonts.inter(
+              color: AppColors.textHeader,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
           ),
         ),
-      ),
-      body: _isLoading 
-        ? Center(child: CircularProgressIndicator(color: AppColors.accent))
-        : _post == null 
-          ? Center(child: Text('No se encontró la publicación', style: TextStyle(color: Colors.white)))
-          : SingleChildScrollView(
-              child: PostCard(post: _post!),
-            ),
-    );
+        body: _isLoading 
+          ? Center(child: CircularProgressIndicator(color: AppColors.accent))
+          : _post == null 
+            ? Center(child: Text('No se encontró la publicación', style: TextStyle(color: AppColors.textHeader)))
+            : SingleChildScrollView(
+                child: PostCard(post: _post!),
+              ),
+      );
+    });
   }
 }

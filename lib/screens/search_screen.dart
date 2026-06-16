@@ -11,6 +11,7 @@ import '../widgets/post_card.dart';
 import '../widgets/user_card.dart';
 import '../widgets/filter_modal.dart';
 import '../controllers/theme_controller.dart';
+import 'post_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   SearchScreen({super.key});
@@ -255,24 +256,7 @@ void _onSearchChanged(String value) {
         return GestureDetector(
           onTap: () {
             Get.to(
-              () => Scaffold(
-                backgroundColor: AppColors.bg,
-                appBar: AppBar(
-                  backgroundColor: AppColors.bg,
-                  elevation: 0,
-                  leading: IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textHeader),
-                    onPressed: () => Get.back(),
-                  ),
-                  title: Text(
-                    'Publicación',
-                    style: GoogleFonts.inter(color: AppColors.textHeader, fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                body: SingleChildScrollView(
-                  child: PostCard(post: post),
-                ),
-              ),
+              () => PostDetailScreen(post: post),
               transition: Transition.cupertino,
             );
           },

@@ -5,6 +5,7 @@ import '../controllers/profile_controller.dart';
 import '../constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'settings_screen.dart';
+import 'post_detail_screen.dart';
 import '../utils/ui_utils.dart';
 import '../controllers/theme_controller.dart';
 
@@ -436,11 +437,19 @@ class ProfileScreen extends StatelessWidget {
         delegate: SliverChildBuilderDelegate(
           (context, index) {
             final post = controller.userPosts[index];
-            return ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: post.imageUrl != null && post.imageUrl!.isNotEmpty
-                  ? Image.network(post.imageUrl!, fit: BoxFit.cover)
-                  : Container(color: AppColors.border),
+            return GestureDetector(
+              onTap: () {
+                Get.to(() => PostDetailScreen(post: post));
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: post.imageUrl != null && post.imageUrl!.isNotEmpty
+                    ? Hero(
+                        tag: 'post_${post.id}',
+                        child: Image.network(post.imageUrl!, fit: BoxFit.cover),
+                      )
+                    : Container(color: AppColors.border),
+              ),
             );
           },
           childCount: controller.userPosts.length,
