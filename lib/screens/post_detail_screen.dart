@@ -10,7 +10,7 @@ class PostDetailScreen extends StatefulWidget {
   final Post? post;
   final String? postId;
 
-  const PostDetailScreen({super.key, this.post, this.postId});
+  PostDetailScreen({super.key, this.post, this.postId});
 
   @override
   State<PostDetailScreen> createState() => _PostDetailScreenState();
@@ -62,7 +62,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.bg,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: Colors.white),
         title: Text(
           'Publicación',
           style: GoogleFonts.inter(
@@ -73,9 +73,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         ),
       ),
       body: _isLoading 
-        ? const Center(child: CircularProgressIndicator(color: AppColors.accent))
+        ? Center(child: CircularProgressIndicator(color: AppColors.accent))
         : _post == null 
-          ? const Center(child: Text('No se encontró la publicación', style: TextStyle(color: Colors.white)))
+          ? Center(child: Text('No se encontró la publicación', style: TextStyle(color: Colors.white)))
           : SingleChildScrollView(
               child: PostCard(post: _post!),
             ),

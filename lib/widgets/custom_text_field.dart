@@ -8,7 +8,7 @@ class CustomTextField extends StatelessWidget {
   final bool isPassword;
   final Widget? prefixIcon;
 
-  const CustomTextField({
+  CustomTextField({
     super.key,
     required this.label,
     required this.controller,
@@ -41,18 +41,18 @@ class CustomTextField extends StatelessWidget {
             fillColor: AppColors.inputBg,
             prefixIcon: prefixIcon != null
                 ? IconTheme(
-                    data: const IconThemeData(color: AppColors.textMuted),
+                    data: IconThemeData(color: AppColors.textMuted),
                     child: prefixIcon!,
                   )
                 : null,
             contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.inputBorder),
+              borderSide: BorderSide(color: AppColors.inputBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.inputFocus, width: 1.5),
+              borderSide: BorderSide(color: AppColors.inputFocus, width: 1.5),
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),

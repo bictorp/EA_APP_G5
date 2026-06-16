@@ -7,7 +7,7 @@ class NotificationService {
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: ApiConstants.baseUrl,
-      connectTimeout: const Duration(seconds: 5),
+      connectTimeout: Duration(seconds: 5),
     ),
   );
 

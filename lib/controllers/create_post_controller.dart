@@ -12,6 +12,7 @@ import '../services/post_service.dart';
 import '../services/upload_service.dart';
 import '../constants/app_colors.dart';
 import 'home_controller.dart';
+import '../controllers/theme_controller.dart';
 
 class CreatePostController extends GetxController {
   final PostService _postService = PostService();
@@ -26,7 +27,7 @@ class CreatePostController extends GetxController {
 
   Future<void> startMediaFlow() async {
     try {
-      final XFile? pickedFile = await Get.to(() => const CameraScreen());
+      final XFile? pickedFile = await Get.to(() => CameraScreen());
       if (pickedFile != null) {
         await _cropImage(pickedFile);
       } else {
@@ -72,13 +73,16 @@ class CreatePostController extends GetxController {
       return;
     }
     try {
+      final themeController = Get.find<ThemeController>();
+      final isDark = themeController.isDarkMode.value;
+
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: imgFile.path,
         uiSettings: [
           AndroidUiSettings(
               toolbarTitle: 'Recortar foto',
               toolbarColor: AppColors.bg,
-              toolbarWidgetColor: Colors.white,
+              toolbarWidgetColor: AppColors.textHeader,
               activeControlsWidgetColor: AppColors.accent,
               backgroundColor: AppColors.bg,
               initAspectRatio: CropAspectRatioPreset.square,
@@ -127,32 +131,43 @@ class CreatePostController extends GetxController {
       
       if (decodedImage == null) return;
 
+      final themeController = Get.find<ThemeController>();
+      final isDark = themeController.isDarkMode.value;
+
       Map? imagefile = await Navigator.push(
         Get.context!,
         MaterialPageRoute(
           builder: (context) => Theme(
-            data: ThemeData.dark().copyWith(
+            data: ThemeData(
+              brightness: isDark ? Brightness.dark : Brightness.light,
               primaryColor: AppColors.accent,
               scaffoldBackgroundColor: AppColors.bg,
-              appBarTheme: const AppBarTheme(
+              appBarTheme: AppBarTheme(
                 backgroundColor: AppColors.bg,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.textHeader,
                 elevation: 0,
               ),
-              colorScheme: const ColorScheme.dark(
-                primary: AppColors.accent,
-                secondary: AppColors.accent,
-                surface: AppColors.containerBg,
-                background: AppColors.bg,
-              ),
+              colorScheme: isDark
+                  ? ColorScheme.dark(
+                      primary: AppColors.accent,
+                      secondary: AppColors.accent,
+                      surface: AppColors.containerBg,
+                      background: AppColors.bg,
+                    )
+                  : ColorScheme.light(
+                      primary: AppColors.accent,
+                      secondary: AppColors.accent,
+                      surface: AppColors.containerBg,
+                      background: AppColors.bg,
+                    ),
             ),
             child: PhotoFilterSelector(
               appBarColor: AppColors.bg,
-              title: const Text("Aplicar filtros", style: TextStyle(color: Colors.white)),
+              title: Text("Aplicar filtros", style: TextStyle(color: AppColors.textHeader)),
               image: decodedImage,
               filters: presetFiltersList,
               filename: fileName,
-              loader: const Center(child: CircularProgressIndicator()),
+              loader: Center(child: CircularProgressIndicator()),
               fit: BoxFit.contain,
             ),
           ),

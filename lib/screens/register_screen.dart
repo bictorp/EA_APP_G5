@@ -9,7 +9,7 @@ import '../widgets/custom_button.dart';
 import '../widgets/error_banner.dart';
 
 class RegisterScreen extends StatelessWidget {
-  const RegisterScreen({super.key});
+  RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class RegisterScreen extends StatelessWidget {
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment.topRight,
                 radius: 1.5,
@@ -56,7 +56,7 @@ class RegisterScreen extends StatelessWidget {
                       children: [
                         // Título con Gradiente y fuente Inter
                         ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
+                          shaderCallback: (bounds) => LinearGradient(
                             colors: [AppColors.titleStart, AppColors.titleEnd],
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
@@ -71,7 +71,7 @@ class RegisterScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Text(
                           'Crea tu cuenta',
                           style: GoogleFonts.inter(
@@ -79,7 +79,7 @@ class RegisterScreen extends StatelessWidget {
                             fontSize: 16,
                           ),
                         ),
-                        const SizedBox(height: 40),
+                        SizedBox(height: 40),
 
                         Obx(() => ErrorBanner(
                           message: controller.errorMessage.value,
@@ -90,24 +90,24 @@ class RegisterScreen extends StatelessWidget {
                           label: 'Nombre completo',
                           controller: controller.nameController,
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20),
                         CustomTextField(
                           label: 'Correo electrónico',
                           controller: controller.emailController,
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20),
                         CustomTextField(
                           label: 'Contraseña',
                           controller: controller.passwordController,
                           isPassword: true,
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20),
                         CustomTextField(
                           label: 'Confirmar Contraseña',
                           controller: controller.confirmPasswordController,
                           isPassword: true,
                         ),
-                        const SizedBox(height: 32),
+                        SizedBox(height: 32),
                         
                         Obx(() => CustomButton(
                           text: 'Registrarse',
@@ -115,7 +115,7 @@ class RegisterScreen extends StatelessWidget {
                           isLoading: controller.isLoading.value,
                         )),
                         
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

@@ -12,6 +12,7 @@ import 'services/socket_service.dart';
 import 'package:camera/camera.dart';
 import 'controllers/chat_controller.dart';
 import 'services/report_service.dart';
+import 'controllers/theme_controller.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -30,6 +31,7 @@ void main() async {
   // Inyectamos servicios básicos siempre
   Get.put(AuthService(), permanent: true);
   Get.put(ReportService(), permanent: true);
+  await Get.putAsync(() => ThemeController().init(), permanent: true);
 
   if (isLoggedIn) {
     await SocketService().connect();
@@ -42,25 +44,27 @@ void main() async {
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;
   
-  const MyApp({super.key, this.isLoggedIn = false});
+  MyApp({super.key, this.isLoggedIn = false});
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    final themeController = Get.find<ThemeController>();
+
+    return Obx(() => GetMaterialApp(
       title: 'Univy App',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: themeController.themeMode,
       initialRoute: isLoggedIn ? '/home' : '/login',
       getPages: [
-        GetPage(name: '/login', page: () => const LoginScreen()),
-        GetPage(name: '/register', page: () => const RegisterScreen()),
-        GetPage(name: '/home', page: () => const MainScreen()),
-        GetPage(name: '/create-post', page: () => const CreatePostScreen()),
-        GetPage(name: '/profile/edit', page: () => const EditProfileScreen()),
-        GetPage(name: '/post-detail', page: () => const PostDetailScreen()),
+        GetPage(name: '/login', page: () => LoginScreen()),
+        GetPage(name: '/register', page: () => RegisterScreen()),
+        GetPage(name: '/home', page: () => MainScreen()),
+        GetPage(name: '/create-post', page: () => CreatePostScreen()),
+        GetPage(name: '/profile/edit', page: () => EditProfileScreen()),
+        GetPage(name: '/post-detail', page: () => PostDetailScreen()),
       ],
       debugShowCheckedModeBanner: false,
-    );
+    ));
   }
 }

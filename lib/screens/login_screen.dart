@@ -11,7 +11,7 @@ import '../widgets/error_banner.dart';
 import '../screens/register_screen.dart';
 
 class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+  LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class LoginScreen extends StatelessWidget {
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: RadialGradient(
                 center: Alignment.topRight,
                 radius: 1.5,
@@ -58,7 +58,7 @@ class LoginScreen extends StatelessWidget {
                       children: [
                         // Título con Gradiente y fuente Inter
                         ShaderMask(
-                          shaderCallback: (bounds) => const LinearGradient(
+                          shaderCallback: (bounds) => LinearGradient(
                             colors: [AppColors.titleStart, AppColors.titleEnd],
                             begin: Alignment.centerLeft,
                             end: Alignment.centerRight,
@@ -73,7 +73,7 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Text(
                           'Bienvenido de nuevo',
                           style: GoogleFonts.inter(
@@ -81,7 +81,7 @@ class LoginScreen extends StatelessWidget {
                             fontSize: 16,
                           ),
                         ),
-                        const SizedBox(height: 40),
+                        SizedBox(height: 40),
 
                         Obx(() => ErrorBanner(
                           message: controller.errorMessage.value,
@@ -92,13 +92,13 @@ class LoginScreen extends StatelessWidget {
                           label: 'Correo electrónico',
                           controller: controller.emailController,
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20),
                         CustomTextField(
                           label: 'Contraseña',
                           controller: controller.passwordController,
                           isPassword: true,
                         ),
-                        const SizedBox(height: 32),
+                        SizedBox(height: 32),
                         
                         Obx(() => CustomButton(
                           text: 'Iniciar Sesión',
@@ -106,7 +106,7 @@ class LoginScreen extends StatelessWidget {
                           isLoading: controller.isLoading.value,
                         )),
                         
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -115,7 +115,7 @@ class LoginScreen extends StatelessWidget {
                               style: GoogleFonts.inter(color: AppColors.textMuted),
                             ),
                             TextButton(
-                              onPressed: () => Get.to(() => const RegisterScreen()),
+                              onPressed: () => Get.to(() => RegisterScreen()),
                               child: Text(
                                 'Regístrate',
                                 style: GoogleFonts.inter(

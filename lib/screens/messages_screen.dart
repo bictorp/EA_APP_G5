@@ -1,155 +1,160 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/chat_controller.dart';
+import '../controllers/theme_controller.dart';
 import '../constants/app_colors.dart';
 import 'chat_detail_screen.dart';
 import 'assistant_screen.dart';
 
 class MessagesScreen extends StatelessWidget {
-  const MessagesScreen({super.key});
+  MessagesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        title: const Text('Mensajes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+    final themeController = Get.find<ThemeController>();
+    return Obx(() {
+      final _ = themeController.isDarkMode.value;
+      return Scaffold(
         backgroundColor: AppColors.bg,
-        elevation: 0,
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.smart_toy_outlined, color: Colors.white, size: 26),
-            onPressed: () => Get.to(() => const AssistantScreen()),
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.add, color: Colors.white, size: 28),
-            color: AppColors.surface,
-            offset: const Offset(0, 50),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            onSelected: (value) {
-              if (value == 'new_chat') {
-                _showNewChatSheet(context, Get.find<ChatController>());
-              } else if (value == 'join_group') {
-                Get.snackbar(
-                  'Próximamente',
-                  'La funcionalidad de unirse a grupos estará disponible pronto',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: const Color(0xFF1E293B),
-                  colorText: Colors.white,
-                  margin: const EdgeInsets.all(15),
-                  duration: const Duration(seconds: 3),
-                );
-              } else if (value == 'create_group') {
-                Get.snackbar(
-                  'Próximamente',
-                  'La creación de grupos se implementará en una futura actualización',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: const Color(0xFF1E293B),
-                  colorText: Colors.white,
-                  margin: const EdgeInsets.all(15),
-                  duration: const Duration(seconds: 3),
-                );
-              }
-              print('Seleccionado: $value');
-            },
-            itemBuilder: (BuildContext context) => [
-              _buildPopupItem('Iniciar Chat', Icons.chat_outlined, 'new_chat'),
-              _buildPopupItem('Unirse a Grupo', Icons.group_add_outlined, 'join_group'),
-              _buildPopupItem('Crear Grupo', Icons.groups_outlined, 'create_group'),
-            ],
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: GetBuilder<ChatController>(
-        builder: (controller) {
-          if (controller.isContactsLoading && controller.contacts.isEmpty) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.accent));
-          }
+        appBar: AppBar(
+          title: Text('Mensajes', style: TextStyle(color: AppColors.textHeader, fontWeight: FontWeight.bold)),
+          backgroundColor: AppColors.bg,
+          elevation: 0,
+          centerTitle: false,
+          actions: [
+            IconButton(
+              icon: Icon(Icons.smart_toy_outlined, color: AppColors.textHeader, size: 26),
+              onPressed: () => Get.to(() => AssistantScreen()),
+            ),
+            PopupMenuButton<String>(
+              icon: Icon(Icons.add, color: AppColors.textHeader, size: 28),
+              color: AppColors.surface,
+              offset: Offset(0, 50),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              onSelected: (value) {
+                if (value == 'new_chat') {
+                  _showNewChatSheet(context, Get.find<ChatController>());
+                } else if (value == 'join_group') {
+                  Get.snackbar(
+                    'Próximamente',
+                    'La funcionalidad de unirse a grupos estará disponible pronto',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Color(0xFF1E293B),
+                    colorText: Colors.white,
+                    margin: const EdgeInsets.all(15),
+                    duration: Duration(seconds: 3),
+                  );
+                } else if (value == 'create_group') {
+                  Get.snackbar(
+                    'Próximamente',
+                    'La creación de grupos se implementará en una futura actualización',
+                    snackPosition: SnackPosition.BOTTOM,
+                    backgroundColor: Color(0xFF1E293B),
+                    colorText: Colors.white,
+                    margin: const EdgeInsets.all(15),
+                    duration: Duration(seconds: 3),
+                  );
+                }
+                print('Seleccionado: $value');
+              },
+              itemBuilder: (BuildContext context) => [
+                _buildPopupItem('Iniciar Chat', Icons.chat_outlined, 'new_chat'),
+                _buildPopupItem('Unirse a Grupo', Icons.group_add_outlined, 'join_group'),
+                _buildPopupItem('Crear Grupo', Icons.groups_outlined, 'create_group'),
+              ],
+            ),
+            SizedBox(width: 8),
+          ],
+        ),
+        body: GetBuilder<ChatController>(
+          builder: (controller) {
+            if (controller.isContactsLoading && controller.contacts.isEmpty) {
+              return Center(child: CircularProgressIndicator(color: AppColors.accent));
+            }
 
-          // Filtrar solo chats con mensajes (chats activos)
-          final activeContacts = controller.contacts.where((c) => c['lastMessage'] != null).toList();
+            // Filtrar solo chats con mensajes (chats activos)
+            final activeContacts = controller.contacts.where((c) => c['lastMessage'] != null).toList();
 
-          if (activeContacts.isEmpty) {
+            if (activeContacts.isEmpty) {
+              return RefreshIndicator(
+                onRefresh: () => controller.fetchContacts(),
+                color: AppColors.accent,
+                child: ListView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                    Icon(Icons.chat_bubble_outline, size: 80, color: AppColors.textMuted.withOpacity(0.2)),
+                    SizedBox(height: 20),
+                    Center(child: Text('No tienes conversaciones activas', style: TextStyle(color: AppColors.textMuted, fontSize: 16))),
+                    SizedBox(height: 10),
+                    Center(
+                      child: TextButton(
+                        onPressed: () => _showNewChatSheet(context, controller),
+                        child: Text('Iniciar una nueva', style: TextStyle(color: AppColors.accent)),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
             return RefreshIndicator(
               onRefresh: () => controller.fetchContacts(),
               color: AppColors.accent,
-              child: ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
-                  Icon(Icons.chat_bubble_outline, size: 80, color: AppColors.textMuted.withOpacity(0.2)),
-                  const SizedBox(height: 20),
-                  const Center(child: Text('No tienes conversaciones activas', style: TextStyle(color: AppColors.textMuted, fontSize: 16))),
-                  const SizedBox(height: 10),
-                  Center(
-                    child: TextButton(
-                      onPressed: () => _showNewChatSheet(context, controller),
-                      child: const Text('Iniciar una nueva', style: TextStyle(color: AppColors.accent)),
+              child: ListView.separated(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                itemCount: activeContacts.length,
+                separatorBuilder: (context, index) => Divider(color: AppColors.border.withOpacity(0.1), height: 1),
+                itemBuilder: (context, index) {
+                  final contact = activeContacts[index];
+                  final String contactId = contact['_id'];
+                  final String name = contact['nombre'] ?? 'Usuario';
+                  final String? avatarUrl = contact['avatarUrl'];
+
+                  return ListTile(
+                    onTap: () => Get.to(() => ChatDetailScreen(
+                          contactId: contactId, 
+                          contactName: name,
+                          contactAvatar: avatarUrl,
+                        )),
+                    leading: CircleAvatar(
+                      backgroundColor: AppColors.surface,
+                      backgroundImage: avatarUrl != null 
+                      ? NetworkImage(avatarUrl.replaceAll('/svg', '/png')) 
+                      : null,
+                      child: avatarUrl == null ? Icon(Icons.person, color: AppColors.textMuted) : null,
                     ),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () => controller.fetchContacts(),
-            color: AppColors.accent,
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              itemCount: activeContacts.length,
-              separatorBuilder: (context, index) => Divider(color: AppColors.border.withOpacity(0.1), height: 1),
-              itemBuilder: (context, index) {
-                final contact = activeContacts[index];
-                final String contactId = contact['_id'];
-                final String name = contact['nombre'] ?? 'Usuario';
-                final String? avatarUrl = contact['avatarUrl'];
-
-                return ListTile(
-                  onTap: () => Get.to(() => ChatDetailScreen(
-                        contactId: contactId, 
-                        contactName: name,
-                        contactAvatar: avatarUrl,
-                      )),
-                  leading: CircleAvatar(
-                    backgroundColor: AppColors.surface,
-                    backgroundImage: avatarUrl != null 
-                        ? NetworkImage(avatarUrl.replaceAll('/svg', '/png')) 
-                        : null,
-                    child: avatarUrl == null ? const Icon(Icons.person, color: Colors.white70) : null,
-                  ),
-                  title: Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-                  subtitle: Text(
-                    contact['lastMessage'] != null 
+                    title: Text(name, style: TextStyle(color: AppColors.textHeader, fontWeight: FontWeight.w600)),
+                    subtitle: Text(
+                      contact['lastMessage'] != null 
                       ? (contact['lastMessage'].length > 25 
                           ? '${contact['lastMessage'].substring(0, 25)}...' 
                           : contact['lastMessage'])
                       : 'Toca para chatear', 
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: GetBuilder<ChatController>(
-                    id: 'unread_$contactId',
-                    builder: (ctrl) {
-                      final count = ctrl.unreadCounts[contactId] ?? 0;
-                      if (count == 0) return const Icon(Icons.chevron_right, color: AppColors.textMuted, size: 20);
-                      return Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
-                        child: Text('$count', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          );
-        },
-      ),
-    );
+                      style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: GetBuilder<ChatController>(
+                      id: 'unread_$contactId',
+                      builder: (ctrl) {
+                        final count = ctrl.unreadCounts[contactId] ?? 0;
+                        if (count == 0) return Icon(Icons.chevron_right, color: AppColors.textMuted, size: 20);
+                        return Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+                          child: Text('$count', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      );
+    });
   }
 
   void _showNewChatSheet(BuildContext context, ChatController controller) {
@@ -161,7 +166,7 @@ class MessagesScreen extends StatelessWidget {
       context: context,
       backgroundColor: AppColors.surface,
       isScrollControlled: true, 
-      shape: const RoundedRectangleBorder(
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => StatefulBuilder(
@@ -190,14 +195,14 @@ class MessagesScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 20),
-                const Text(
+                SizedBox(height: 20),
+                Text(
                   'Iniciar nuevo chat',
-                  style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: AppColors.textHeader, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 15),
-                Divider(color: Colors.white.withOpacity(0.1), thickness: 1),
-                const SizedBox(height: 15),
+                SizedBox(height: 15),
+                Divider(color: AppColors.borderWhite, thickness: 1),
+                SizedBox(height: 15),
                 
                 // Buscador
                 Container(
@@ -207,11 +212,11 @@ class MessagesScreen extends StatelessWidget {
                     border: Border.all(color: AppColors.border.withOpacity(0.2)),
                   ),
                   child: TextField(
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppColors.textHeader),
                     decoration: InputDecoration(
                       hintText: 'Buscar amigos...',
                       hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5)),
-                      prefixIcon: const Icon(Icons.search, color: AppColors.textMuted),
+                      prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -222,7 +227,7 @@ class MessagesScreen extends StatelessWidget {
                     },
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20),
 
                 if (filteredCandidates.isEmpty)
                   Padding(
@@ -230,10 +235,10 @@ class MessagesScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         Icon(Icons.search_off, size: 48, color: AppColors.textMuted.withOpacity(0.3)),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
                         Text(
                           searchQuery.isEmpty ? 'No hay nuevos contactos disponibles' : 'No se encontraron resultados',
-                          style: const TextStyle(color: AppColors.textMuted),
+                          style: TextStyle(color: AppColors.textMuted),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -252,14 +257,14 @@ class MessagesScreen extends StatelessWidget {
                             backgroundImage: contact['avatarUrl'] != null 
                                 ? NetworkImage(contact['avatarUrl']) 
                                 : null,
-                            child: contact['avatarUrl'] == null ? const Icon(Icons.person) : null,
+                            child: contact['avatarUrl'] == null ? Icon(Icons.person) : null,
                           ),
                           title: Text(
                             contact['nombre'] ?? 'Usuario',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
+                            style: TextStyle(color: AppColors.textHeader, fontWeight: FontWeight.w500),
                           ),
-                          subtitle: const Text('Disponible para chatear', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
-                          trailing: const Icon(Icons.chevron_right, color: AppColors.textMuted),
+                          subtitle: Text('Disponible para chatear', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                          trailing: Icon(Icons.chevron_right, color: AppColors.textMuted),
                           onTap: () {
                             Get.back(); // Cerrar sheet
                             Get.to(() => ChatDetailScreen(
@@ -285,9 +290,9 @@ class MessagesScreen extends StatelessWidget {
       value: value,
       child: Row(
         children: [
-          Icon(icon, color: Colors.white70, size: 20),
-          const SizedBox(width: 12),
-          Text(title, style: const TextStyle(color: Colors.white, fontSize: 14)),
+          Icon(icon, color: AppColors.textMuted, size: 20),
+          SizedBox(width: 12),
+          Text(title, style: TextStyle(color: AppColors.textHeader, fontSize: 14)),
         ],
       ),
     );

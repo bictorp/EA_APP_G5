@@ -14,7 +14,7 @@ import '../utils/ui_utils.dart';
 class PostCard extends StatefulWidget {
   final Post post;
 
-  const PostCard({super.key, required this.post});
+  PostCard({super.key, required this.post});
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -64,7 +64,7 @@ class _PostCardState extends State<PostCard> {
 
     Get.bottomSheet(
       Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.containerBg,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
@@ -80,8 +80,8 @@ class _PostCardState extends State<PostCard> {
             
             // Ver Perfil
             ListTile(
-              leading: const Icon(Icons.account_circle_outlined, color: Colors.white),
-              title: const Text('Ver perfil', style: TextStyle(color: Colors.white)),
+              leading: Icon(Icons.account_circle_outlined, color: AppColors.textHeader),
+              title: Text('Ver perfil', style: TextStyle(color: AppColors.textHeader)),
               onTap: () {
                 Get.back();
                 Get.to(() => ProfileScreen(userId: widget.post.usuario.id));
@@ -90,8 +90,8 @@ class _PostCardState extends State<PostCard> {
 
             // Compartir
             ListTile(
-              leading: const Icon(Icons.send_outlined, color: Colors.white),
-              title: const Text('Compartir', style: TextStyle(color: Colors.white)),
+              leading: Icon(Icons.send_outlined, color: AppColors.textHeader),
+              title: Text('Compartir', style: TextStyle(color: AppColors.textHeader)),
               onTap: () {
                 Get.back();
                 _showShareSheet(context);
@@ -101,8 +101,8 @@ class _PostCardState extends State<PostCard> {
             // Editar (Si es mío)
             if (isOwnPost && ctrl != null)
               ListTile(
-                leading: const Icon(Icons.edit_outlined, color: Colors.white),
-                title: const Text('Editar publicación', style: TextStyle(color: Colors.white)),
+                leading: Icon(Icons.edit_outlined, color: AppColors.textHeader),
+                title: Text('Editar publicación', style: TextStyle(color: AppColors.textHeader)),
                 onTap: () {
                   Get.back();
                   _showEditDialog(context, ctrl);
@@ -112,9 +112,9 @@ class _PostCardState extends State<PostCard> {
             // Dejar de seguir (Si no es mío)
             if (!isOwnPost && ctrl != null)
               ListTile(
-                leading: const Icon(Icons.person_remove_outlined, color: AppColors.error),
+                leading: Icon(Icons.person_remove_outlined, color: AppColors.error),
                 title: Text('Dejar de seguir a ${widget.post.usuario.nombre}', 
-                  style: const TextStyle(color: AppColors.error)),
+                  style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
                   _confirmUnfollow(context, ctrl);
@@ -124,8 +124,8 @@ class _PostCardState extends State<PostCard> {
             // Reportar (Si no es mío)
             if (!isOwnPost)
               ListTile(
-                leading: const Icon(Icons.report_problem_outlined, color: AppColors.error),
-                title: const Text('Reportar publicación', style: TextStyle(color: AppColors.error)),
+                leading: Icon(Icons.report_problem_outlined, color: AppColors.error),
+                title: Text('Reportar publicación', style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
                   UIUtils.showReportBottomSheet(
@@ -139,15 +139,15 @@ class _PostCardState extends State<PostCard> {
             // Eliminar (Si es mío)
             if (isOwnPost && ctrl != null)
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: AppColors.error),
-                title: const Text('Eliminar publicación', style: TextStyle(color: AppColors.error)),
+                leading: Icon(Icons.delete_outline, color: AppColors.error),
+                title: Text('Eliminar publicación', style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
                   _confirmDelete(context, ctrl);
                 },
               ),
 
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -166,7 +166,7 @@ class _PostCardState extends State<PostCard> {
           right: 20,
           top: 10,
         ),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
@@ -184,7 +184,7 @@ class _PostCardState extends State<PostCard> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             
             // Header
             Row(
@@ -193,7 +193,7 @@ class _PostCardState extends State<PostCard> {
                 Text(
                   'Editar descripción',
                   style: GoogleFonts.inter(
-                    color: Colors.white,
+                    color: AppColors.textHeader,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
@@ -214,17 +214,17 @@ class _PostCardState extends State<PostCard> {
                 ),
               ],
             ),
-            const Divider(color: AppColors.border, height: 24),
+            Divider(color: AppColors.border, height: 24),
             
             // Input Field
             TextField(
               controller: editCtrl,
               maxLines: 5,
-              style: GoogleFonts.inter(color: Colors.white),
+              style: GoogleFonts.inter(color: AppColors.textHeader),
               autofocus: true,
               decoration: InputDecoration(
                 hintText: '¿Qué estás pensando?',
-                hintStyle: GoogleFonts.inter(color: Colors.white24),
+                hintStyle: GoogleFonts.inter(color: AppColors.textMuted.withOpacity(0.5)),
                 filled: true,
                 fillColor: AppColors.containerBg.withOpacity(0.5),
                 border: OutlineInputBorder(
@@ -234,7 +234,7 @@ class _PostCardState extends State<PostCard> {
                 contentPadding: const EdgeInsets.all(20),
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
           ],
         ),
       ),
@@ -261,7 +261,7 @@ class _PostCardState extends State<PostCard> {
 
     return Container(
       width: screenWidth,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: AppColors.border, width: 0.5)),
       ),
       child: Column(
@@ -283,7 +283,7 @@ class _PostCardState extends State<PostCard> {
                         : null,
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10),
                 Expanded(
                   child: GestureDetector(
                     onTap: () => Get.to(() => ProfileScreen(userId: widget.post.usuario.id)),
@@ -292,14 +292,14 @@ class _PostCardState extends State<PostCard> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
-                        color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
+                        color: AppColors.textHeader, fontWeight: FontWeight.w700, fontSize: 14),
                     ),
                   ),
                 ),
                 IconButton(
                   padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  icon: const Icon(Icons.more_horiz, color: AppColors.textMuted),
+                  constraints: BoxConstraints(),
+                  icon: Icon(Icons.more_horiz, color: AppColors.textMuted),
                   onPressed: () => _showOptions(context),
                 ),
               ],
@@ -352,12 +352,13 @@ class _PostCardState extends State<PostCard> {
                         isLiked: _isLiked,
                         size: 24,
                         onTap: _toggleLike,
+                        color: _isLiked ? Colors.redAccent : AppColors.textHeader,
                       ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: 6),
                       Text(
                         Post.formatCount(widget.post.likes.length),
                         style: GoogleFonts.inter(
-                          color: Colors.white,
+                          color: AppColors.textHeader,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                         ),
@@ -365,18 +366,18 @@ class _PostCardState extends State<PostCard> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 20),
+                SizedBox(width: 20),
                 GestureDetector(
                   onTap: () => _showComments(context),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.chat_bubble_outline_rounded, color: Colors.white, size: 22),
-                      const SizedBox(width: 6),
+                      Icon(Icons.chat_bubble_outline_rounded, color: AppColors.textHeader, size: 22),
+                      SizedBox(width: 6),
                       Text(
                         Post.formatCount(widget.post.commentsCount),
                         style: GoogleFonts.inter(
-                          color: Colors.white,
+                          color: AppColors.textHeader,
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
                         ),
@@ -384,12 +385,12 @@ class _PostCardState extends State<PostCard> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 20),
+                SizedBox(width: 20),
                 GestureDetector(
                   onTap: () => _showShareSheet(context),
-                  child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                  child: Icon(Icons.send_rounded, color: AppColors.textHeader, size: 20),
                 ),
-                const Spacer(),
+                Spacer(),
               ],
             ),
           ),
@@ -404,14 +405,14 @@ class _PostCardState extends State<PostCard> {
                   Text(
                     '${widget.post.usuario.nombre} ',
                     style: GoogleFonts.inter(
-                      fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13),
+                      fontWeight: FontWeight.bold, color: AppColors.textHeader, fontSize: 13),
                   ),
                   Expanded(
                     child: Text(
                       widget.post.caption!,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(color: Colors.white70, fontSize: 13),
+                      style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
                     ),
                   ),
                 ],
@@ -423,7 +424,7 @@ class _PostCardState extends State<PostCard> {
             padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
             child: Text(
               widget.post.timeAgo,
-              style: const TextStyle(color: Colors.white30, fontSize: 11),
+              style: TextStyle(color: AppColors.textMuted.withOpacity(0.5), fontSize: 11),
             ),
           ),
         ],

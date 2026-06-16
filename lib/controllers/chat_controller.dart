@@ -80,8 +80,8 @@ class ChatController extends GetxController {
           snackPosition: SnackPosition.TOP,
           backgroundColor: AppColors.accent.withOpacity(0.9),
           colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          icon: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+          duration: Duration(seconds: 3),
+          icon: Icon(Icons.chat_bubble_rounded, color: Colors.white),
           onTap: (snack) {
             if (contact != null) {
               Get.to(() => ChatDetailScreen(
@@ -247,7 +247,7 @@ class ChatController extends GetxController {
       final response = await AuthService.dio.get(
         '${ApiConstants.baseUrl}/chat/conversation/$otherUserId',
         options: Options(
-          receiveTimeout: const Duration(seconds: 10),
+          receiveTimeout: Duration(seconds: 10),
         ),
       );
 

@@ -5,7 +5,7 @@ import '../services/bug_service.dart';
 import '../constants/app_colors.dart';
 
 class BugReportScreen extends StatefulWidget {
-  const BugReportScreen({super.key});
+  BugReportScreen({super.key});
 
   @override
   State<BugReportScreen> createState() => _BugReportScreenState();
@@ -63,13 +63,13 @@ class _BugReportScreenState extends State<BugReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: AppColors.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textHeader),
+          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.textHeader),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -95,12 +95,12 @@ class _BugReportScreenState extends State<BugReportScreen> {
                 fontSize: 20,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               'Cuéntanos qué no funciona correctamente para que podamos solucionarlo.',
               style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
             
             Text(
               'Título del problema *',
@@ -109,13 +109,13 @@ class _BugReportScreenState extends State<BugReportScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: _tituloController,
-              style: const TextStyle(color: AppColors.textHeader),
+              style: TextStyle(color: AppColors.textHeader),
               decoration: InputDecoration(
                 hintText: 'Ej. La aplicación se cierra sola',
-                hintStyle: const TextStyle(color: AppColors.textMuted),
+                hintStyle: TextStyle(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.containerBg,
                 border: OutlineInputBorder(
@@ -124,7 +124,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             Text(
               'Descripción detallada *',
@@ -133,14 +133,14 @@ class _BugReportScreenState extends State<BugReportScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: _descController,
               maxLines: 4,
-              style: const TextStyle(color: AppColors.textHeader),
+              style: TextStyle(color: AppColors.textHeader),
               decoration: InputDecoration(
                 hintText: 'Explica con más detalle qué estabas haciendo y qué ocurrió...',
-                hintStyle: const TextStyle(color: AppColors.textMuted),
+                hintStyle: TextStyle(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.containerBg,
                 border: OutlineInputBorder(
@@ -149,7 +149,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
 
             Text(
               '¿Cómo replicarlo? (Opcional)',
@@ -158,14 +158,14 @@ class _BugReportScreenState extends State<BugReportScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: _repController,
               maxLines: 3,
-              style: const TextStyle(color: AppColors.textHeader),
+              style: TextStyle(color: AppColors.textHeader),
               decoration: InputDecoration(
                 hintText: 'Pasos para reproducir el error...',
-                hintStyle: const TextStyle(color: AppColors.textMuted),
+                hintStyle: TextStyle(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.containerBg,
                 border: OutlineInputBorder(
@@ -174,7 +174,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: 40),
             
             SizedBox(
               width: double.infinity,
@@ -187,7 +187,7 @@ class _BugReportScreenState extends State<BugReportScreen> {
                   elevation: 0,
                 ),
                 child: _isSending 
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? CircularProgressIndicator(color: Colors.white)
                   : Text(
                       'Enviar reporte',
                       style: GoogleFonts.inter(
@@ -201,6 +201,6 @@ class _BugReportScreenState extends State<BugReportScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 }

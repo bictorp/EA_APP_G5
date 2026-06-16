@@ -6,11 +6,12 @@ import '../constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'settings_screen.dart';
 import '../utils/ui_utils.dart';
+import '../controllers/theme_controller.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String? userId;
 
-  const ProfileScreen({
+  ProfileScreen({
     super.key,
     this.userId,
   });
@@ -18,57 +19,64 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String tag = (userId == null || userId!.isEmpty) ? 'me' : userId!;
+    final themeController = Get.find<ThemeController>();
     
     final ProfileController controller = Get.put(
       ProfileController(userId: userId),
       tag: tag,
     );
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Container(
-        width: MediaQuery.of(context).size.width, // Fuerza ancho total
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.topRight,
-            radius: 1.5,
-            colors: [
-              Color(0xFF2D0E4D),
-              Color(0xFF0F172A),
-              Color(0xFF000000),
-            ],
+    return Obx(() {
+      final isDark = themeController.isDarkMode.value;
+      return Scaffold(
+        backgroundColor: AppColors.bg,
+        body: Container(
+          width: MediaQuery.of(context).size.width, // Fuerza ancho total
+          decoration: BoxDecoration(
+            gradient: isDark
+                ? RadialGradient(
+                    center: Alignment.topRight,
+                    radius: 1.5,
+                    colors: [
+                      Color(0xFF2D0E4D),
+                      Color(0xFF0F172A),
+                      Color(0xFF000000),
+                    ],
+                  )
+                : null,
+            color: isDark ? null : AppColors.bg,
+          ),
+          child: SafeArea(
+            child: Obx(() {
+              if (controller.isLoading.value && controller.user.value == null) {
+                return Center(child: CircularProgressIndicator(color: AppColors.btnStart));
+              }
+
+              final user = controller.user.value;
+              if (user == null) {
+                return Center(child: Text('No user data found', style: TextStyle(color: AppColors.textHeader)));
+              }
+
+              return RefreshIndicator(
+                onRefresh: () => controller.loadUserData(),
+                color: AppColors.accent,
+                backgroundColor: AppColors.bg,
+                child: CustomScrollView(
+                  physics: AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                  slivers: [
+                    _buildAppBar(user, controller),
+                    _buildProfileHeader(user, controller),
+                    _buildAcademicInfo(user),
+                    _buildSectionDivider(),
+                    _buildPhotoGrid(controller),
+                  ],
+                ),
+              );
+            }),
           ),
         ),
-        child: SafeArea(
-          child: Obx(() {
-            if (controller.isLoading.value && controller.user.value == null) {
-              return const Center(child: CircularProgressIndicator(color: AppColors.btnStart));
-            }
-
-            final user = controller.user.value;
-            if (user == null) {
-              return const Center(child: Text('No user data found', style: TextStyle(color: Colors.white)));
-            }
-
-            return RefreshIndicator(
-              onRefresh: () => controller.loadUserData(),
-              color: AppColors.accent,
-              backgroundColor: AppColors.bg,
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-                slivers: [
-                  _buildAppBar(user, controller),
-                  _buildProfileHeader(user, controller),
-                  _buildAcademicInfo(user),
-                  _buildSectionDivider(),
-                  _buildPhotoGrid(controller),
-                ],
-              ),
-            );
-          }),
-        ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildAppBar(dynamic user, ProfileController controller) {
@@ -77,15 +85,16 @@ class ProfileScreen extends StatelessWidget {
       elevation: 0,
       pinned: true,
       centerTitle: true,
+      iconTheme: IconThemeData(color: AppColors.textHeader),
       actions: [
         if (controller.isMe)
           IconButton(
-            icon: const Icon(Icons.settings_outlined, color: Colors.white),
-            onPressed: () => Get.to(() => const SettingsScreen()),
+            icon: Icon(Icons.settings_outlined, color: AppColors.textHeader),
+            onPressed: () => Get.to(() => SettingsScreen()),
           )
         else
           IconButton(
-            icon: const Icon(Icons.report_problem_outlined, color: Colors.white),
+            icon: Icon(Icons.report_problem_outlined, color: AppColors.textHeader),
             onPressed: () {
               UIUtils.showReportBottomSheet(
                 targetId: controller.userId!,
@@ -99,6 +108,9 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildProfileHeader(dynamic user, ProfileController controller) {
+    final themeController = Get.find<ThemeController>();
+    final isDark = themeController.isDarkMode.value;
+
     return SliverToBoxAdapter(
       child: Container(
         width: double.infinity,
@@ -107,14 +119,14 @@ class ProfileScreen extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildAvatar(user, controller),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             
             // Username con restricción de ancho
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 300),
+              constraints: BoxConstraints(maxWidth: 300),
               child: ShaderMask(
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [Colors.white, Color(0xFFCBD5E1)],
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: isDark ? [Colors.white, Color(0xFFCBD5E1)] : [AppColors.textHeader, AppColors.textMuted],
                 ).createShader(bounds),
                 child: Text(
                   user.nombre,
@@ -124,12 +136,12 @@ class ProfileScreen extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: AppColors.textHeader,
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             
             // Stats Row con MainAxisSize.min
             Row(
@@ -137,17 +149,17 @@ class ProfileScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min, 
               children: [
                 _buildStatItem(controller.postCount.value.toString(), 'Posts'),
-                const SizedBox(width: 25),
+                SizedBox(width: 25),
                 _buildStatItem(controller.followersCount.value.toString(), 'Followers'),
-                const SizedBox(width: 25),
+                SizedBox(width: 25),
                 _buildStatItem(controller.followingCount.value.toString(), 'Following'),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             
             _buildActionButton(controller),
             
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             
             if (user.descripcion != null && user.descripcion!.isNotEmpty)
               Padding(
@@ -158,7 +170,7 @@ class ProfileScreen extends StatelessWidget {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    color: const Color(0xFF94A3B8),
+                    color: AppColors.textMuted,
                     fontSize: 14,
                     height: 1.5,
                   ),
@@ -168,7 +180,7 @@ class ProfileScreen extends StatelessWidget {
             Text(
               user.email,
               style: GoogleFonts.inter(
-                color: const Color(0xFFA78BFA),
+                color: AppColors.accent,
                 fontSize: 13,
               ),
             ),
@@ -179,31 +191,35 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildAvatar(dynamic user, ProfileController controller) {
+    final themeController = Get.find<ThemeController>();
+    final isDark = themeController.isDarkMode.value;
+    final bgCol = isDark ? Color(0xFF0F172A) : AppColors.bg;
+
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [Color(0xFF7C3AED), Color(0xFFA78BFA)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF7C3AED).withOpacity(0.3),
+            color: Color(0xFF7C3AED).withOpacity(0.3),
             blurRadius: 20,
           ),
         ],
       ),
       child: Container(
         padding: const EdgeInsets.all(4),
-        decoration: const BoxDecoration(
-          color: Color(0xFF0F172A),
+        decoration: BoxDecoration(
+          color: bgCol,
           shape: BoxShape.circle,
         ),
         child: CircleAvatar(
           radius: 60,
-          backgroundColor: const Color(0xFF0F172A),
+          backgroundColor: bgCol,
           backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
               ? NetworkImage(
                   user.avatarUrl!.contains('?') 
@@ -217,7 +233,7 @@ class ProfileScreen extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 40,
                     fontWeight: FontWeight.w800,
-                    color: Colors.white,
+                    color: AppColors.textHeader,
                   ),
                 )
               : null,
@@ -227,6 +243,9 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildActionButton(ProfileController controller) {
+    final themeController = Get.find<ThemeController>();
+    final isDark = themeController.isDarkMode.value;
+
     return ElevatedButton(
       onPressed: () {
         if (controller.isMe) {
@@ -243,21 +262,21 @@ class ProfileScreen extends StatelessWidget {
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: controller.isMe 
-            ? Colors.white.withOpacity(0.05)
+            ? (isDark ? Colors.white.withOpacity(0.05) : AppColors.border)
             : (controller.isFollowing.value 
-                ? Colors.white.withOpacity(0.05)
-                : const Color(0xFF7C3AED)),
+                ? (isDark ? Colors.white.withOpacity(0.05) : AppColors.border)
+                : AppColors.accent),
         foregroundColor: controller.isMe 
-            ? const Color(0xFFA78BFA)
+            ? (isDark ? Color(0xFFA78BFA) : AppColors.textHeader)
             : (controller.isFollowing.value 
-                ? const Color(0xFF94A3B8)
+                ? (isDark ? Color(0xFF94A3B8) : AppColors.textMuted)
                 : Colors.white),
         elevation: controller.isFollowing.value || controller.isMe ? 0 : 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
           side: BorderSide(
             color: controller.isFollowing.value || controller.isMe 
-                ? Colors.white.withOpacity(0.1)
+                ? (isDark ? Colors.white.withOpacity(0.1) : AppColors.border)
                 : Colors.transparent
           ),
         ),
@@ -281,7 +300,7 @@ class ProfileScreen extends StatelessWidget {
         Text(
           value,
           style: GoogleFonts.inter(
-            color: const Color(0xFFF8FAFC),
+            color: AppColors.textHeader,
             fontSize: 18,
             fontWeight: FontWeight.w800,
           ),
@@ -289,7 +308,7 @@ class ProfileScreen extends StatelessWidget {
         Text(
           label,
           style: GoogleFonts.inter(
-            color: const Color(0xFF94A3B8),
+            color: AppColors.textMuted,
             fontSize: 12,
           ),
         ),
@@ -303,7 +322,7 @@ class ProfileScreen extends StatelessWidget {
     final asignaturas = user.asignaturas as List<dynamic>;
 
     if (uniName == null && gradoName == null && asignaturas.isEmpty) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
+      return SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
     return SliverToBoxAdapter(
@@ -313,12 +332,12 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Divider(color: Colors.white.withOpacity(0.06)),
-            const SizedBox(height: 14),
+            Divider(color: AppColors.border),
+            SizedBox(height: 14),
             if (uniName != null) _buildAcademicRow(Icons.school_outlined, uniName, true),
             if (gradoName != null) _buildAcademicRow(Icons.edit_note_rounded, gradoName, false),
             if (asignaturas.isNotEmpty) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
@@ -327,14 +346,14 @@ class ProfileScreen extends StatelessWidget {
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF7C3AED).withOpacity(0.1),
+                      color: AppColors.accent.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: const Color(0xFFA78BFA).withOpacity(0.2)),
+                      border: Border.all(color: AppColors.accent.withOpacity(0.2)),
                     ),
                     child: Text(
                       name ?? '',
                       style: GoogleFonts.inter(
-                        color: const Color(0xFFC4B5FD),
+                        color: AppColors.accent,
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
@@ -355,15 +374,15 @@ class ProfileScreen extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: const Color(0xFFA78BFA)),
-          const SizedBox(width: 8),
+          Icon(icon, size: 18, color: AppColors.accent),
+          SizedBox(width: 8),
           Flexible(
             child: Text(
               text,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(
-                color: const Color(0xFFE2E8F0),
+                color: AppColors.textHeader,
                 fontSize: isMain ? 15 : 13,
                 fontWeight: isMain ? FontWeight.w700 : FontWeight.w600,
               ),
@@ -378,19 +397,19 @@ class ProfileScreen extends StatelessWidget {
     return SliverToBoxAdapter(
       child: Column(
         children: [
-          const SizedBox(height: 20),
+          SizedBox(height: 20),
           Text(
             'PUBLICACIONES',
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w900,
               letterSpacing: 2,
-              color: Colors.white70,
+              color: AppColors.textMuted,
             ),
           ),
-          const SizedBox(height: 8),
-          Container(width: 40, height: 2, color: const Color(0xFFA78BFA)),
-          const SizedBox(height: 20),
+          SizedBox(height: 8),
+          Container(width: 40, height: 2, color: AppColors.accent),
+          SizedBox(height: 20),
         ],
       ),
     );
@@ -398,10 +417,10 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildPhotoGrid(ProfileController controller) {
     if (controller.userPosts.isEmpty) {
-      return const SliverToBoxAdapter(
+      return SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 60),
-          child: Center(child: Text('Aún no hay publicaciones', style: TextStyle(color: Colors.white38))),
+          child: Center(child: Text('Aún no hay publicaciones', style: TextStyle(color: AppColors.textMuted))),
         ),
       );
     }
@@ -409,7 +428,7 @@ class ProfileScreen extends StatelessWidget {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       sliver: SliverGrid(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 3,
           mainAxisSpacing: 10,
           crossAxisSpacing: 10,
@@ -421,7 +440,7 @@ class ProfileScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
               child: post.imageUrl != null && post.imageUrl!.isNotEmpty
                   ? Image.network(post.imageUrl!, fit: BoxFit.cover)
-                  : Container(color: Colors.white10),
+                  : Container(color: AppColors.border),
             );
           },
           childCount: controller.userPosts.length,

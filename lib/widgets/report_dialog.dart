@@ -8,7 +8,7 @@ class ReportDialog extends StatefulWidget {
   final String tipo;
   final String objetivoId;
 
-  const ReportDialog({super.key, required this.tipo, required this.objetivoId});
+  ReportDialog({super.key, required this.tipo, required this.objetivoId});
 
   @override
   State<ReportDialog> createState() => _ReportDialogState();
@@ -68,7 +68,7 @@ class _ReportDialogState extends State<ReportDialog> {
       backgroundColor: AppColors.containerBg,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.border, width: 0.5),
+        side: BorderSide(color: AppColors.border, width: 0.5),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -84,12 +84,12 @@ class _ReportDialogState extends State<ReportDialog> {
                 fontSize: 18,
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
+            SizedBox(height: 16),
+            Text(
               '¿Por qué quieres reportar este contenido?',
               style: TextStyle(color: AppColors.textMuted, fontSize: 14),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
@@ -104,41 +104,41 @@ class _ReportDialogState extends State<ReportDialog> {
                   isExpanded: true,
                   items: _reasons.map((r) => DropdownMenuItem(
                     value: r,
-                    child: Text(r, style: const TextStyle(color: AppColors.textHeader)),
+                    child: Text(r, style: TextStyle(color: AppColors.textHeader)),
                   )).toList(),
                   onChanged: (val) => setState(() => _selectedReason = val!),
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: _controller,
               maxLines: 3,
-              style: const TextStyle(color: AppColors.textHeader),
+              style: TextStyle(color: AppColors.textHeader),
               decoration: InputDecoration(
                 hintText: 'Detalles adicionales (opcional)',
-                hintStyle: const TextStyle(color: AppColors.textMuted),
+                hintStyle: TextStyle(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.bg,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.border),
+                  borderSide: BorderSide(color: AppColors.border),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.accent),
+                  borderSide: BorderSide(color: AppColors.accent),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
                   onPressed: () => Get.back(),
-                  child: const Text('Cancelar', style: TextStyle(color: AppColors.textMuted)),
+                  child: Text('Cancelar', style: TextStyle(color: AppColors.textMuted)),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _isSending ? null : _submit,
                   style: ElevatedButton.styleFrom(
@@ -146,8 +146,8 @@ class _ReportDialogState extends State<ReportDialog> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: _isSending 
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text('Reportar', style: TextStyle(color: Colors.white)),
+                    ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    : Text('Reportar', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),

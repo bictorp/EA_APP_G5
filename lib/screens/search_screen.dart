@@ -10,9 +10,10 @@ import '../models/post.dart';
 import '../widgets/post_card.dart';
 import '../widgets/user_card.dart';
 import '../widgets/filter_modal.dart';
+import '../controllers/theme_controller.dart';
 
 class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+  SearchScreen({super.key});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -72,7 +73,7 @@ class _SearchScreenState extends State<SearchScreen> {
 void _onSearchChanged(String value) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
-    _debounce = Timer(const Duration(milliseconds: 400), () {
+    _debounce = Timer(Duration(milliseconds: 400), () {
       final bool isSearchEmpty = value.trim().isEmpty && selectedFilters.isEmpty;
       
       if (isSearchEmpty) {
@@ -199,25 +200,25 @@ void _onSearchChanged(String value) {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  const Icon(Icons.tune_rounded, color: Colors.white),
+                  Icon(Icons.tune_rounded, color: AppColors.textHeader),
                   if (selectedFilters.isNotEmpty)
-                    Positioned(top: 10, right: 10, child: CircleAvatar(radius: 9, backgroundColor: AppColors.textLink, child: Text(selectedFilters.length.toString(), style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)))),
+                    Positioned(top: 10, right: 10, child: CircleAvatar(radius: 9, backgroundColor: AppColors.textLink, child: Text(selectedFilters.length.toString(), style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)))),
                 ],
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           Expanded(
             child: Container(
               decoration: BoxDecoration(color: AppColors.containerBg, borderRadius: BorderRadius.circular(16)),
               child: TextField(
                 controller: _searchController,
                 onChanged: _onSearchChanged,
-                style: GoogleFonts.inter(color: Colors.white),
+                style: GoogleFonts.inter(color: AppColors.textHeader),
                 decoration: InputDecoration(
                   hintText: 'Buscar usuarios...',
                   hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
-                  prefixIcon: const Icon(Icons.search, color: AppColors.textMuted),
+                  prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 16),
                 ),
@@ -232,7 +233,7 @@ void _onSearchChanged(String value) {
   // DISCOVERY GRID VIEW
     Widget _buildDiscoveryFeed() {
   if (isLoadingDiscovery && discoveryPosts.isEmpty) {
-    return const Center(child: CircularProgressIndicator(color: AppColors.textLink));
+    return Center(child: CircularProgressIndicator(color: AppColors.textLink));
   }
 
   return RefreshIndicator(
@@ -240,9 +241,9 @@ void _onSearchChanged(String value) {
     color: AppColors.textLink,
     backgroundColor: AppColors.bg,
     child: GridView.builder(
-      physics: const AlwaysScrollableScrollPhysics(),
+      physics: AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(2),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
@@ -260,12 +261,12 @@ void _onSearchChanged(String value) {
                   backgroundColor: AppColors.bg,
                   elevation: 0,
                   leading: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                    icon: Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textHeader),
                     onPressed: () => Get.back(),
                   ),
                   title: Text(
                     'Publicación',
-                    style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                    style: GoogleFonts.inter(color: AppColors.textHeader, fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
                 body: SingleChildScrollView(
@@ -282,7 +283,7 @@ void _onSearchChanged(String value) {
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => Container(
                 color: AppColors.containerBg,
-                child: const Icon(Icons.broken_image, color: AppColors.textMuted),
+                child: Icon(Icons.broken_image, color: AppColors.textMuted),
               ),
             ),
           ),
@@ -302,7 +303,7 @@ void _onSearchChanged(String value) {
 
     // While searching/loading
     if (isLoading && users.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.textLink));
+      return Center(child: CircularProgressIndicator(color: AppColors.textLink));
     }
 
     // Search gave 0 results
@@ -312,13 +313,13 @@ void _onSearchChanged(String value) {
         color: AppColors.textLink,
         backgroundColor: AppColors.bg,
         child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: AlwaysScrollableScrollPhysics(),
           children: [
             SizedBox(height: MediaQuery.of(context).size.height * 0.2),
             Center(
               child: Text(
                 'No se encontraron usuarios',
-                style: GoogleFonts.inter(color: Colors.white70, fontSize: 16),
+                style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 16),
               ),
             ),
           ],
@@ -332,14 +333,14 @@ void _onSearchChanged(String value) {
       color: AppColors.textLink,
       backgroundColor: AppColors.bg,
       child: ListView.builder(
-        physics: const AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
+        physics: AlwaysScrollableScrollPhysics(), // Important for RefreshIndicator
         controller: _scrollController,
       padding: const EdgeInsets.only(top: 12, bottom: 100),
       itemCount: users.length + 1,
       itemBuilder: (context, index) {
         if (index == users.length) {
           return isLoadingMore 
-            ? const Padding(
+            ? Padding(
                 padding: EdgeInsets.all(16.0),
                 child: Center(child: CircularProgressIndicator(color: AppColors.textLink)),
               )
@@ -353,21 +354,25 @@ void _onSearchChanged(String value) {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
+    final themeController = Get.find<ThemeController>();
+    return Obx(() {
+      final _ = themeController.isDarkMode.value;
+      return Scaffold(
         backgroundColor: AppColors.bg,
-        elevation: 0,
-        title: Text('Explorar', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 22)),
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: 8),
-          _buildSearchBar(),
-          const SizedBox(height: 12),
-          Expanded(child: _buildResults()),
-        ],
-      ),
-    );
+        appBar: AppBar(
+          backgroundColor: AppColors.bg,
+          elevation: 0,
+          title: Text('Explorar', style: GoogleFonts.inter(color: AppColors.textHeader, fontWeight: FontWeight.w800, fontSize: 22)),
+        ),
+        body: Column(
+          children: [
+            SizedBox(height: 8),
+            _buildSearchBar(),
+            SizedBox(height: 12),
+            Expanded(child: _buildResults()),
+          ],
+        ),
+      );
+    });
   }
 }

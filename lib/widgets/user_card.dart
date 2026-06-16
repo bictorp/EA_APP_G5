@@ -9,7 +9,7 @@ class UserCard extends StatelessWidget {
   final dynamic user;
   final VoidCallback? onTap;
 
-  const UserCard({
+  UserCard({
     super.key,
     required this.user,
     this.onTap,
@@ -34,7 +34,7 @@ class UserCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.containerBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          border: Border.all(color: AppColors.borderWhite),
         ),
         child: Row(
           children: [
@@ -46,14 +46,14 @@ class UserCard extends StatelessWidget {
                   : null,
               backgroundColor: Colors.white10,
               child: (user['avatarUrl'] == null || user['avatarUrl'].toString().isEmpty)
-                  ? const Icon(
+                  ? Icon(
                       Icons.person,
-                      color: Colors.white54,
+                      color: AppColors.textMuted,
                     )
                   : null,
             ),
 
-            const SizedBox(width: 14),
+            SizedBox(width: 14),
 
             Expanded(
               child: Column(
@@ -64,13 +64,13 @@ class UserCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
-                      color: Colors.white,
+                      color: AppColors.textHeader,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
 
                   // Usamos Wrap en lugar de Row para evitar overflows masivos
                   Wrap(
@@ -106,7 +106,7 @@ class UserCard extends StatelessWidget {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.05),
+                            color: AppColors.borderWhite,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -114,7 +114,7 @@ class UserCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
-                              color: Colors.white70,
+                              color: AppColors.textMuted,
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
                             ),
@@ -128,7 +128,7 @@ class UserCard extends StatelessWidget {
             
             Icon(
               Icons.chevron_right_rounded,
-              color: Colors.white.withOpacity(0.2),
+              color: AppColors.textMuted.withOpacity(0.4),
             ),
           ],
         ),

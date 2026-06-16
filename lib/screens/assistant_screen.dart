@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../constants/app_colors.dart';
 import '../services/assistant_service.dart';
+import '../controllers/theme_controller.dart';
 
 class Message {
   final String text;
@@ -15,7 +17,7 @@ class Message {
 }
 
 class AssistantScreen extends StatefulWidget {
-  const AssistantScreen({super.key});
+  AssistantScreen({super.key});
 
   @override
   State<AssistantScreen> createState() => _AssistantScreenState();
@@ -40,7 +42,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 300),
           curve: Curves.easeOut,
         );
       }
@@ -81,44 +83,47 @@ class _AssistantScreenState extends State<AssistantScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: AppBar(
+    final themeController = Get.find<ThemeController>();
+    return Obx(() {
+      final _ = themeController.isDarkMode.value;
+      return Scaffold(
         backgroundColor: AppColors.bg,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppColors.accent,
-                borderRadius: BorderRadius.circular(10),
+        appBar: AppBar(
+          backgroundColor: AppColors.bg,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back, color: AppColors.textHeader),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.accent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.smart_toy_outlined, color: Colors.white, size: 24),
               ),
-              child: const Icon(Icons.smart_toy_outlined, color: Colors.white, size: 24),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'Asistente "Toni"',
-                    style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'Ingeniero académico EETAC',
-                    style: TextStyle(color: AppColors.textMuted, fontSize: 11),
-                  ),
-                ],
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Asistente "Toni"',
+                      style: TextStyle(color: AppColors.textHeader, fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      'Ingeniero académico EETAC',
+                      style: TextStyle(color: AppColors.textMuted, fontSize: 11),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       body: Column(
         children: [
           Expanded(
@@ -139,6 +144,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
         ],
       ),
     );
+   });
   }
 
   Widget _buildMessageBubble(Message message) {
@@ -165,7 +171,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildFormattedText(message.text, isUser),
-            const SizedBox(height: 6),
+            SizedBox(height: 6),
             Align(
               alignment: Alignment.bottomRight,
               child: Text(
@@ -200,7 +206,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: const [
+          children: [
             SizedBox(
               width: 14,
               height: 14,
@@ -240,8 +246,8 @@ class _AssistantScreenState extends State<AssistantScreen> {
               ),
               child: TextField(
                 controller: _inputController,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: const InputDecoration(
+                style: TextStyle(color: AppColors.textHeader, fontSize: 14),
+                decoration: InputDecoration(
                   hintText: 'Pregunta a Toni sobre grados o asignaturas...',
                   hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
                   border: InputBorder.none,
@@ -252,16 +258,16 @@ class _AssistantScreenState extends State<AssistantScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12),
           InkWell(
             onTap: _handleSend,
             child: Container(
               padding: const EdgeInsets.all(12),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.accent,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.send, color: Colors.white, size: 20),
+              child: Icon(Icons.send, color: Colors.white, size: 20),
             ),
           ),
         ],
