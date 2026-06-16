@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
 import '../models/notification.dart';
 import 'auth_service.dart';
+import '../constants/api_constants.dart';
 
 class NotificationService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://192.168.1.24:1337', // Ajustar según entorno
+    baseUrl: ApiConstants.baseUrl,
     connectTimeout: const Duration(seconds: 5),
   ));
   
