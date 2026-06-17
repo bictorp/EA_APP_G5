@@ -691,7 +691,7 @@ class _UserListBottomSheetState extends State<_UserListBottomSheet> {
                         Get.back(); // Cierra el bottom sheet
                         if (uid.isNotEmpty) {
                           // Navegar al perfil del usuario clicked
-                          Get.to(() => ProfileScreen(userId: uid));
+                          Get.to(() => ProfileScreen(userId: uid), preventDuplicates: false);
                         }
                       },
                     );

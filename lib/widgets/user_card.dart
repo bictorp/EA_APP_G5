@@ -19,7 +19,7 @@ class UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap ?? () => Get.to(() => ProfileScreen(userId: user['_id'] ?? user['id'])),
+      onTap: onTap ?? () => Get.to(() => ProfileScreen(userId: user['_id'] ?? user['id']), preventDuplicates: false),
       child: Container(
         margin: const EdgeInsets.symmetric(
           horizontal: 16,

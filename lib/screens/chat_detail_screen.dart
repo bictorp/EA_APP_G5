@@ -606,7 +606,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               title: Text('view_profile'.tr, style: TextStyle(color: AppColors.textHeader)),
               onTap: () {
                 Get.back();
-                Get.to(() => ProfileScreen(userId: widget.contactId));
+                Get.to(() => ProfileScreen(userId: widget.contactId), preventDuplicates: false);
               },
             ),
             ListTile(

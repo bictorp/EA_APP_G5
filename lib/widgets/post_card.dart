@@ -85,7 +85,7 @@ class _PostCardState extends State<PostCard> {
               title: Text('view_profile'.tr, style: TextStyle(color: AppColors.textHeader)),
               onTap: () {
                 Get.back();
-                Get.to(() => ProfileScreen(userId: widget.post.usuario.id));
+                Get.to(() => ProfileScreen(userId: widget.post.usuario.id), preventDuplicates: false);
               },
             ),
 
@@ -275,7 +275,7 @@ class _PostCardState extends State<PostCard> {
             child: Row(
               children: [
                 GestureDetector(
-                  onTap: () => Get.to(() => ProfileScreen(userId: widget.post.usuario.id)),
+                  onTap: () => Get.to(() => ProfileScreen(userId: widget.post.usuario.id), preventDuplicates: false),
                   child: SafeCircleAvatar(
                     radius: 18,
                     url: widget.post.usuario.avatarUrl,
@@ -285,7 +285,7 @@ class _PostCardState extends State<PostCard> {
                 SizedBox(width: 10),
                 Expanded(
                   child: GestureDetector(
-                    onTap: () => Get.to(() => ProfileScreen(userId: widget.post.usuario.id)),
+                    onTap: () => Get.to(() => ProfileScreen(userId: widget.post.usuario.id), preventDuplicates: false),
                     child: Text(
                       widget.post.usuario.nombre,
                       maxLines: 1,

@@ -263,7 +263,7 @@ class _NotificationItem extends StatelessWidget {
           children: [
             // Avatar con Badge de tipo
             GestureDetector(
-              onTap: () => Get.to(() => ProfileScreen(userId: notification.sender.id)),
+              onTap: () => Get.to(() => ProfileScreen(userId: notification.sender.id), preventDuplicates: false),
               child: Stack(
                 children: [
                   SafeCircleAvatar(
@@ -299,7 +299,7 @@ class _NotificationItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   GestureDetector(
-                    onTap: () => Get.to(() => ProfileScreen(userId: notification.sender.id)),
+                    onTap: () => Get.to(() => ProfileScreen(userId: notification.sender.id), preventDuplicates: false),
                     child: RichText(
                       text: TextSpan(
                         style: GoogleFonts.inter(color: AppColors.textMain, fontSize: 14),
