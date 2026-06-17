@@ -3,7 +3,6 @@ import 'package:camera/camera.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../main.dart';
-import '../theme/app_theme.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -15,7 +14,7 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   CameraController? _controller;
   int _selectedCameraIndex = 0;
-  bool _isRecording = false;
+  final bool _isRecording = false;
 
   @override
   void initState() {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "509460773140",
+    "project_id": "univy-push",
+    "storage_bucket": "univy-push.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:509460773140:android:9b826dc5ea089d6dfa2a01",
+        "android_client_info": {
+          "package_name": "com.example.ea_app_g5"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2fc7f-g0uzskuTIxNISYdn4BMSuj-QAw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

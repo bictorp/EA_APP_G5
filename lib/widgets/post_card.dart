@@ -324,7 +324,7 @@ class _PostCardState extends State<PostCard> {
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(color: Colors.white10),
+                          errorBuilder: (_, _, _) => Container(color: Colors.white10),
                         ),
                         LargeHeartAnim(
                           isVisible: _showLargeHeart,

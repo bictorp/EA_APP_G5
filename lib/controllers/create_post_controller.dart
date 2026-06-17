@@ -143,7 +143,6 @@ class CreatePostController extends GetxController {
                 primary: AppColors.accent,
                 secondary: AppColors.accent,
                 surface: AppColors.containerBg,
-                background: AppColors.bg,
               ),
             ),
             child: PhotoFilterSelector(

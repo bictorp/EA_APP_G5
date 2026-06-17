@@ -173,7 +173,7 @@ class SettingsScreen extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: color,
+            activeThumbColor: color,
             activeTrackColor: color.withOpacity(0.2),
           ),
         ],

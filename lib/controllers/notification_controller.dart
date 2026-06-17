@@ -6,7 +6,6 @@ import '../services/user_service.dart';
 import '../services/storage_service.dart';
 import '../services/socket_service.dart';
 import '../screens/notifications_screen.dart';
-import '../screens/chat_detail_screen.dart';
 import '../constants/app_colors.dart';
 import 'package:flutter/material.dart';
 

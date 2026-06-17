@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:ui';
 import '../controllers/profile_controller.dart';
 import '../constants/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
