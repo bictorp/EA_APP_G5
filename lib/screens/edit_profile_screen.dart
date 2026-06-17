@@ -30,7 +30,7 @@ class EditProfileScreen extends StatelessWidget {
             onPressed: () => Get.back(),
           ),
           title: Text(
-            'Editar Perfil',
+            'edit_profile'.tr,
             style: GoogleFonts.inter(
               color: AppColors.textHeader,
               fontWeight: FontWeight.w700,
@@ -141,29 +141,27 @@ class EditProfileScreen extends StatelessWidget {
                               ),
                               SizedBox(height: 32),
 
-                              // Fields
                               CustomTextField(
-                                label: 'Nombre completo',
+                                label: 'full_name'.tr,
                                 controller: controller.nameController,
                                 prefixIcon: Icon(Icons.person_outline),
                               ),
                               SizedBox(height: 24),
 
                               CustomTextField(
-                                label: 'Correo electrónico',
+                                label: 'email'.tr,
                                 controller: controller.emailController,
                                 prefixIcon: Icon(Icons.email_outlined),
                               ),
                               SizedBox(height: 24),
 
-                              // Bio Field (Textarea style)
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.only(left: 4, bottom: 8),
                                     child: Text(
-                                      'Biografía',
+                                      'bio'.tr,
                                       style: GoogleFonts.inter(
                                         color: AppColors.textMuted,
                                         fontSize: 14,
@@ -178,7 +176,7 @@ class EditProfileScreen extends StatelessWidget {
                                     decoration: InputDecoration(
                                       filled: true,
                                       fillColor: AppColors.inputBg,
-                                      hintText: 'Cuéntanos sobre ti...',
+                                      hintText: 'tell_us_about_yourself'.tr,
                                       hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                                       enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(12),
@@ -201,7 +199,7 @@ class EditProfileScreen extends StatelessWidget {
                                   Padding(
                                     padding: const EdgeInsets.only(left: 4, bottom: 8),
                                     child: Text(
-                                      'Asignaturas',
+                                      'subjects'.tr,
                                       style: GoogleFonts.inter(
                                         color: AppColors.textMuted,
                                         fontSize: 14,
@@ -220,8 +218,8 @@ class EditProfileScreen extends StatelessWidget {
                                       onPressed: () {
                                         // TODO: Implement subjects modal
                                         Get.snackbar(
-                                          'Próximamente',
-                                          'La edición de asignaturas estará disponible pronto',
+                                          'soon'.tr,
+                                          'manage_subjects_soon'.tr,
                                           snackPosition: SnackPosition.BOTTOM,
                                           backgroundColor: isDark ? Colors.white10 : Colors.black12,
                                           colorText: AppColors.textMain,
@@ -237,7 +235,7 @@ class EditProfileScreen extends StatelessWidget {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              'Gestionar mis asignaturas',
+                                              'manage_my_subjects'.tr,
                                               style: GoogleFonts.inter(
                                                 color: AppColors.textMain,
                                                 fontSize: 16,
@@ -267,7 +265,7 @@ class EditProfileScreen extends StatelessWidget {
                                         ),
                                       ),
                                       child: Text(
-                                        'Cancelar',
+                                        'cancel'.tr,
                                         style: GoogleFonts.inter(
                                           color: AppColors.textMuted,
                                           fontWeight: FontWeight.w600,
@@ -303,7 +301,7 @@ class EditProfileScreen extends StatelessWidget {
                                               ),
                                             )
                                           : Text(
-                                              'Guardar',
+                                              'save'.tr,
                                               style: GoogleFonts.inter(
                                                 fontWeight: FontWeight.w700,
                                               ),

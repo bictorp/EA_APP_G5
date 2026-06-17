@@ -159,7 +159,7 @@ void _onSearchChanged(String value) {
         });
       }
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo realizar la búsqueda',
+      Get.snackbar('Error', 'search_error'.tr,
           backgroundColor: Colors.redAccent, colorText: Colors.white);
     } finally {
       setState(() {
@@ -217,7 +217,7 @@ void _onSearchChanged(String value) {
                 onChanged: _onSearchChanged,
                 style: GoogleFonts.inter(color: AppColors.textHeader),
                 decoration: InputDecoration(
-                  hintText: 'Buscar usuarios...',
+                  hintText: 'search_users'.tr,
                   hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                   prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
                   border: InputBorder.none,
@@ -302,7 +302,7 @@ void _onSearchChanged(String value) {
             SizedBox(height: MediaQuery.of(context).size.height * 0.2),
             Center(
               child: Text(
-                'No se encontraron usuarios',
+                'no_users_found'.tr,
                 style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 16),
               ),
             ),
@@ -346,7 +346,7 @@ void _onSearchChanged(String value) {
         appBar: AppBar(
           backgroundColor: AppColors.bg,
           elevation: 0,
-          title: Text('Explorar', style: GoogleFonts.inter(color: AppColors.textHeader, fontWeight: FontWeight.w800, fontSize: 22)),
+          title: Text('explore'.tr, style: GoogleFonts.inter(color: AppColors.textHeader, fontWeight: FontWeight.w800, fontSize: 22)),
         ),
         body: Column(
           children: [

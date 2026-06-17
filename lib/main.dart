@@ -13,6 +13,8 @@ import 'package:camera/camera.dart';
 import 'controllers/chat_controller.dart';
 import 'services/report_service.dart';
 import 'controllers/theme_controller.dart';
+import 'controllers/language_controller.dart';
+import 'locales/app_translations.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -32,6 +34,7 @@ void main() async {
   Get.put(AuthService(), permanent: true);
   Get.put(ReportService(), permanent: true);
   await Get.putAsync(() => ThemeController().init(), permanent: true);
+  await Get.putAsync(() => LanguageController().init(), permanent: true);
 
   if (isLoggedIn) {
     await SocketService().connect();
@@ -49,12 +52,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = Get.find<ThemeController>();
+    final languageController = Get.find<LanguageController>();
 
     return Obx(() => GetMaterialApp(
       title: 'Univy App',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeController.themeMode,
+      translations: AppTranslations(),
+      locale: languageController.locale,
+      fallbackLocale: const Locale('es'),
       initialRoute: isLoggedIn ? '/home' : '/login',
       getPages: [
         GetPage(name: '/', page: () => isLoggedIn ? MainScreen() : LoginScreen()),

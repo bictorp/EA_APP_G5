@@ -35,7 +35,7 @@ class UIUtils {
               ),
               
               Text(
-                '¿Dejar de seguir a $nombre?',
+                'unfollow_confirm_title'.trParams({'name': nombre}),
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: AppColors.textHeader,
@@ -45,7 +45,7 @@ class UIUtils {
               ),
               SizedBox(height: 8),
               Text(
-                'Si dejas de seguir a este usuario, dejarás de ver sus publicaciones en tu feed principal.',
+                'unfollow_confirm_msg'.tr,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: AppColors.textMuted,
@@ -73,7 +73,7 @@ class UIUtils {
                     ),
                   ),
                   child: Text(
-                    'Dejar de seguir',
+                    'unfollow_btn'.tr,
                     style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
@@ -85,7 +85,7 @@ class UIUtils {
                 child: TextButton(
                   onPressed: () => Get.back(),
                   child: Text(
-                    'Cancelar',
+                    'cancel'.tr,
                     style: GoogleFonts.inter(
                       color: AppColors.textHeader,
                       fontWeight: FontWeight.w600,
@@ -129,7 +129,7 @@ class UIUtils {
               ),
               
               Text(
-                '¿Eliminar publicación?',
+                'delete_post_confirm_title'.tr,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: AppColors.textHeader,
@@ -139,7 +139,7 @@ class UIUtils {
               ),
               SizedBox(height: 8),
               Text(
-                'Esta acción es definitiva y no se podrá recuperar la publicación ni sus comentarios.',
+                'delete_post_confirm_msg'.tr,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   color: AppColors.textMuted,
@@ -167,7 +167,7 @@ class UIUtils {
                     ),
                   ),
                   child: Text(
-                    'Eliminar publicación',
+                    'delete_post'.tr,
                     style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
@@ -179,7 +179,7 @@ class UIUtils {
                 child: TextButton(
                   onPressed: () => Get.back(),
                   child: Text(
-                    'Cancelar',
+                    'cancel'.tr,
                     style: GoogleFonts.inter(
                       color: AppColors.textHeader,
                       fontWeight: FontWeight.w600,
@@ -201,13 +201,13 @@ class UIUtils {
     required String tipo, // 'post' | 'comment' | 'user' | 'chat'
     required String title,
   }) {
-    final List<String> reasons = [
-      'Contenido inapropiado',
-      'Spam o estafa',
-      'Acoso o bullying',
-      'Discurso de odio',
-      'Información falsa',
-      'Otros'
+    final List<Map<String, String>> reasons = [
+      {'key': 'report_reason_inappropriate', 'value': 'Contenido inapropiado'},
+      {'key': 'report_reason_spam_scam', 'value': 'Spam o estafa'},
+      {'key': 'report_reason_harassment_bullying', 'value': 'Acoso o bullying'},
+      {'key': 'report_reason_hate_speech', 'value': 'Discurso de odio'},
+      {'key': 'report_reason_false_info', 'value': 'Información falsa'},
+      {'key': 'report_reason_other', 'value': 'Otros'}
     ];
     final themeController = Get.find<ThemeController>();
 
@@ -235,7 +235,7 @@ class UIUtils {
                 ),
               ),
               Text(
-                'Reportar $title',
+                'report'.tr + ' ' + title,
                 style: GoogleFonts.inter(
                   color: AppColors.textHeader,
                   fontSize: 20,
@@ -244,7 +244,7 @@ class UIUtils {
               ),
               SizedBox(height: 8),
               Text(
-                '¿Por qué quieres reportar este contenido? Tu reporte es anónimo.',
+                'report_reason_anonymous'.tr,
                 style: GoogleFonts.inter(
                   color: AppColors.textMuted,
                   fontSize: 14,
@@ -261,7 +261,7 @@ class UIUtils {
                     return ListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text(
-                        reasons[index],
+                        reasons[index]['key']!.tr,
                         style: GoogleFonts.inter(color: AppColors.textHeader, fontSize: 16),
                       ),
                       trailing: Icon(Icons.chevron_right, color: AppColors.textMuted),
@@ -270,13 +270,13 @@ class UIUtils {
                         final success = await Get.find<ReportService>().reportContent(
                           tipo: tipo,
                           objetivoId: targetId,
-                          descripcion: reasons[index],
+                          descripcion: reasons[index]['value']!,
                         );
                         
                         if (success) {
                           Get.snackbar(
-                            'Reporte enviado',
-                            'Gracias por ayudarnos a mantener la comunidad segura.',
+                            'report_sent'.tr,
+                            'report_sent_msg'.tr,
                             snackPosition: SnackPosition.TOP,
                             backgroundColor: AppColors.accent.withOpacity(0.9),
                             colorText: Colors.white,
@@ -284,7 +284,7 @@ class UIUtils {
                         } else {
                           Get.snackbar(
                             'Error',
-                            'No se pudo enviar el reporte. Inténtalo de nuevo.',
+                            'report_error_msg'.tr,
                             snackPosition: SnackPosition.TOP,
                             backgroundColor: AppColors.error.withOpacity(0.9),
                             colorText: Colors.white,

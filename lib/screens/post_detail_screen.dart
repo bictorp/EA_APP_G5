@@ -52,7 +52,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         });
       } else {
         Get.back();
-        Get.snackbar('Error', 'No se pudo cargar la publicación');
+        Get.snackbar('Error', 'post_load_error'.tr);
       }
     } catch (e) {
       Get.back();
@@ -74,7 +74,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             onPressed: () => Get.back(),
           ),
           title: Text(
-            'Publicación',
+            'post_detail_title'.tr,
             style: GoogleFonts.inter(
               color: AppColors.textHeader,
               fontWeight: FontWeight.bold,
@@ -85,7 +85,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         body: _isLoading 
           ? Center(child: CircularProgressIndicator(color: AppColors.accent))
           : _post == null 
-            ? Center(child: Text('No se encontró la publicación', style: TextStyle(color: AppColors.textHeader)))
+            ? Center(child: Text('post_not_found'.tr, style: TextStyle(color: AppColors.textHeader)))
             : SingleChildScrollView(
                 child: PostCard(post: _post!),
               ),

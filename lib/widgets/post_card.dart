@@ -82,7 +82,7 @@ class _PostCardState extends State<PostCard> {
             // Ver Perfil
             ListTile(
               leading: Icon(Icons.account_circle_outlined, color: AppColors.textHeader),
-              title: Text('Ver perfil', style: TextStyle(color: AppColors.textHeader)),
+              title: Text('view_profile'.tr, style: TextStyle(color: AppColors.textHeader)),
               onTap: () {
                 Get.back();
                 Get.to(() => ProfileScreen(userId: widget.post.usuario.id));
@@ -92,7 +92,7 @@ class _PostCardState extends State<PostCard> {
             // Compartir
             ListTile(
               leading: Icon(Icons.send_outlined, color: AppColors.textHeader),
-              title: Text('Compartir', style: TextStyle(color: AppColors.textHeader)),
+              title: Text('share'.tr, style: TextStyle(color: AppColors.textHeader)),
               onTap: () {
                 Get.back();
                 _showShareSheet(context);
@@ -103,7 +103,7 @@ class _PostCardState extends State<PostCard> {
             if (isOwnPost && ctrl != null)
               ListTile(
                 leading: Icon(Icons.edit_outlined, color: AppColors.textHeader),
-                title: Text('Editar publicación', style: TextStyle(color: AppColors.textHeader)),
+                title: Text('edit_post'.tr, style: TextStyle(color: AppColors.textHeader)),
                 onTap: () {
                   Get.back();
                   _showEditDialog(context, ctrl);
@@ -114,7 +114,7 @@ class _PostCardState extends State<PostCard> {
             if (!isOwnPost && ctrl != null)
               ListTile(
                 leading: Icon(Icons.person_remove_outlined, color: AppColors.error),
-                title: Text('Dejar de seguir a ${widget.post.usuario.nombre}', 
+                title: Text('${'unfollow_user'.tr} ${widget.post.usuario.nombre}', 
                   style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
@@ -126,13 +126,13 @@ class _PostCardState extends State<PostCard> {
             if (!isOwnPost)
               ListTile(
                 leading: Icon(Icons.report_problem_outlined, color: AppColors.error),
-                title: Text('Reportar publicación', style: TextStyle(color: AppColors.error)),
+                title: Text('report_post'.tr, style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
                   UIUtils.showReportBottomSheet(
                     targetId: widget.post.id,
                     tipo: 'post',
-                    title: 'esta publicación',
+                    title: 'this_post'.tr,
                   );
                 },
               ),
@@ -141,7 +141,7 @@ class _PostCardState extends State<PostCard> {
             if (isOwnPost && ctrl != null)
               ListTile(
                 leading: Icon(Icons.delete_outline, color: AppColors.error),
-                title: Text('Eliminar publicación', style: TextStyle(color: AppColors.error)),
+                title: Text('delete_post'.tr, style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
                   _confirmDelete(context, ctrl);
@@ -192,7 +192,7 @@ class _PostCardState extends State<PostCard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Editar descripción',
+                  'edit_description'.tr,
                   style: GoogleFonts.inter(
                     color: AppColors.textHeader,
                     fontSize: 18,
@@ -205,7 +205,7 @@ class _PostCardState extends State<PostCard> {
                     ctrl.editPost(widget.post.id, editCtrl.text.trim());
                   },
                   child: Text(
-                    'Guardar',
+                    'save'.tr,
                     style: GoogleFonts.inter(
                       color: AppColors.accent,
                       fontWeight: FontWeight.bold,
@@ -224,7 +224,7 @@ class _PostCardState extends State<PostCard> {
               style: GoogleFonts.inter(color: AppColors.textHeader),
               autofocus: true,
               decoration: InputDecoration(
-                hintText: '¿Qué estás pensando?',
+                hintText: 'what_are_you_thinking'.tr,
                 hintStyle: GoogleFonts.inter(color: AppColors.textMuted.withOpacity(0.5)),
                 filled: true,
                 fillColor: AppColors.containerBg.withOpacity(0.5),

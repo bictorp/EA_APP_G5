@@ -73,8 +73,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       }
     } else {
       Get.snackbar(
-        'Mensaje lejano',
-        'El mensaje está demasiado arriba para saltar directamente.',
+        'far_message_title'.tr,
+        'far_message_msg'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.black54,
         colorText: Colors.white,
@@ -197,15 +197,15 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     Get.dialog(
       AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('Eliminar mensaje', style: TextStyle(color: AppColors.textHeader)),
-        content: Text('¿Quieres eliminar los mensajes seleccionados?', style: TextStyle(color: AppColors.textMuted)),
+        title: Text('delete_message'.tr, style: TextStyle(color: AppColors.textHeader)),
+        content: Text('delete_messages_confirm'.tr, style: TextStyle(color: AppColors.textMuted)),
         actions: [
           TextButton(
-            child: Text('CANCELAR', style: TextStyle(color: AppColors.accent)),
+            child: Text('cancel'.tr, style: TextStyle(color: AppColors.accent)),
             onPressed: () => Get.back(),
           ),
           TextButton(
-            child: Text('ELIMINAR PARA MÍ', style: TextStyle(color: AppColors.accent)),
+            child: Text('delete_for_me'.tr, style: TextStyle(color: AppColors.accent)),
             onPressed: () {
               _chatController.deleteMessages('me', widget.contactId);
               Get.back();
@@ -213,7 +213,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           ),
           if (canDeleteForEveryone)
             TextButton(
-              child: Text('ELIMINAR PARA TODOS', style: TextStyle(color: AppColors.accent)),
+              child: Text('delete_for_all'.tr, style: TextStyle(color: AppColors.accent)),
               onPressed: () {
                 _chatController.deleteMessages('everyone', widget.contactId);
                 Get.back();
@@ -300,7 +300,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  msg.parentMessage!.remitenteId == myId ? 'Tú' : widget.contactName,
+                                  msg.parentMessage!.remitenteId == myId ? 'you'.tr : widget.contactName,
                                   style: GoogleFonts.inter(
                                     color: isMe ? Colors.white.withOpacity(0.9) : AppColors.accent,
                                     fontWeight: FontWeight.w800,
@@ -416,7 +416,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Publicación privada',
+                'private_post'.tr,
                 style: GoogleFonts.inter(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.w500),
               ),
             ),
@@ -534,7 +534,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            replyingTo.remitenteId == _chatController.currentUserId.value ? 'Tú' : widget.contactName,
+                            replyingTo.remitenteId == _chatController.currentUserId.value ? 'you'.tr : widget.contactName,
                             style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold, fontSize: 12),
                           ),
                           Text(
@@ -563,7 +563,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     controller: _textController,
                     style: TextStyle(color: AppColors.textHeader),
                     decoration: InputDecoration(
-                      hintText: 'Escribe un mensaje...',
+                      hintText: 'write_message'.tr,
                       hintStyle: TextStyle(color: AppColors.textMuted),
                       filled: true,
                       fillColor: AppColors.surface,
@@ -603,7 +603,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             SizedBox(height: 16),
             ListTile(
               leading: Icon(Icons.person_outline, color: AppColors.textHeader),
-              title: Text('Ver perfil', style: TextStyle(color: AppColors.textHeader)),
+              title: Text('view_profile'.tr, style: TextStyle(color: AppColors.textHeader)),
               onTap: () {
                 Get.back();
                 Get.to(() => ProfileScreen(userId: widget.contactId));
@@ -611,7 +611,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             ),
             ListTile(
               leading: Icon(Icons.delete_sweep_outlined, color: Colors.redAccent),
-              title: Text('Vaciar chat', style: TextStyle(color: Colors.redAccent)),
+              title: Text('clear_chat'.tr, style: TextStyle(color: Colors.redAccent)),
               onTap: () {
                 Get.back();
                 _confirmClearChat();
@@ -619,7 +619,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             ),
             ListTile(
               leading: Icon(Icons.report_gmailerrorred_outlined, color: AppColors.textHeader),
-              title: Text('Reportar', style: TextStyle(color: AppColors.textHeader)),
+              title: Text('report'.tr, style: TextStyle(color: AppColors.textHeader)),
               onTap: () {
                 Get.back();
                 final lastMsg = _chatController.messages.isNotEmpty ? _chatController.messages.first : null;
@@ -627,20 +627,20 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   UIUtils.showReportBottomSheet(
                     targetId: lastMsg.id,
                     tipo: 'chat',
-                    title: 'conversación con ${widget.contactName}',
+                    title: 'conversation_with'.trParams({'name': widget.contactName}),
                   );
                 } else {
                   UIUtils.showReportBottomSheet(
                     targetId: widget.contactId,
                     tipo: 'user',
-                    title: 'usuario ${widget.contactName}',
+                    title: 'user_with_name'.trParams({'name': widget.contactName}),
                   );
                 }
               },
             ),
             ListTile(
               leading: Icon(Icons.close, color: AppColors.textMuted),
-              title: Text('Cancelar', style: TextStyle(color: AppColors.textMuted)),
+              title: Text('cancel'.tr, style: TextStyle(color: AppColors.textMuted)),
               onTap: () => Get.back(),
             ),
             SizedBox(height: 20),
@@ -654,16 +654,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     Get.dialog(
       AlertDialog(
         backgroundColor: AppColors.surface,
-        title: Text('¿Vaciar chat?', style: TextStyle(color: Colors.white)),
-        content: Text('Se eliminarán todos los mensajes de esta conversación para ti.', style: TextStyle(color: AppColors.textMuted)),
+        title: Text('clear_chat_confirm_title'.tr, style: TextStyle(color: Colors.white)),
+        content: Text('clear_chat_confirm_msg'.tr, style: TextStyle(color: AppColors.textMuted)),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('Cancelar', style: TextStyle(color: Colors.white))),
+          TextButton(onPressed: () => Get.back(), child: Text('cancel'.tr, style: TextStyle(color: Colors.white))),
           TextButton(
             onPressed: () {
               Get.back();
               _chatController.clearChat(widget.contactId);
             },
-            child: Text('Vaciar', style: TextStyle(color: Colors.redAccent)),
+            child: Text('clear'.tr, style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -759,13 +759,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: ListTile(
                     leading: Icon(Icons.report_gmailerrorred_outlined, color: Colors.white70),
-                    title: Text('Reportar mensaje', style: TextStyle(color: Colors.white70)),
+                    title: Text('report_message'.tr, style: TextStyle(color: Colors.white70)),
                     onTap: () {
                       Get.back();
                       UIUtils.showReportBottomSheet(
                         targetId: messageId,
                         tipo: 'chat',
-                        title: 'mensaje',
+                        title: 'message'.tr,
                       );
                     },
                   ),

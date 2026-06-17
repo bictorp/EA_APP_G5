@@ -20,20 +20,20 @@ class _ReportDialogState extends State<ReportDialog> {
   bool _isSending = false;
 
   final List<String> _reasons = [
-    'Spam',
-    'Contenido inapropiado',
-    'Acoso',
-    'Información falsa',
-    'Odio',
-    'Otro'
+    'spam',
+    'inappropriate_content',
+    'harassment',
+    'false_info',
+    'hate_speech',
+    'other'
   ];
 
-  String _selectedReason = 'Spam';
+  String _selectedReason = 'spam';
 
   Future<void> _submit() async {
     setState(() => _isSending = true);
     
-    final desc = '$_selectedReason: ${_controller.text.trim()}';
+    final desc = '${_selectedReason.tr}: ${_controller.text.trim()}';
     final success = await _reportService.reportContent(
       tipo: widget.tipo,
       objetivoId: widget.objetivoId,
@@ -45,8 +45,8 @@ class _ReportDialogState extends State<ReportDialog> {
     if (success) {
       Get.back();
       Get.snackbar(
-        'Reporte enviado',
-        'Gracias por ayudarnos a mantener la comunidad segura.',
+        'report_sent'.tr,
+        'report_sent_msg'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.success.withOpacity(0.8),
         colorText: Colors.white,
@@ -54,7 +54,7 @@ class _ReportDialogState extends State<ReportDialog> {
     } else {
       Get.snackbar(
         'Error',
-        'No se pudo enviar el reporte. Inténtalo de nuevo.',
+        'report_error_msg'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error.withOpacity(0.8),
         colorText: Colors.white,
@@ -77,7 +77,7 @@ class _ReportDialogState extends State<ReportDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Reportar ${widget.tipo == 'post' ? 'Publicación' : 'Comentario'}',
+              widget.tipo == 'post' ? 'report_title_post'.tr : 'report_title_comment'.tr,
               style: GoogleFonts.inter(
                 color: AppColors.textHeader,
                 fontWeight: FontWeight.bold,
@@ -86,7 +86,7 @@ class _ReportDialogState extends State<ReportDialog> {
             ),
             SizedBox(height: 16),
             Text(
-              '¿Por qué quieres reportar este contenido?',
+              'report_reason_q'.tr,
               style: TextStyle(color: AppColors.textMuted, fontSize: 14),
             ),
             SizedBox(height: 12),
@@ -104,7 +104,7 @@ class _ReportDialogState extends State<ReportDialog> {
                   isExpanded: true,
                   items: _reasons.map((r) => DropdownMenuItem(
                     value: r,
-                    child: Text(r, style: TextStyle(color: AppColors.textHeader)),
+                    child: Text(r.tr, style: TextStyle(color: AppColors.textHeader)),
                   )).toList(),
                   onChanged: (val) => setState(() => _selectedReason = val!),
                 ),
@@ -116,7 +116,7 @@ class _ReportDialogState extends State<ReportDialog> {
               maxLines: 3,
               style: TextStyle(color: AppColors.textHeader),
               decoration: InputDecoration(
-                hintText: 'Detalles adicionales (opcional)',
+                hintText: 'additional_details'.tr,
                 hintStyle: TextStyle(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.bg,
@@ -136,7 +136,7 @@ class _ReportDialogState extends State<ReportDialog> {
               children: [
                 TextButton(
                   onPressed: () => Get.back(),
-                  child: Text('Cancelar', style: TextStyle(color: AppColors.textMuted)),
+                  child: Text('cancel'.tr, style: TextStyle(color: AppColors.textMuted)),
                 ),
                 SizedBox(width: 8),
                 ElevatedButton(
@@ -147,7 +147,7 @@ class _ReportDialogState extends State<ReportDialog> {
                   ),
                   child: _isSending 
                     ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : Text('Reportar', style: TextStyle(color: Colors.white)),
+                    : Text('report'.tr, style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),

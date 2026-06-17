@@ -35,7 +35,7 @@ class NotificationsScreen extends StatelessWidget {
             onPressed: () => Get.back(),
           ),
           title: Text(
-            'Notificaciones',
+            'notifications'.tr,
             style: GoogleFonts.inter(
               color: AppColors.textHeader,
               fontWeight: FontWeight.w800,
@@ -86,7 +86,7 @@ class NotificationsScreen extends StatelessWidget {
                   Icon(Icons.favorite_border_rounded, size: 80, color: AppColors.textHeader.withOpacity(0.05)),
                   SizedBox(height: 16),
                   Text(
-                    'Aún no hay nada por aquí',
+                    'no_notifications'.tr,
                     style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 16),
                   ),
                 ],
@@ -146,7 +146,7 @@ class NotificationsScreen extends StatelessWidget {
               ),
               
               Text(
-                'Solicitudes de seguimiento (${requests.length})',
+                '${'follow_requests'.tr} (${requests.length})',
                 style: GoogleFonts.inter(
                   color: AppColors.textHeader,
                   fontSize: 18,
@@ -164,7 +164,7 @@ class NotificationsScreen extends StatelessWidget {
                       Icon(Icons.person_off_rounded, size: 60, color: AppColors.textMuted.withOpacity(0.1)),
                       SizedBox(height: 16),
                       Text(
-                        'No tienes solicitudes pendientes',
+                        'no_pending_requests'.tr,
                         style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
                       ),
                     ],
@@ -202,7 +202,7 @@ class NotificationsScreen extends StatelessWidget {
                                     color: AppColors.accent,
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Text('Aceptar', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                                  child: Text('accept'.tr, style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
                                 ),
                               ),
                               SizedBox(width: 8),
@@ -215,7 +215,7 @@ class NotificationsScreen extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(color: AppColors.border),
                                   ),
-                                  child: Text('Rechazar', style: TextStyle(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.bold)),
+                                  child: Text('reject'.tr, style: TextStyle(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.bold)),
                                 ),
                               ),
                             ],
@@ -385,7 +385,7 @@ class _NotificationItem extends StatelessWidget {
                             child: Icon(Icons.check, color: AppColors.textHeader, size: 14),
                           ),
                         Text(
-                          following ? 'Siguiendo' : 'Seguir',
+                          following ? 'following_action'.tr : 'follow'.tr,
                           style: TextStyle(
                             color: following ? AppColors.textHeader : Colors.white,
                             fontSize: 12,
@@ -414,7 +414,7 @@ class _NotificationItem extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        'Aceptar',
+                        'accept'.tr,
                         style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -433,7 +433,7 @@ class _NotificationItem extends StatelessWidget {
                         border: Border.all(color: AppColors.border),
                       ),
                       child: Text(
-                        'Rechazar',
+                        'reject'.tr,
                         style: TextStyle(color: AppColors.textMuted, fontSize: 12, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -466,11 +466,11 @@ class _NotificationItem extends StatelessWidget {
 
   String _getNotificationText(NotificationType type) {
     switch (type) {
-      case NotificationType.like: return "le ha dado me gusta a tu publicación.";
-      case NotificationType.comment: return "ha comentado tu publicación.";
-      case NotificationType.follow: return "ha comenzado a seguirte.";
-      case NotificationType.followRequest: return "te ha enviado una solicitud de seguimiento.";
-      case NotificationType.followAccepted: return "ha aceptado tu solicitud.";
+      case NotificationType.like: return "notif_like".tr;
+      case NotificationType.comment: return "notif_comment".tr;
+      case NotificationType.follow: return "notif_follow".tr;
+      case NotificationType.followRequest: return "notif_follow_req".tr;
+      case NotificationType.followAccepted: return "notif_follow_accept".tr;
     }
   }
 }
@@ -480,8 +480,8 @@ String _formatTime(DateTime time) {
   final now = DateTime.now();
   final difference = now.difference(time);
   
-  if (difference.inDays > 0) return 'hace ${difference.inDays} días';
-  if (difference.inHours > 0) return 'hace aproximadamente ${difference.inHours} horas';
-  if (difference.inMinutes > 0) return 'hace ${difference.inMinutes} minutos';
-  return 'hace un momento';
+  if (difference.inDays > 0) return 'ago_days'.trParams({'days': '${difference.inDays}'});
+  if (difference.inHours > 0) return 'ago_hours'.trParams({'hours': '${difference.inHours}'});
+  if (difference.inMinutes > 0) return 'ago_minutes'.trParams({'minutes': '${difference.inMinutes}'});
+  return 'just_now'.tr;
 }

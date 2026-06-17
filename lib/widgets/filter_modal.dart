@@ -79,7 +79,7 @@ class _FilterModalState extends State<FilterModal> {
     } catch (e) {
       Get.snackbar(
         'Error',
-        'Error al cargar filtros',
+        'filter_load_error'.tr,
         backgroundColor: Colors.redAccent,
         colorText: Colors.white,
       );
@@ -126,13 +126,13 @@ class _FilterModalState extends State<FilterModal> {
   String getTabTitle(FilterTab tab) {
     switch (tab) {
       case FilterTab.universidades:
-        return 'Universidades';
+        return 'universidades'.tr;
 
       case FilterTab.grados:
-        return 'Grados';
+        return 'grados'.tr;
 
       case FilterTab.asignaturas:
-        return 'Asignaturas';
+        return 'asignaturas'.tr;
     }
   }
 
@@ -235,8 +235,9 @@ class _FilterModalState extends State<FilterModal> {
                         style:
                             GoogleFonts.inter(color: AppColors.textHeader),
                         decoration: InputDecoration(
-                          hintText:
-                              'Buscar ${getTabTitle(activeTab).toLowerCase()}...',
+                          hintText: 'filter_search_hint'.trParams({
+                            'type': getTabTitle(activeTab).toLowerCase(),
+                          }),
                           hintStyle: GoogleFonts.inter(
                             color: AppColors.textMuted,
                           ),
@@ -415,7 +416,7 @@ class _FilterModalState extends State<FilterModal> {
                         ),
                       ),
                       child: Text(
-                        'Cancelar',
+                        'cancel'.tr,
                         style: GoogleFonts.inter(
                           color: AppColors.textHeader,
                         ),
@@ -450,7 +451,7 @@ class _FilterModalState extends State<FilterModal> {
                         ),
                       ),
                       child: Text(
-                        'Aplicar (${localSelected.length})',
+                        'apply_count'.trParams({'count': localSelected.length.toString()}),
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,

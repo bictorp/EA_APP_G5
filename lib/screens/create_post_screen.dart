@@ -28,7 +28,7 @@ class CreatePostScreen extends StatelessWidget {
             onPressed: () => Get.back(),
           ),
           title: Text(
-            'Nueva publicación',
+            'new_post'.tr,
             style: GoogleFonts.inter(
               color: AppColors.textHeader,
               fontWeight: FontWeight.bold,
@@ -39,7 +39,7 @@ class CreatePostScreen extends StatelessWidget {
             Obx(() => TextButton(
                   onPressed: controller.isLoading.value ? null : () => controller.submitPost(),
                   child: Text(
-                    'Compartir',
+                    'share'.tr,
                     style: GoogleFonts.inter(
                       color: controller.isLoading.value ? AppColors.textMuted : AppColors.textLink,
                       fontWeight: FontWeight.bold,
@@ -79,7 +79,7 @@ class CreatePostScreen extends StatelessWidget {
                           child: ElevatedButton.icon(
                             onPressed: () => controller.reEditImage(),
                             icon: Icon(Icons.edit, size: 18),
-                            label: Text('Editar'),
+                            label: Text('edit'.tr),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.black54,
                               foregroundColor: Colors.white,
@@ -91,14 +91,14 @@ class CreatePostScreen extends StatelessWidget {
                         ),
                       ],
                     )
-                  : Center(child: Text("Sin imagen", style: TextStyle(color: AppColors.textMuted))),
+                  : Center(child: Text("no_image".tr, style: TextStyle(color: AppColors.textMuted))),
               )),
               
               SizedBox(height: 24),
               
               // Campo de descripción (Pie de foto)
               Text(
-                'Descripción',
+                'description'.tr,
                 style: GoogleFonts.inter(
                   color: AppColors.textHeader,
                   fontWeight: FontWeight.w600,
@@ -112,7 +112,7 @@ class CreatePostScreen extends StatelessWidget {
                 style: GoogleFonts.inter(color: AppColors.textMain),
                 autofocus: true, // Abrir teclado directamente para escribir la descripción
                 decoration: InputDecoration(
-                  hintText: 'Escribe un pie de foto...',
+                  hintText: 'write_caption'.tr,
                   hintStyle: GoogleFonts.inter(color: AppColors.textMuted),
                   filled: true,
                   fillColor: AppColors.containerBg,

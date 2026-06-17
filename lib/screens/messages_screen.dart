@@ -18,7 +18,7 @@ class MessagesScreen extends StatelessWidget {
       return Scaffold(
         backgroundColor: AppColors.bg,
         appBar: AppBar(
-          title: Text('Mensajes', style: TextStyle(color: AppColors.textHeader, fontWeight: FontWeight.bold)),
+          title: Text('messages'.tr, style: TextStyle(color: AppColors.textHeader, fontWeight: FontWeight.bold)),
           backgroundColor: AppColors.bg,
           elevation: 0,
           centerTitle: false,
@@ -37,8 +37,8 @@ class MessagesScreen extends StatelessWidget {
                   _showNewChatSheet(context, Get.find<ChatController>());
                 } else if (value == 'join_group') {
                   Get.snackbar(
-                    'Próximamente',
-                    'La funcionalidad de unirse a grupos estará disponible pronto',
+                    'soon'.tr,
+                    'join_group_soon'.tr,
                     snackPosition: SnackPosition.BOTTOM,
                     backgroundColor: Color(0xFF1E293B),
                     colorText: Colors.white,
@@ -47,8 +47,8 @@ class MessagesScreen extends StatelessWidget {
                   );
                 } else if (value == 'create_group') {
                   Get.snackbar(
-                    'Próximamente',
-                    'La creación de grupos se implementará en una futura actualización',
+                    'soon'.tr,
+                    'create_group_soon'.tr,
                     snackPosition: SnackPosition.BOTTOM,
                     backgroundColor: Color(0xFF1E293B),
                     colorText: Colors.white,
@@ -59,9 +59,9 @@ class MessagesScreen extends StatelessWidget {
                 print('Seleccionado: $value');
               },
               itemBuilder: (BuildContext context) => [
-                _buildPopupItem('Iniciar Chat', Icons.chat_outlined, 'new_chat'),
-                _buildPopupItem('Unirse a Grupo', Icons.group_add_outlined, 'join_group'),
-                _buildPopupItem('Crear Grupo', Icons.groups_outlined, 'create_group'),
+                _buildPopupItem('start_chat'.tr, Icons.chat_outlined, 'new_chat'),
+                _buildPopupItem('join_group'.tr, Icons.group_add_outlined, 'join_group'),
+                _buildPopupItem('create_group'.tr, Icons.groups_outlined, 'create_group'),
               ],
             ),
             SizedBox(width: 8),
@@ -86,12 +86,12 @@ class MessagesScreen extends StatelessWidget {
                     SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                     Icon(Icons.chat_bubble_outline, size: 80, color: AppColors.textMuted.withOpacity(0.2)),
                     SizedBox(height: 20),
-                    Center(child: Text('No tienes conversaciones activas', style: TextStyle(color: AppColors.textMuted, fontSize: 16))),
+                    Center(child: Text('no_chats'.tr, style: TextStyle(color: AppColors.textMuted, fontSize: 16))),
                     SizedBox(height: 10),
                     Center(
                       child: TextButton(
                         onPressed: () => _showNewChatSheet(context, controller),
-                        child: Text('Iniciar una nueva', style: TextStyle(color: AppColors.accent)),
+                        child: Text('start_new_chat'.tr, style: TextStyle(color: AppColors.accent)),
                       ),
                     ),
                   ],
@@ -124,16 +124,24 @@ class MessagesScreen extends StatelessWidget {
                       name: name,
                     ),
                     title: Text(name, style: TextStyle(color: AppColors.textHeader, fontWeight: FontWeight.w600)),
-                    subtitle: Text(
-                      contact['lastMessage'] != null 
-                      ? (contact['lastMessage'].length > 25 
-                          ? '${contact['lastMessage'].substring(0, 25)}...' 
-                          : contact['lastMessage'])
-                      : 'Toca para chatear', 
-                      style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    subtitle: () {
+                      String? lastMsg = contact['lastMessage'];
+                      if (lastMsg == 'Envió una publicación') {
+                        lastMsg = 'sent_post_notif'.tr;
+                      } else if (lastMsg == 'El mensaje ha sido eliminado') {
+                        lastMsg = 'message_deleted_placeholder'.tr;
+                      }
+                      return Text(
+                        lastMsg != null 
+                        ? (lastMsg.length > 25 
+                            ? '${lastMsg.substring(0, 25)}...' 
+                            : lastMsg)
+                        : 'tap_to_chat'.tr, 
+                        style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      );
+                    }(),
                     trailing: GetBuilder<ChatController>(
                       id: 'unread_$contactId',
                       builder: (ctrl) {
@@ -196,7 +204,7 @@ class MessagesScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  'Iniciar nuevo chat',
+                  'start_new_chat_title'.tr,
                   style: TextStyle(color: AppColors.textHeader, fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 15),
@@ -213,7 +221,7 @@ class MessagesScreen extends StatelessWidget {
                   child: TextField(
                     style: TextStyle(color: AppColors.textHeader),
                     decoration: InputDecoration(
-                      hintText: 'Buscar amigos...',
+                      hintText: 'search_friends'.tr,
                       hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5)),
                       prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
                       border: InputBorder.none,
@@ -236,7 +244,7 @@ class MessagesScreen extends StatelessWidget {
                         Icon(Icons.search_off, size: 48, color: AppColors.textMuted.withOpacity(0.3)),
                         SizedBox(height: 10),
                         Text(
-                          searchQuery.isEmpty ? 'No hay nuevos contactos disponibles' : 'No se encontraron resultados',
+                          searchQuery.isEmpty ? 'no_new_contacts'.tr : 'no_results'.tr,
                           style: TextStyle(color: AppColors.textMuted),
                           textAlign: TextAlign.center,
                         ),
@@ -261,7 +269,7 @@ class MessagesScreen extends StatelessWidget {
                             contact['nombre'] ?? 'Usuario',
                             style: TextStyle(color: AppColors.textHeader, fontWeight: FontWeight.w500),
                           ),
-                          subtitle: Text('Disponible para chatear', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                          subtitle: Text('available_to_chat'.tr, style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                           trailing: Icon(Icons.chevron_right, color: AppColors.textMuted),
                           onTap: () {
                             Get.back(); // Cerrar sheet

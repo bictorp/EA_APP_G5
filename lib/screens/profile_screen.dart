@@ -57,7 +57,7 @@ class ProfileScreen extends StatelessWidget {
 
               final user = controller.user.value;
               if (user == null) {
-                return Center(child: Text('No user data found', style: TextStyle(color: AppColors.textHeader)));
+                return Center(child: Text('no_user_data'.tr, style: TextStyle(color: AppColors.textHeader)));
               }
 
               return RefreshIndicator(
@@ -110,7 +110,7 @@ class ProfileScreen extends StatelessWidget {
               UIUtils.showReportBottomSheet(
                 targetId: controller.userId!,
                 tipo: 'user',
-                title: 'este perfil',
+                title: 'this_profile'.tr,
               );
             },
           ),
@@ -159,7 +159,7 @@ class ProfileScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min, 
               children: [
-                _buildStatItem(controller.postCount.value.toString(), 'Posts'),
+                _buildStatItem(controller.postCount.value.toString(), 'posts'.tr),
                 SizedBox(width: 25),
                 GestureDetector(
                   onTap: () {
@@ -169,14 +169,14 @@ class ProfileScreen extends StatelessWidget {
                     if (targetId.isNotEmpty) {
                       Get.bottomSheet(
                         _UserListBottomSheet(
-                          title: 'Seguidores',
+                          title: 'followers'.tr,
                           userId: targetId,
                           isFollowers: true,
                         ),
                       );
                     }
                   },
-                  child: _buildStatItem(controller.followersCount.value.toString(), 'Followers'),
+                  child: _buildStatItem(controller.followersCount.value.toString(), 'followers'.tr),
                 ),
                 SizedBox(width: 25),
                 GestureDetector(
@@ -187,14 +187,14 @@ class ProfileScreen extends StatelessWidget {
                     if (targetId.isNotEmpty) {
                       Get.bottomSheet(
                         _UserListBottomSheet(
-                          title: 'Seguidos',
+                          title: 'following'.tr,
                           userId: targetId,
                           isFollowers: false,
                         ),
                       );
                     }
                   },
-                  child: _buildStatItem(controller.followingCount.value.toString(), 'Following'),
+                  child: _buildStatItem(controller.followingCount.value.toString(), 'following'.tr),
                 ),
               ],
             ),
@@ -315,8 +315,8 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: Text(
         controller.isMe 
-            ? 'Editar Perfil' 
-            : (controller.isFollowing.value ? 'Siguiendo' : 'Seguir'),
+            ? 'edit_profile'.tr 
+            : (controller.isFollowing.value ? 'following_action'.tr : 'follow'.tr),
         style: GoogleFonts.inter(
           fontWeight: FontWeight.w700,
         ),
@@ -430,7 +430,7 @@ class ProfileScreen extends StatelessWidget {
         children: [
           SizedBox(height: 20),
           Text(
-            'PUBLICACIONES',
+            'posts_title'.tr,
             style: GoogleFonts.inter(
               fontSize: 11,
               fontWeight: FontWeight.w900,
@@ -451,7 +451,7 @@ class ProfileScreen extends StatelessWidget {
       return SliverToBoxAdapter(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 60),
-          child: Center(child: Text('Aún no hay publicaciones', style: TextStyle(color: AppColors.textMuted))),
+          child: Center(child: Text('no_posts'.tr, style: TextStyle(color: AppColors.textMuted))),
         ),
       );
     }
@@ -608,7 +608,7 @@ class _UserListBottomSheetState extends State<_UserListBottomSheet> {
                 },
                 style: GoogleFonts.inter(color: AppColors.textHeader, fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: 'Buscar...',
+                  hintText: 'search'.tr,
                   hintStyle: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 13),
                   prefixIcon: Icon(Icons.search, color: AppColors.textMuted, size: 20),
                   suffixIcon: _searchQuery.isNotEmpty
@@ -644,8 +644,8 @@ class _UserListBottomSheetState extends State<_UserListBottomSheet> {
                     SizedBox(height: 16),
                     Text(
                       _searchQuery.isNotEmpty 
-                          ? 'No se encontraron usuarios para tu búsqueda'
-                          : 'No hay usuarios para mostrar',
+                          ? 'no_users_found_search'.tr
+                          : 'no_users_show'.tr,
                       style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
                       textAlign: TextAlign.center,
                     ),

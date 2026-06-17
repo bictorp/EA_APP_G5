@@ -37,7 +37,7 @@ class CreatePostController extends GetxController {
         }
       }
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo abrir la cámara',
+      Get.snackbar('Error', 'camera_error'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error.withOpacity(0.8),
         colorText: Colors.white,
@@ -52,7 +52,7 @@ class CreatePostController extends GetxController {
         await _cropImage(pickedFile);
       }
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo seleccionar la imagen',
+      Get.snackbar('Error', 'image_select_error'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error.withOpacity(0.8),
         colorText: Colors.white,
@@ -80,7 +80,7 @@ class CreatePostController extends GetxController {
         sourcePath: imgFile.path,
         uiSettings: [
           AndroidUiSettings(
-              toolbarTitle: 'Recortar foto',
+              toolbarTitle: 'crop_photo'.tr,
               toolbarColor: AppColors.bg,
               toolbarWidgetColor: AppColors.textHeader,
               activeControlsWidgetColor: AppColors.accent,
@@ -90,7 +90,7 @@ class CreatePostController extends GetxController {
               hideBottomControls: true, // Ocultamos todo para máxima limpieza
           ),
           IOSUiSettings(
-            title: 'Recortar foto',
+            title: 'crop_photo'.tr,
             aspectRatioLockEnabled: true,
             resetAspectRatioEnabled: false,
             aspectRatioPickerButtonHidden: true,
@@ -163,7 +163,7 @@ class CreatePostController extends GetxController {
             ),
             child: PhotoFilterSelector(
               appBarColor: AppColors.bg,
-              title: Text("Aplicar filtros", style: TextStyle(color: AppColors.textHeader)),
+              title: Text("apply_filters".tr, style: TextStyle(color: AppColors.textHeader)),
               image: decodedImage,
               filters: presetFiltersList,
               filename: fileName,
@@ -201,7 +201,7 @@ class CreatePostController extends GetxController {
     if (selectedImage.value == null) {
       Get.snackbar(
         'Error',
-        'Por favor, selecciona o toma una foto',
+        'select_photo_prompt'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error.withOpacity(0.8),
         colorText: Colors.white,
@@ -218,7 +218,7 @@ class CreatePostController extends GetxController {
       if (uploadedUrl == null) {
         Get.snackbar(
           'Error',
-          'No se pudo subir la imagen',
+          'upload_error'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColors.error.withOpacity(0.8),
           colorText: Colors.white,
@@ -235,8 +235,8 @@ class CreatePostController extends GetxController {
         
         Get.back();
         Get.snackbar(
-          'Éxito',
-          'Publicación creada correctamente',
+          'success'.tr,
+          'post_create_success'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColors.success.withOpacity(0.8),
           colorText: Colors.white,
@@ -244,7 +244,7 @@ class CreatePostController extends GetxController {
       } else {
         Get.snackbar(
           'Error',
-          'No se pudo crear la publicación',
+          'post_create_error'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColors.error.withOpacity(0.8),
           colorText: Colors.white,

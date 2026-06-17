@@ -70,7 +70,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                 ),
                 SizedBox(height: 24),
                 Text(
-                  '¿Eliminar comentario?',
+                  'delete_comment_confirm_title'.tr,
                   style: GoogleFonts.inter(
                     color: AppColors.textHeader,
                     fontWeight: FontWeight.w900,
@@ -80,7 +80,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                 ),
                 SizedBox(height: 12),
                 Text(
-                  'Esta acción borrará permanentemente tu comentario.',
+                  'delete_comment_confirm_msg'.tr,
                   style: GoogleFonts.inter(
                     color: AppColors.textMuted,
                     fontSize: 14,
@@ -106,7 +106,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         child: Text(
-                          'Eliminar permanentemente',
+                          'delete_permanently'.tr,
                           style: GoogleFonts.inter(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -125,7 +125,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                           ),
                         ),
                         child: Text(
-                          'Cancelar',
+                          'cancel'.tr,
                           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                         ),
                       ),
@@ -169,7 +169,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
             if (isOwnComment) ...[
               ListTile(
                 leading: Icon(Icons.delete_outline, color: AppColors.error),
-                title: Text('Eliminar comentario', style: TextStyle(color: AppColors.error)),
+                title: Text('delete_comment'.tr, style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
                   _confirmDeleteComment(context, controller, commentId);
@@ -178,7 +178,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
             ] else ...[
               ListTile(
                 leading: Icon(Icons.report_problem_outlined, color: AppColors.error),
-                title: Text('Reportar comentario', style: TextStyle(color: AppColors.error)),
+                title: Text('report_comment'.tr, style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
                   _showReportScreen(context, commentId);
@@ -187,7 +187,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
             ],
             ListTile(
               leading: Icon(Icons.close, color: AppColors.textHeader),
-              title: Text('Cancelar', style: TextStyle(color: AppColors.textHeader)),
+              title: Text('cancel'.tr, style: TextStyle(color: AppColors.textHeader)),
               onTap: () => Get.back(),
             ),
             SizedBox(height: 20),
@@ -225,7 +225,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
             ),
           ),
           Text(
-            'Comentarios',
+            'comments_title'.tr,
             style: GoogleFonts.inter(
               color: AppColors.textHeader,
               fontWeight: FontWeight.bold,
@@ -246,7 +246,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                       Icon(Icons.chat_bubble_outline, color: AppColors.textMuted, size: 48),
                       SizedBox(height: 16),
                       Text(
-                        'Aún no hay comentarios',
+                        'no_comments'.tr,
                         style: GoogleFonts.inter(color: AppColors.textMuted),
                       ),
                     ],
@@ -390,7 +390,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                       keyboardType: TextInputType.multiline,
                       style: TextStyle(color: AppColors.textHeader, fontSize: 14),
                       decoration: InputDecoration(
-                        hintText: 'Añadir un comentario...',
+                        hintText: 'add_comment'.tr,
                         hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14),
                         border: InputBorder.none,
                         isDense: true,
@@ -403,7 +403,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                 TextButton(
                   onPressed: controller.sendComment,
                   child: Text(
-                    'Publicar',
+                    'publish'.tr,
                     style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold),
                   ),
                 ),

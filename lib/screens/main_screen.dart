@@ -21,7 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   List<Widget> get _pages => [
     HomeScreen(),
     SearchScreen(),
-    Scaffold(backgroundColor: AppColors.bg, body: Center(child: Text('Modo Tinder / Conocer gente', style: TextStyle(color: AppColors.textHeader)))),
+    Scaffold(backgroundColor: AppColors.bg, body: Center(child: Text('tinder_mode'.tr, style: TextStyle(color: AppColors.textHeader)))),
     MessagesScreen(),
     ProfileScreen(),
   ];

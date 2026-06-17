@@ -24,13 +24,19 @@ class AssistantScreen extends StatefulWidget {
 }
 
 class _AssistantScreenState extends State<AssistantScreen> {
-  final List<Message> _messages = [
-    Message(
-      text: '¡Hola! Soy **Toni**, asistente virtual e ingeniero académico de la EETAC. ¿En qué puedo ayudarte hoy sobre la oferta de grado o asignaturas?',
-      isUser: false,
-      timestamp: DateTime.now(),
-    ),
-  ];
+  late final List<Message> _messages;
+
+  @override
+  void initState() {
+    super.initState();
+    _messages = [
+      Message(
+        text: 'toni_welcome_msg'.tr,
+        isUser: false,
+        timestamp: DateTime.now(),
+      ),
+    ];
+  }
 
   final TextEditingController _inputController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -68,7 +74,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
     } catch (e) {
       setState(() {
         _messages.add(Message(
-          text: 'Lo siento, ha ocurrido un error al conectar con el asistente. Por favor, inténtalo de nuevo.',
+          text: 'toni_error_msg'.tr,
           isUser: false,
           timestamp: DateTime.now(),
         ));
@@ -111,11 +117,11 @@ class _AssistantScreenState extends State<AssistantScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Asistente "Toni"',
+                      'assistant_toni'.tr,
                       style: TextStyle(color: AppColors.textHeader, fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      'Ingeniero académico EETAC',
+                      'academic_engineer_eetac'.tr,
                       style: TextStyle(color: AppColors.textMuted, fontSize: 11),
                     ),
                   ],
@@ -217,7 +223,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
             ),
             SizedBox(width: 10),
             Text(
-              'Toni está pensando...',
+              'toni_thinking'.tr,
               style: TextStyle(color: AppColors.textMuted, fontSize: 13),
             ),
           ],
@@ -248,7 +254,7 @@ class _AssistantScreenState extends State<AssistantScreen> {
                 controller: _inputController,
                 style: TextStyle(color: AppColors.textHeader, fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: 'Pregunta a Toni sobre grados o asignaturas...',
+                  hintText: 'ask_toni_hint'.tr,
                   hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
