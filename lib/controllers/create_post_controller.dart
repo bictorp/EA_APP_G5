@@ -147,11 +147,6 @@ class CreatePostController extends GetxController {
                 foregroundColor: AppColors.textHeader,
                 elevation: 0,
               ),
-              colorScheme: const ColorScheme.dark(
-                primary: AppColors.accent,
-                secondary: AppColors.accent,
-                surface: AppColors.containerBg,
-              ),
               colorScheme: isDark
                   ? ColorScheme.dark(
                       primary: AppColors.accent,
