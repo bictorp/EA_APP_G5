@@ -4,12 +4,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_colors.dart';
 import '../screens/profile_screen.dart';
+import '../widgets/safe_circle_avatar.dart';
 
 class UserCard extends StatelessWidget {
   final dynamic user;
   final VoidCallback? onTap;
 
-  const UserCard({
+  UserCard({
     super.key,
     required this.user,
     this.onTap,
@@ -18,13 +19,7 @@ class UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Get.to(
-          () => ProfileScreen(
-            userId: user['_id'],
-          ),
-        );
-      },
+      onTap: onTap ?? () => Get.to(() => ProfileScreen(userId: user['_id'] ?? user['id']), preventDuplicates: false),
       child: Container(
         margin: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -34,26 +29,18 @@ class UserCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.containerBg,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          border: Border.all(color: AppColors.borderWhite),
         ),
         child: Row(
           children: [
             // Avatar con fallback
-            CircleAvatar(
+            SafeCircleAvatar(
               radius: 28,
-              backgroundImage: (user['avatarUrl'] != null && user['avatarUrl'].toString().isNotEmpty)
-                  ? NetworkImage(user['avatarUrl'])
-                  : null,
-              backgroundColor: Colors.white10,
-              child: (user['avatarUrl'] == null || user['avatarUrl'].toString().isEmpty)
-                  ? const Icon(
-                      Icons.person,
-                      color: Colors.white54,
-                    )
-                  : null,
+              url: user['avatarUrl'],
+              name: user['nombre'],
             ),
 
-            const SizedBox(width: 14),
+            SizedBox(width: 14),
 
             Expanded(
               child: Column(
@@ -64,13 +51,13 @@ class UserCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
-                      color: Colors.white,
+                      color: AppColors.textHeader,
                       fontWeight: FontWeight.w700,
                       fontSize: 16,
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
 
                   // Usamos Wrap en lugar de Row para evitar overflows masivos
                   Wrap(
@@ -106,7 +93,7 @@ class UserCard extends StatelessWidget {
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.05),
+                            color: AppColors.borderWhite,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -114,7 +101,7 @@ class UserCard extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
-                              color: Colors.white70,
+                              color: AppColors.textMuted,
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
                             ),
@@ -128,7 +115,7 @@ class UserCard extends StatelessWidget {
             
             Icon(
               Icons.chevron_right_rounded,
-              color: Colors.white.withOpacity(0.2),
+              color: AppColors.textMuted.withOpacity(0.4),
             ),
           ],
         ),

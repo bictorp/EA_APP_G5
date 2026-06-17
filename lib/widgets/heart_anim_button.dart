@@ -6,7 +6,7 @@ class HeartAnimButton extends StatefulWidget {
   final double size;
   final Color? color;
 
-  const HeartAnimButton({
+  HeartAnimButton({
     super.key,
     required this.isLiked,
     required this.onTap,
@@ -27,7 +27,7 @@ class _HeartAnimButtonState extends State<HeartAnimButton> with SingleTickerProv
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: Duration(milliseconds: 300),
       vsync: this,
     );
 
@@ -88,7 +88,7 @@ class _HeartAnimButtonState extends State<HeartAnimButton> with SingleTickerProv
                 scale: _scaleAnimation.isAnimating ? _scaleAnimation.value : 1.0,
                 child: Icon(
                   widget.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                  color: widget.isLiked ? (widget.color ?? Colors.redAccent) : (widget.color?.withOpacity(0.5) ?? Colors.white),
+                  color: widget.isLiked ? (widget.color ?? Colors.redAccent) : (widget.color ?? Colors.white.withOpacity(0.5)),
                   size: widget.size,
                 ),
               ),

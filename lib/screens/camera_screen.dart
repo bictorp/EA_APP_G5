@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../main.dart';
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({super.key});
+  CameraScreen({super.key});
 
   @override
   State<CameraScreen> createState() => _CameraScreenState();
@@ -73,7 +73,7 @@ class _CameraScreenState extends State<CameraScreen> {
   @override
   Widget build(BuildContext context) {
     if (_controller == null || !_controller!.value.isInitialized) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: Colors.black,
         body: Center(child: CircularProgressIndicator()),
       );
@@ -93,7 +93,7 @@ class _CameraScreenState extends State<CameraScreen> {
             top: 40,
             left: 10,
             child: IconButton(
-              icon: const Icon(Icons.close, color: Colors.white, size: 30),
+              icon: Icon(Icons.close, color: Colors.white, size: 30),
               onPressed: () => Get.back(),
             ),
           ),
@@ -108,7 +108,7 @@ class _CameraScreenState extends State<CameraScreen> {
               children: [
                 // Botón Cambiar Cámara (izquierda)
                 IconButton(
-                  icon: const Icon(Icons.flip_camera_ios, color: Colors.white, size: 30),
+                  icon: Icon(Icons.flip_camera_ios, color: Colors.white, size: 30),
                   onPressed: _toggleCamera,
                 ),
 
@@ -126,7 +126,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       child: Container(
                         height: 60,
                         width: 60,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
@@ -146,7 +146,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.white, width: 2),
                     ),
-                    child: const Icon(Icons.photo_library, color: Colors.white, size: 25),
+                    child: Icon(Icons.photo_library, color: Colors.white, size: 25),
                   ),
                 ),
               ],

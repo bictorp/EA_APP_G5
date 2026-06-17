@@ -209,12 +209,15 @@ class PostService {
     }
   }
 
-  Future<Map<String, dynamic>> getPostsByUserId(String userId) async {
+  Future<Map<String, dynamic>> getPostsByUserId(String userId, {int limit = 100}) async {
     if (userId.isEmpty || userId == 'null') {
       return {'posts': <Post>[], 'hasNextPage': false};
     }
     try {
-      final response = await _dio.get('${ApiConstants.baseUrl}/posts/user/$userId');
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}/posts/user/$userId',
+        queryParameters: {'limit': limit},
+      );
       
       if (response.statusCode == 200) {
         final List docs = response.data['docs'] ?? [];

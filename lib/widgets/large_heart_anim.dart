@@ -4,7 +4,7 @@ class LargeHeartAnim extends StatefulWidget {
   final bool isVisible;
   final VoidCallback onFinished;
 
-  const LargeHeartAnim({
+  LargeHeartAnim({
     super.key,
     required this.isVisible,
     required this.onFinished,
@@ -24,7 +24,7 @@ class _LargeHeartAnimState extends State<LargeHeartAnim> with SingleTickerProvid
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: Duration(milliseconds: 600),
     );
 
     _scaleAnimation = TweenSequence<double>([
@@ -77,12 +77,12 @@ class _LargeHeartAnimState extends State<LargeHeartAnim> with SingleTickerProvid
           child: Transform.scale(
             scale: _scaleAnimation.value,
             child: ShaderMask(
-              shaderCallback: (bounds) => const LinearGradient(
+              shaderCallback: (bounds) => LinearGradient(
                 colors: [Colors.white, Colors.redAccent],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ).createShader(bounds),
-              child: const Icon(
+              child: Icon(
                 Icons.favorite_rounded,
                 size: 100,
                 color: Colors.white,

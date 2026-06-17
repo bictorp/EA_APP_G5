@@ -72,21 +72,21 @@ class ChatController extends GetxController {
 
         // Mostrar notificación si no estamos en el chat
         final contact = contacts.firstWhereOrNull((c) => c['_id'] == message.remitenteId);
-        final senderName = contact?['nombre'] ?? 'Alguien';
+        final senderName = contact?['nombre'] ?? 'someone'.tr;
         
         Get.snackbar(
-          'Mensaje de $senderName',
-          message.post != null ? 'Envió una publicación' : message.contenido,
+          'message_from'.trParams({'name': senderName}),
+          message.post != null ? 'sent_post_notif'.tr : message.contenido,
           snackPosition: SnackPosition.TOP,
           backgroundColor: AppColors.accent.withOpacity(0.9),
           colorText: Colors.white,
-          duration: const Duration(seconds: 3),
-          icon: const Icon(Icons.chat_bubble_rounded, color: Colors.white),
+          duration: Duration(seconds: 3),
+          icon: Icon(Icons.chat_bubble_rounded, color: Colors.white),
           onTap: (snack) {
             if (contact != null) {
               Get.to(() => ChatDetailScreen(
                 contactId: contact['_id'],
-                contactName: contact['nombre'] ?? 'Usuario',
+                contactName: contact['nombre'] ?? 'user'.tr,
                 contactAvatar: contact['avatarUrl'],
               ));
             }
@@ -129,7 +129,7 @@ class ChatController extends GetxController {
               id: messages[i].id,
               remitenteId: messages[i].remitenteId,
               destinatarioId: messages[i].destinatarioId,
-              contenido: 'El mensaje ha sido eliminado',
+              contenido: 'message_deleted_placeholder'.tr,
               createdAt: messages[i].createdAt,
               leido: messages[i].leido,
               eliminadoParaTodos: true,
@@ -150,9 +150,9 @@ class ChatController extends GetxController {
     if (contactIndex != -1) {
       final updatedContact = Map<String, dynamic>.from(contacts[contactIndex]);
       if (message.eliminadoParaTodos) {
-        updatedContact['lastMessage'] = 'El mensaje ha sido eliminado';
+        updatedContact['lastMessage'] = 'message_deleted_placeholder'.tr;
       } else if (message.post != null) {
-        updatedContact['lastMessage'] = 'Envió una publicación';
+        updatedContact['lastMessage'] = 'sent_post_notif'.tr;
       } else {
         updatedContact['lastMessage'] = message.contenido;
       }
@@ -247,7 +247,7 @@ class ChatController extends GetxController {
       final response = await AuthService.dio.get(
         '${ApiConstants.baseUrl}/chat/conversation/$otherUserId',
         options: Options(
-          receiveTimeout: const Duration(seconds: 10),
+          receiveTimeout: Duration(seconds: 10),
         ),
       );
 

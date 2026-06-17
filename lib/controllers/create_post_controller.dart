@@ -12,6 +12,7 @@ import '../services/post_service.dart';
 import '../services/upload_service.dart';
 import '../constants/app_colors.dart';
 import 'home_controller.dart';
+import '../controllers/theme_controller.dart';
 
 class CreatePostController extends GetxController {
   final PostService _postService = PostService();
@@ -26,7 +27,7 @@ class CreatePostController extends GetxController {
 
   Future<void> startMediaFlow() async {
     try {
-      final XFile? pickedFile = await Get.to(() => const CameraScreen());
+      final XFile? pickedFile = await Get.to(() => CameraScreen());
       if (pickedFile != null) {
         await _cropImage(pickedFile);
       } else {
@@ -36,7 +37,7 @@ class CreatePostController extends GetxController {
         }
       }
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo abrir la cámara',
+      Get.snackbar('Error', 'camera_error'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error.withOpacity(0.8),
         colorText: Colors.white,
@@ -51,7 +52,7 @@ class CreatePostController extends GetxController {
         await _cropImage(pickedFile);
       }
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo seleccionar la imagen',
+      Get.snackbar('Error', 'image_select_error'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error.withOpacity(0.8),
         colorText: Colors.white,
@@ -72,13 +73,16 @@ class CreatePostController extends GetxController {
       return;
     }
     try {
+      final themeController = Get.find<ThemeController>();
+      final isDark = themeController.isDarkMode.value;
+
       final croppedFile = await ImageCropper().cropImage(
         sourcePath: imgFile.path,
         uiSettings: [
           AndroidUiSettings(
-              toolbarTitle: 'Recortar foto',
+              toolbarTitle: 'crop_photo'.tr,
               toolbarColor: AppColors.bg,
-              toolbarWidgetColor: Colors.white,
+              toolbarWidgetColor: AppColors.textHeader,
               activeControlsWidgetColor: AppColors.accent,
               backgroundColor: AppColors.bg,
               initAspectRatio: CropAspectRatioPreset.square,
@@ -86,7 +90,7 @@ class CreatePostController extends GetxController {
               hideBottomControls: true, // Ocultamos todo para máxima limpieza
           ),
           IOSUiSettings(
-            title: 'Recortar foto',
+            title: 'crop_photo'.tr,
             aspectRatioLockEnabled: true,
             resetAspectRatioEnabled: false,
             aspectRatioPickerButtonHidden: true,
@@ -127,16 +131,20 @@ class CreatePostController extends GetxController {
       
       if (decodedImage == null) return;
 
+      final themeController = Get.find<ThemeController>();
+      final isDark = themeController.isDarkMode.value;
+
       Map? imagefile = await Navigator.push(
         Get.context!,
         MaterialPageRoute(
           builder: (context) => Theme(
-            data: ThemeData.dark().copyWith(
+            data: ThemeData(
+              brightness: isDark ? Brightness.dark : Brightness.light,
               primaryColor: AppColors.accent,
               scaffoldBackgroundColor: AppColors.bg,
-              appBarTheme: const AppBarTheme(
+              appBarTheme: AppBarTheme(
                 backgroundColor: AppColors.bg,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.textHeader,
                 elevation: 0,
               ),
               colorScheme: const ColorScheme.dark(
@@ -144,14 +152,27 @@ class CreatePostController extends GetxController {
                 secondary: AppColors.accent,
                 surface: AppColors.containerBg,
               ),
+              colorScheme: isDark
+                  ? ColorScheme.dark(
+                      primary: AppColors.accent,
+                      secondary: AppColors.accent,
+                      surface: AppColors.containerBg,
+                      background: AppColors.bg,
+                    )
+                  : ColorScheme.light(
+                      primary: AppColors.accent,
+                      secondary: AppColors.accent,
+                      surface: AppColors.containerBg,
+                      background: AppColors.bg,
+                    ),
             ),
             child: PhotoFilterSelector(
               appBarColor: AppColors.bg,
-              title: const Text("Aplicar filtros", style: TextStyle(color: Colors.white)),
+              title: Text("apply_filters".tr, style: TextStyle(color: AppColors.textHeader)),
               image: decodedImage,
               filters: presetFiltersList,
               filename: fileName,
-              loader: const Center(child: CircularProgressIndicator()),
+              loader: Center(child: CircularProgressIndicator()),
               fit: BoxFit.contain,
             ),
           ),
@@ -185,7 +206,7 @@ class CreatePostController extends GetxController {
     if (selectedImage.value == null) {
       Get.snackbar(
         'Error',
-        'Por favor, selecciona o toma una foto',
+        'select_photo_prompt'.tr,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColors.error.withOpacity(0.8),
         colorText: Colors.white,
@@ -202,7 +223,7 @@ class CreatePostController extends GetxController {
       if (uploadedUrl == null) {
         Get.snackbar(
           'Error',
-          'No se pudo subir la imagen',
+          'upload_error'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColors.error.withOpacity(0.8),
           colorText: Colors.white,
@@ -219,8 +240,8 @@ class CreatePostController extends GetxController {
         
         Get.back();
         Get.snackbar(
-          'Éxito',
-          'Publicación creada correctamente',
+          'success'.tr,
+          'post_create_success'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColors.success.withOpacity(0.8),
           colorText: Colors.white,
@@ -228,7 +249,7 @@ class CreatePostController extends GetxController {
       } else {
         Get.snackbar(
           'Error',
-          'No se pudo crear la publicación',
+          'post_create_error'.tr,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColors.error.withOpacity(0.8),
           colorText: Colors.white,

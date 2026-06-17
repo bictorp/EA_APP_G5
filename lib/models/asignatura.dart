@@ -6,7 +6,7 @@ class Asignatura {
   Asignatura({
     required this.id,
     required this.nombre,
-    this.usuarios = const [],
+    this.usuarios = [],
   });
 
   factory Asignatura.fromJson(Map<String, dynamic> json) {

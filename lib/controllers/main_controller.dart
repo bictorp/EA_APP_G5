@@ -24,7 +24,7 @@ class MainController extends GetxController {
             if (homeCtrl.scrollController.hasClients) {
               homeCtrl.scrollController.animateTo(
                 0,
-                duration: const Duration(milliseconds: 600),
+                duration: Duration(milliseconds: 600),
                 curve: Curves.easeOutQuart,
               );
             }

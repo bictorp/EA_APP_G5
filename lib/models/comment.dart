@@ -1,3 +1,4 @@
+import 'package:get/get.dart';
 import 'user.dart';
 
 class Comment {
@@ -20,20 +21,23 @@ class Comment {
     final difference = now.difference(createdAt);
 
     if (difference.inMinutes < 3) {
-      return 'Hace un momento';
+      return 'just_now'.tr;
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes} min';
+      return 'time_minutes_short'.trParams({'val': difference.inMinutes.toString()});
     } else if (difference.inDays < 1) {
-      return '${difference.inHours} h';
+      return 'time_hours_short'.trParams({'val': difference.inHours.toString()});
     } else if (difference.inDays < 365) {
-      return '${difference.inDays} d';
+      return 'time_days_short'.trParams({'val': difference.inDays.toString()});
     } else {
       final years = (difference.inDays / 365).floor();
       final months = ((difference.inDays % 365) / 30).floor();
       if (months > 0) {
-        return '${years}a ${months}m';
+        return 'time_years_months_short'.trParams({
+          'years': years.toString(),
+          'months': months.toString(),
+        });
       }
-      return '${years}a';
+      return 'time_years_short'.trParams({'val': years.toString()});
     }
   }
 

@@ -12,6 +12,9 @@ import 'services/socket_service.dart';
 import 'package:camera/camera.dart';
 import 'controllers/chat_controller.dart';
 import 'services/report_service.dart';
+import 'controllers/theme_controller.dart';
+import 'controllers/language_controller.dart';
+import 'locales/app_translations.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -30,6 +33,8 @@ void main() async {
   // Inyectamos servicios básicos siempre
   Get.put(AuthService(), permanent: true);
   Get.put(ReportService(), permanent: true);
+  await Get.putAsync(() => ThemeController().init(), permanent: true);
+  await Get.putAsync(() => LanguageController().init(), permanent: true);
 
   if (isLoggedIn) {
     await SocketService().connect();
@@ -42,25 +47,32 @@ void main() async {
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;
   
-  const MyApp({super.key, this.isLoggedIn = false});
+  MyApp({super.key, this.isLoggedIn = false});
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
+    final themeController = Get.find<ThemeController>();
+    final languageController = Get.find<LanguageController>();
+
+    return Obx(() => GetMaterialApp(
       title: 'Univy App',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: themeController.themeMode,
+      translations: AppTranslations(),
+      locale: languageController.locale,
+      fallbackLocale: const Locale('es'),
       initialRoute: isLoggedIn ? '/home' : '/login',
       getPages: [
-        GetPage(name: '/login', page: () => const LoginScreen()),
-        GetPage(name: '/register', page: () => const RegisterScreen()),
-        GetPage(name: '/home', page: () => const MainScreen()),
-        GetPage(name: '/create-post', page: () => const CreatePostScreen()),
-        GetPage(name: '/profile/edit', page: () => const EditProfileScreen()),
-        GetPage(name: '/post-detail', page: () => const PostDetailScreen()),
+        GetPage(name: '/', page: () => isLoggedIn ? MainScreen() : LoginScreen()),
+        GetPage(name: '/login', page: () => LoginScreen()),
+        GetPage(name: '/register', page: () => RegisterScreen()),
+        GetPage(name: '/home', page: () => MainScreen()),
+        GetPage(name: '/create-post', page: () => CreatePostScreen()),
+        GetPage(name: '/profile/edit', page: () => EditProfileScreen()),
+        GetPage(name: '/post-detail', page: () => PostDetailScreen()),
       ],
       debugShowCheckedModeBanner: false,
-    );
+    ));
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'user.dart';
 
 class Post {
@@ -25,20 +26,23 @@ class Post {
     final difference = now.difference(createdAt);
 
     if (difference.inSeconds < 60) {
-      return 'Hace ${difference.inSeconds} s';
+      return 'ago_seconds_short'.trParams({'val': difference.inSeconds.toString()});
     } else if (difference.inMinutes < 60) {
-      return 'Hace ${difference.inMinutes} min';
+      return 'ago_minutes_short'.trParams({'val': difference.inMinutes.toString()});
     } else if (difference.inHours < 24) {
-      return 'Hace ${difference.inHours} h';
+      return 'ago_hours_short'.trParams({'val': difference.inHours.toString()});
     } else if (difference.inDays < 365) {
-      return 'Hace ${difference.inDays} d';
+      return 'ago_days_short'.trParams({'val': difference.inDays.toString()});
     } else {
       final years = (difference.inDays / 365).floor();
       final months = ((difference.inDays % 365) / 30).floor();
       if (months > 0) {
-        return 'Hace ${years}a ${months}m';
+        return 'ago_years_months_short'.trParams({
+          'years': years.toString(),
+          'months': months.toString(),
+        });
       }
-      return 'Hace ${years}a';
+      return 'ago_years_short'.trParams({'val': years.toString()});
     }
   }
 

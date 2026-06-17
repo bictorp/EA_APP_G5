@@ -5,7 +5,7 @@ class ErrorBanner extends StatelessWidget {
   final String message;
   final VoidCallback? onClose;
 
-  const ErrorBanner({
+  ErrorBanner({
     super.key,
     required this.message,
     this.onClose,
@@ -17,7 +17,7 @@ class ErrorBanner extends StatelessWidget {
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 300),
+      duration: Duration(milliseconds: 300),
       curve: Curves.easeOutBack,
       builder: (context, value, child) {
         return Transform.scale(
@@ -42,12 +42,12 @@ class ErrorBanner extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.error_outline_rounded,
                     color: Colors.redAccent,
                     size: 20,
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       message,
@@ -60,11 +60,11 @@ class ErrorBanner extends StatelessWidget {
                   ),
                   if (onClose != null)
                     IconButton(
-                      icon: const Icon(Icons.close_rounded, size: 16),
+                      icon: Icon(Icons.close_rounded, size: 16),
                       color: Colors.redAccent,
                       onPressed: onClose,
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      constraints: BoxConstraints(),
                     ),
                 ],
               ),
