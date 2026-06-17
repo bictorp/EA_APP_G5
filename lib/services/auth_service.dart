@@ -13,8 +13,8 @@ class AuthService {
 
   static Dio _createDio() {
     final dio = Dio(BaseOptions(
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 15),
+      connectTimeout: Duration(seconds: 10),
+      receiveTimeout: Duration(seconds: 15),
     ));
     dio.interceptors.add(AuthInterceptor());
     return dio;

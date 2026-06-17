@@ -57,20 +57,20 @@ class NotificationController extends GetxController {
           snackPosition: SnackPosition.TOP,
           backgroundColor: AppColors.accent.withOpacity(0.9),
           colorText: Colors.white,
-          duration: const Duration(seconds: 4),
+          duration: Duration(seconds: 4),
           icon: Icon(_getSnackbarIcon(newNotification.type), color: Colors.white),
           onTap: (snack) {
             if (newNotification.type == NotificationType.followRequest) {
               // Navegar y abrir el panel de solicitudes
-              Get.to(() => const NotificationsScreen())?.then((_) {
+              Get.to(() => NotificationsScreen())?.then((_) {
                 // Opcional: acción al volver
               });
               // Pequeño delay para que la pantalla cargue antes de lanzar el bottom sheet
-              Future.delayed(const Duration(milliseconds: 300), () {
+              Future.delayed(Duration(milliseconds: 300), () {
                 NotificationsScreen.showFollowRequestsBottomSheet();
               });
             } else {
-              Get.to(() => const NotificationsScreen());
+              Get.to(() => NotificationsScreen());
             }
           },
         );

@@ -8,7 +8,7 @@ class ReportScreen extends StatefulWidget {
   final String tipo;
   final String objetivoId;
 
-  const ReportScreen({super.key, required this.tipo, required this.objetivoId});
+  ReportScreen({super.key, required this.tipo, required this.objetivoId});
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
@@ -64,13 +64,13 @@ class _ReportScreenState extends State<ReportScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Obx(() => Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
         backgroundColor: AppColors.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textHeader),
+          icon: Icon(Icons.close, color: AppColors.textHeader),
           onPressed: () => Get.back(),
         ),
         title: Text(
@@ -96,12 +96,12 @@ class _ReportScreenState extends State<ReportScreen> {
                 fontSize: 20,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8),
             Text(
               'Tu reporte es anónimo, a menos que estés reportando una infracción de propiedad intelectual.',
               style: GoogleFonts.inter(color: AppColors.textMuted, fontSize: 14),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32),
             
             // Reasons List (Selectable)
             ..._reasons.map((reason) => Container(
@@ -123,13 +123,13 @@ class _ReportScreenState extends State<ReportScreen> {
                   ),
                 ),
                 trailing: _selectedReason == reason 
-                  ? const Icon(Icons.check_circle, color: AppColors.accent)
+                  ? Icon(Icons.check_circle, color: AppColors.accent)
                   : null,
                 onTap: () => setState(() => _selectedReason = reason),
               ),
             )),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             Text(
               'Detalles adicionales',
               style: GoogleFonts.inter(
@@ -137,14 +137,14 @@ class _ReportScreenState extends State<ReportScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12),
             TextField(
               controller: _controller,
               maxLines: 4,
-              style: const TextStyle(color: AppColors.textHeader),
+              style: TextStyle(color: AppColors.textHeader),
               decoration: InputDecoration(
                 hintText: 'Cuéntanos más...',
-                hintStyle: const TextStyle(color: AppColors.textMuted),
+                hintStyle: TextStyle(color: AppColors.textMuted),
                 filled: true,
                 fillColor: AppColors.containerBg,
                 border: OutlineInputBorder(
@@ -153,7 +153,7 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
+            SizedBox(height: 40),
             
             SizedBox(
               width: double.infinity,
@@ -166,7 +166,7 @@ class _ReportScreenState extends State<ReportScreen> {
                   elevation: 0,
                 ),
                 child: _isSending 
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? CircularProgressIndicator(color: Colors.white)
                   : Text(
                       'Enviar reporte',
                       style: GoogleFonts.inter(
@@ -180,6 +180,6 @@ class _ReportScreenState extends State<ReportScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 }

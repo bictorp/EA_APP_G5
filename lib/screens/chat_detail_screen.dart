@@ -3,18 +3,20 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../controllers/chat_controller.dart';
+import '../controllers/theme_controller.dart';
 import '../models/message.dart';
 import '../constants/app_colors.dart';
 import 'post_detail_screen.dart';
 import 'profile_screen.dart';
 import '../utils/ui_utils.dart';
+import '../widgets/safe_circle_avatar.dart';
 
 class ChatDetailScreen extends StatefulWidget {
   final String contactId;
   final String contactName;
   final String? contactAvatar;
 
-  const ChatDetailScreen({
+  ChatDetailScreen({
     super.key,
     required this.contactId,
     required this.contactName,
@@ -58,12 +60,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       // 2. Hacer scroll
       Scrollable.ensureVisible(
         key.currentContext!,
-        duration: const Duration(milliseconds: 600),
+        duration: Duration(milliseconds: 600),
         curve: Curves.easeInOut,
       );
 
       // 3. Quitar el resaltado tras 1.5 segundos
-      await Future.delayed(const Duration(milliseconds: 1500));
+      await Future.delayed(Duration(milliseconds: 1500));
       if (mounted) {
         setState(() {
           _highlightedMessageId = null;
@@ -76,7 +78,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.black54,
         colorText: Colors.white,
-        duration: const Duration(seconds: 2),
+        duration: Duration(seconds: 2),
       );
     }
   }
@@ -91,78 +93,80 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final String myId = _chatController.currentUserId.value ?? '';
+    final themeController = Get.find<ThemeController>();
 
-    return Scaffold(
-      backgroundColor: AppColors.bg,
-      appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                GetBuilder<ChatController>(
-                  builder: (controller) {
-                    if (controller.isMessagesLoading && controller.messages.isEmpty) {
-                      return const Center(child: CircularProgressIndicator(color: AppColors.accent));
-                    }
-                    return ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.symmetric(vertical: 20),
-                      reverse: true,
-                      cacheExtent: 5000,
-                      itemCount: controller.messages.length,
-                      itemBuilder: (context, index) {
-                        final msg = controller.messages[index];
-                        final isMe = msg.remitenteId == myId;
-                        final isSelected = controller.selectedMessageIds.contains(msg.id);
-                        
-                        final key = _messageKeys.putIfAbsent(msg.id, () => GlobalKey());
-                        
-                        return Container(
-                          key: key,
-                          child: _buildMessageBubble(msg, isMe, isSelected, myId),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ],
+    return Obx(() {
+      final _ = themeController.isDarkMode.value;
+      return Scaffold(
+        backgroundColor: AppColors.bg,
+        appBar: _buildAppBar(),
+        body: Column(
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  GetBuilder<ChatController>(
+                    builder: (controller) {
+                      if (controller.isMessagesLoading && controller.messages.isEmpty) {
+                        return Center(child: CircularProgressIndicator(color: AppColors.accent));
+                      }
+                      return ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        reverse: true,
+                        cacheExtent: 5000,
+                        itemCount: controller.messages.length,
+                        itemBuilder: (context, index) {
+                          final msg = controller.messages[index];
+                          final isMe = msg.remitenteId == myId;
+                          final isSelected = controller.selectedMessageIds.contains(msg.id);
+                          
+                          final key = _messageKeys.putIfAbsent(msg.id, () => GlobalKey());
+                          
+                          return Container(
+                            key: key,
+                            child: _buildMessageBubble(msg, isMe, isSelected, myId),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-          _buildInput(),
-        ],
-      ),
-    );
+            _buildInput(),
+          ],
+        ),
+      );
+    });
   }
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
       backgroundColor: AppColors.bg,
       elevation: 0,
-      iconTheme: const IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: AppColors.textHeader),
       leading: Obx(() => _chatController.isSelectionMode.value
           ? IconButton(
-              icon: const Icon(Icons.close),
+              icon: Icon(Icons.close),
               onPressed: () => _chatController.clearSelection(),
             )
-          : const BackButton()),
+          : BackButton()),
       titleSpacing: 0,
       title: Obx(() {
         if (_chatController.isSelectionMode.value) {
           return Text('${_chatController.selectedMessageIds.length}',
-              style: const TextStyle(color: Colors.white, fontSize: 18));
+              style: TextStyle(color: AppColors.textHeader, fontSize: 18));
         }
         return Row(
           children: [
-            CircleAvatar(
+            SafeCircleAvatar(
               radius: 16,
-              backgroundImage: widget.contactAvatar != null 
-                  ? NetworkImage(widget.contactAvatar!.replaceAll('/svg', '/png')) 
-                  : null,
-              child: widget.contactAvatar == null ? const Icon(Icons.person, size: 20) : null,
+              url: widget.contactAvatar?.replaceAll('/svg', '/png'),
+              name: widget.contactName,
             ),
-            const SizedBox(width: 10),
-            Text(widget.contactName, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+            SizedBox(width: 10),
+            Text(widget.contactName, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textHeader)),
           ],
         );
       }),
@@ -170,14 +174,14 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         Obx(() {
           if (_chatController.isSelectionMode.value) {
             return IconButton(
-              icon: const Icon(Icons.delete, color: Colors.white),
+              icon: Icon(Icons.delete, color: AppColors.textHeader),
               onPressed: () => _showDeleteDialog(),
             );
           }
           return const SizedBox.shrink();
         }),
         IconButton(
-          icon: const Icon(Icons.more_vert, color: Colors.white),
+          icon: Icon(Icons.more_vert, color: AppColors.textHeader),
           onPressed: () => _showChatOptionsSheet(),
         ),
       ],
@@ -193,15 +197,15 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     Get.dialog(
       AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Eliminar mensaje', style: TextStyle(color: Colors.white)),
-        content: const Text('¿Quieres eliminar los mensajes seleccionados?', style: TextStyle(color: AppColors.textMuted)),
+        title: Text('Eliminar mensaje', style: TextStyle(color: AppColors.textHeader)),
+        content: Text('¿Quieres eliminar los mensajes seleccionados?', style: TextStyle(color: AppColors.textMuted)),
         actions: [
           TextButton(
-            child: const Text('CANCELAR', style: TextStyle(color: AppColors.accent)),
+            child: Text('CANCELAR', style: TextStyle(color: AppColors.accent)),
             onPressed: () => Get.back(),
           ),
           TextButton(
-            child: const Text('ELIMINAR PARA MÍ', style: TextStyle(color: AppColors.accent)),
+            child: Text('ELIMINAR PARA MÍ', style: TextStyle(color: AppColors.accent)),
             onPressed: () {
               _chatController.deleteMessages('me', widget.contactId);
               Get.back();
@@ -209,7 +213,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           ),
           if (canDeleteForEveryone)
             TextButton(
-              child: const Text('ELIMINAR PARA TODOS', style: TextStyle(color: AppColors.accent)),
+              child: Text('ELIMINAR PARA TODOS', style: TextStyle(color: AppColors.accent)),
               onPressed: () {
                 _chatController.deleteMessages('everyone', widget.contactId);
                 Get.back();
@@ -234,7 +238,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       background: Container(
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 30),
-        child: const Icon(Icons.reply, color: AppColors.accent),
+        child: Icon(Icons.reply, color: AppColors.accent),
       ),
       child: GestureDetector(
         onLongPress: msg.eliminadoParaTodos ? null : () {
@@ -245,7 +249,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             ? () => _chatController.toggleSelection(msg.id)
             : null,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 300),
           width: double.infinity,
           color: _highlightedMessageId == msg.id 
               ? AppColors.accent.withOpacity(0.3) 
@@ -261,7 +265,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   decoration: BoxDecoration(
                     color: (msg.eliminadoParaTodos || msg.post != null)
                         ? Colors.transparent
-                        : (isMe ? AppColors.accent : AppColors.surface),
+                        : (isMe ? AppColors.accent : AppColors.incomingBubble),
                     border: (msg.eliminadoParaTodos && msg.post == null)
                         ? Border.all(color: AppColors.textMuted.withOpacity(0.3))
                         : null,
@@ -283,7 +287,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.15),
+                              color: isMe ? Colors.black.withOpacity(0.15) : AppColors.bg,
                               borderRadius: BorderRadius.circular(10),
                               border: Border(
                                 left: BorderSide(
@@ -303,7 +307,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                                     fontSize: 11,
                                   ),
                                 ),
-                                const SizedBox(height: 2),
+                                SizedBox(height: 2),
                                 Text(
                                   msg.parentMessage!.contenido,
                                   maxLines: 2,
@@ -320,13 +324,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         ),
                       ],
                       if (msg.post != null) _buildPostPreview(msg.post!, myId, isMe: isMe, hasComment: msg.contenido.isNotEmpty),
-                      if (msg.post != null && msg.contenido.isNotEmpty) const SizedBox(height: 4),
+                      if (msg.post != null && msg.contenido.isNotEmpty) SizedBox(height: 4),
                       if (msg.eliminadoParaTodos)
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.block, size: 14, color: AppColors.textMuted.withOpacity(0.7)),
-                            const SizedBox(width: 5),
+                            SizedBox(width: 5),
                             Text(
                               msg.contenido,
                               style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontStyle: FontStyle.italic),
@@ -340,7 +344,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                               : EdgeInsets.zero,
                           decoration: msg.post != null
                               ? BoxDecoration(
-                                  color: isMe ? AppColors.accent : AppColors.surface,
+                                  color: isMe ? AppColors.accent : AppColors.incomingBubble,
                                   borderRadius: BorderRadius.only(
                                     topLeft: const Radius.circular(16),
                                     topRight: const Radius.circular(16),
@@ -351,7 +355,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                               : null,
                           child: Text(
                             msg.contenido,
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            style: TextStyle(color: isMe ? Colors.white : AppColors.textHeader, fontSize: 15),
                           ),
                         ),
                     ],
@@ -374,7 +378,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                             fontSize: 9,
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4),
                         _buildReactionsBadge(msg),
                       ],
                     ),
@@ -409,7 +413,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         child: Row(
           children: [
             Icon(Icons.lock_outline, color: Colors.white.withOpacity(0.5), size: 16),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Expanded(
               child: Text(
                 'Publicación privada',
@@ -439,7 +443,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
               blurRadius: 10,
-              offset: const Offset(0, 4),
+              offset: Offset(0, 4),
             ),
           ],
         ),
@@ -451,17 +455,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               child: Row(
                 children: [
-                  CircleAvatar(
+                  SafeCircleAvatar(
                     radius: 9,
-                    backgroundColor: Colors.white10,
-                    backgroundImage: (post.usuario.avatarUrl != null && post.usuario.avatarUrl.isNotEmpty)
-                        ? NetworkImage(post.usuario.avatarUrl)
-                        : null,
-                    child: (post.usuario.avatarUrl == null || post.usuario.avatarUrl.isEmpty)
-                        ? const Icon(Icons.person, size: 10, color: Colors.white)
-                        : null,
+                    url: post.usuario.avatarUrl,
+                    name: post.usuario.nombre ?? 'Usuario',
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       post.usuario.nombre ?? 'Usuario',
@@ -524,9 +523,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 margin: const EdgeInsets.only(bottom: 10),
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.bg,
                   borderRadius: BorderRadius.circular(12),
-                  border: const Border(left: BorderSide(color: AppColors.accent, width: 4)),
+                  border: Border(left: BorderSide(color: AppColors.accent, width: 4)),
                 ),
                 child: Row(
                   children: [
@@ -536,22 +535,22 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                         children: [
                           Text(
                             replyingTo.remitenteId == _chatController.currentUserId.value ? 'Tú' : widget.contactName,
-                            style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold, fontSize: 12),
+                            style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold, fontSize: 12),
                           ),
                           Text(
                             replyingTo.contenido,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                            style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, size: 18, color: AppColors.textMuted),
+                      icon: Icon(Icons.close, size: 18, color: AppColors.textMuted),
                       onPressed: () => _chatController.replyingTo.value = null,
                       padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      constraints: BoxConstraints(),
                     ),
                   ],
                 ),
@@ -562,10 +561,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 Expanded(
                   child: TextField(
                     controller: _textController,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: AppColors.textHeader),
                     decoration: InputDecoration(
                       hintText: 'Escribe un mensaje...',
-                      hintStyle: const TextStyle(color: AppColors.textMuted),
+                      hintStyle: TextStyle(color: AppColors.textMuted),
                       filled: true,
                       fillColor: AppColors.surface,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -577,9 +576,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 IconButton(
-                  icon: const Icon(Icons.send, color: AppColors.accent),
+                  icon: Icon(Icons.send, color: AppColors.accent),
                   onPressed: _sendMessage,
                 ),
               ],
@@ -594,33 +593,33 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 8),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 16),
+            SizedBox(height: 8),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.textMuted.withOpacity(0.3), borderRadius: BorderRadius.circular(2))),
+            SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.person_outline, color: Colors.white),
-              title: const Text('Ver perfil', style: TextStyle(color: Colors.white)),
+              leading: Icon(Icons.person_outline, color: AppColors.textHeader),
+              title: Text('Ver perfil', style: TextStyle(color: AppColors.textHeader)),
               onTap: () {
                 Get.back();
                 Get.to(() => ProfileScreen(userId: widget.contactId));
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete_sweep_outlined, color: Colors.redAccent),
-              title: const Text('Vaciar chat', style: TextStyle(color: Colors.redAccent)),
+              leading: Icon(Icons.delete_sweep_outlined, color: Colors.redAccent),
+              title: Text('Vaciar chat', style: TextStyle(color: Colors.redAccent)),
               onTap: () {
                 Get.back();
                 _confirmClearChat();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.report_gmailerrorred_outlined, color: Colors.white),
-              title: const Text('Reportar', style: TextStyle(color: Colors.white)),
+              leading: Icon(Icons.report_gmailerrorred_outlined, color: AppColors.textHeader),
+              title: Text('Reportar', style: TextStyle(color: AppColors.textHeader)),
               onTap: () {
                 Get.back();
                 final lastMsg = _chatController.messages.isNotEmpty ? _chatController.messages.first : null;
@@ -640,11 +639,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.close, color: AppColors.textMuted),
-              title: const Text('Cancelar', style: TextStyle(color: AppColors.textMuted)),
+              leading: Icon(Icons.close, color: AppColors.textMuted),
+              title: Text('Cancelar', style: TextStyle(color: AppColors.textMuted)),
               onTap: () => Get.back(),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -655,16 +654,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     Get.dialog(
       AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('¿Vaciar chat?', style: TextStyle(color: Colors.white)),
-        content: const Text('Se eliminarán todos los mensajes de esta conversación para ti.', style: TextStyle(color: AppColors.textMuted)),
+        title: Text('¿Vaciar chat?', style: TextStyle(color: Colors.white)),
+        content: Text('Se eliminarán todos los mensajes de esta conversación para ti.', style: TextStyle(color: AppColors.textMuted)),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancelar', style: TextStyle(color: Colors.white))),
+          TextButton(onPressed: () => Get.back(), child: Text('Cancelar', style: TextStyle(color: Colors.white))),
           TextButton(
             onPressed: () {
               Get.back();
               _chatController.clearChat(widget.contactId);
             },
-            child: const Text('Vaciar', style: TextStyle(color: Colors.redAccent)),
+            child: Text('Vaciar', style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -685,9 +684,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
       StatefulBuilder(
         builder: (context, setSheetState) {
           return AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
+            duration: Duration(milliseconds: 300),
             padding: const EdgeInsets.symmetric(vertical: 20),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
@@ -725,19 +724,19 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(color: Colors.white10, shape: BoxShape.circle),
-                            child: const Icon(Icons.add, color: Colors.white, size: 22),
+                            child: Icon(Icons.add, color: Colors.white, size: 22),
                           ),
                         ),
                     ],
                   ),
                 ),
                 if (isExpanded) ...[
-                  const Divider(color: Colors.white10, height: 40, thickness: 1),
+                  Divider(color: Colors.white10, height: 40, thickness: 1),
                   SizedBox(
                     height: 250,
                     child: GridView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 6,
                         mainAxisSpacing: 12,
                         crossAxisSpacing: 12,
@@ -749,18 +748,18 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                           _chatController.reactToMessage(messageId, allEmojis[index], widget.contactId);
                         },
                         child: Center(
-                          child: Text(allEmojis[index], style: const TextStyle(fontSize: 24)),
+                          child: Text(allEmojis[index], style: TextStyle(fontSize: 24)),
                         ),
                       ),
                     ),
                   ),
                 ],
-                const Divider(color: Colors.white10, height: 32, thickness: 1),
+                Divider(color: Colors.white10, height: 32, thickness: 1),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: ListTile(
-                    leading: const Icon(Icons.report_gmailerrorred_outlined, color: Colors.white70),
-                    title: const Text('Reportar mensaje', style: TextStyle(color: Colors.white70)),
+                    leading: Icon(Icons.report_gmailerrorred_outlined, color: Colors.white70),
+                    title: Text('Reportar mensaje', style: TextStyle(color: Colors.white70)),
                     onTap: () {
                       Get.back();
                       UIUtils.showReportBottomSheet(

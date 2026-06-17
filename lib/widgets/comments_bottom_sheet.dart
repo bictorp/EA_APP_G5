@@ -7,11 +7,12 @@ import '../controllers/home_controller.dart';
 import '../constants/app_colors.dart';
 import '../screens/report_screen.dart';
 import '../widgets/heart_anim_button.dart';
+import 'safe_circle_avatar.dart';
 
 class CommentsBottomSheet extends StatefulWidget {
   final String postId;
 
-  const CommentsBottomSheet({super.key, required this.postId});
+  CommentsBottomSheet({super.key, required this.postId});
 
   @override
   State<CommentsBottomSheet> createState() => _CommentsBottomSheetState();
@@ -65,9 +66,9 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.delete_sweep_rounded, color: AppColors.error, size: 40),
+                  child: Icon(Icons.delete_sweep_rounded, color: AppColors.error, size: 40),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 Text(
                   '¿Eliminar comentario?',
                   style: GoogleFonts.inter(
@@ -77,7 +78,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 Text(
                   'Esta acción borrará permanentemente tu comentario.',
                   style: GoogleFonts.inter(
@@ -87,7 +88,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32),
                 Column(
                   children: [
                     SizedBox(
@@ -110,7 +111,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -120,7 +121,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                           foregroundColor: AppColors.textHeader,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: AppColors.border),
+                            side: BorderSide(color: AppColors.border),
                           ),
                         ),
                         child: Text(
@@ -146,7 +147,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
 
     await Get.bottomSheet(
       Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: AppColors.containerBg,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
@@ -167,8 +168,8 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
             ),
             if (isOwnComment) ...[
               ListTile(
-                leading: const Icon(Icons.delete_outline, color: AppColors.error),
-                title: const Text('Eliminar comentario', style: TextStyle(color: AppColors.error)),
+                leading: Icon(Icons.delete_outline, color: AppColors.error),
+                title: Text('Eliminar comentario', style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
                   _confirmDeleteComment(context, controller, commentId);
@@ -176,8 +177,8 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
               ),
             ] else ...[
               ListTile(
-                leading: const Icon(Icons.report_problem_outlined, color: AppColors.error),
-                title: const Text('Reportar comentario', style: TextStyle(color: AppColors.error)),
+                leading: Icon(Icons.report_problem_outlined, color: AppColors.error),
+                title: Text('Reportar comentario', style: TextStyle(color: AppColors.error)),
                 onTap: () {
                   Get.back();
                   _showReportScreen(context, commentId);
@@ -185,11 +186,11 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
               ),
             ],
             ListTile(
-              leading: const Icon(Icons.close, color: AppColors.textHeader),
-              title: const Text('Cancelar', style: TextStyle(color: AppColors.textHeader)),
+              leading: Icon(Icons.close, color: AppColors.textHeader),
+              title: Text('Cancelar', style: TextStyle(color: AppColors.textHeader)),
               onTap: () => Get.back(),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -208,7 +209,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.bg,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -231,19 +232,19 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
               fontSize: 16,
             ),
           ),
-          const Divider(color: AppColors.border, height: 24),
+          Divider(color: AppColors.border, height: 24),
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator(color: AppColors.accent));
+                return Center(child: CircularProgressIndicator(color: AppColors.accent));
               }
               if (controller.comments.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.chat_bubble_outline, color: AppColors.textMuted, size: 48),
-                      const SizedBox(height: 16),
+                      Icon(Icons.chat_bubble_outline, color: AppColors.textMuted, size: 48),
+                      SizedBox(height: 16),
                       Text(
                         'Aún no hay comentarios',
                         style: GoogleFonts.inter(color: AppColors.textMuted),
@@ -264,7 +265,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                     onLongPress: () => _showCommentOptions(context, controller, comment.id, isOwnComment),
                     behavior: HitTestBehavior.opaque,
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
+                      duration: Duration(milliseconds: 200),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: isSelected ? Colors.white.withOpacity(0.05) : Colors.transparent,
@@ -272,17 +273,18 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(
+                          SafeCircleAvatar(
                             radius: 16,
-                            backgroundImage: NetworkImage(comment.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${comment.usuario.nombre}'),
+                            url: comment.usuario.avatarUrl?.replaceAll('/svg', '/png') ?? 'https://api.dicebear.com/7.x/avataaars/png?seed=${comment.usuario.nombre}',
+                            name: comment.usuario.nombre,
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: 12),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                RichText(
-                                  text: TextSpan(
+                                Text.rich(
+                                  TextSpan(
                                     children: [
                                       TextSpan(
                                         text: '${comment.usuario.nombre} ',
@@ -302,7 +304,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                SizedBox(height: 4),
                                 Text(
                                   comment.timeAgo,
                                   style: GoogleFonts.inter(
@@ -313,7 +315,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                               ],
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Padding(
                             padding: const EdgeInsets.only(top: 4),
                             child: Column(
@@ -328,7 +330,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                                       : AppColors.textMuted,
                                 ),
                                 if (comment.likes.isNotEmpty) ...[
-                                  const SizedBox(height: 2),
+                                  SizedBox(height: 2),
                                   Text(
                                     '${comment.likes.length}',
                                     style: GoogleFonts.inter(
@@ -357,7 +359,7 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
             ),
             decoration: BoxDecoration(
               color: AppColors.bg,
-              border: const Border(top: BorderSide(color: AppColors.border)),
+              border: Border(top: BorderSide(color: AppColors.border)),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -367,13 +369,13 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                   // Aquí podríamos buscar el avatarUrl si HomeController lo tuviera accesible, 
                   // pero por ahora usemos un placeholder dinámico basado en el ID o nombre si está disponible.
                   // Idealmente HomeController debería exponer el objeto User completo.
-                  return const CircleAvatar(
+                  return CircleAvatar(
                     radius: 20,
-                    backgroundColor: Colors.white10,
-                    child: Icon(Icons.person, color: Colors.white54, size: 20),
+                    backgroundColor: AppColors.border,
+                    child: Icon(Icons.person, color: AppColors.textMuted, size: 20),
                   );
                 }),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -386,8 +388,8 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                       controller: controller.textController,
                       maxLines: null,
                       keyboardType: TextInputType.multiline,
-                      style: const TextStyle(color: AppColors.textHeader, fontSize: 14),
-                      decoration: const InputDecoration(
+                      style: TextStyle(color: AppColors.textHeader, fontSize: 14),
+                      decoration: InputDecoration(
                         hintText: 'Añadir un comentario...',
                         hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 14),
                         border: InputBorder.none,
@@ -397,10 +399,10 @@ class _CommentsBottomSheetState extends State<CommentsBottomSheet> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 TextButton(
                   onPressed: controller.sendComment,
-                  child: const Text(
+                  child: Text(
                     'Publicar',
                     style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold),
                   ),

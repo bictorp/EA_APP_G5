@@ -49,8 +49,8 @@ class AuthInterceptor extends Interceptor {
         }
 
         final response = await Dio(BaseOptions(
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 15),
+          connectTimeout: Duration(seconds: 10),
+          receiveTimeout: Duration(seconds: 15),
         )).post(
           ApiConstants.refreshEndpoint,
           data: {'refreshToken': refresh},
@@ -89,8 +89,8 @@ class AuthInterceptor extends Interceptor {
     print('[Auth] Reintentando petición con nuevo token: ${options.path}');
     try {
       final response = await Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 15),
+        connectTimeout: Duration(seconds: 10),
+        receiveTimeout: Duration(seconds: 15),
       )).fetch(options);
       return handler.resolve(response);
     } catch (e) {

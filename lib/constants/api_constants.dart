@@ -1,5 +1,16 @@
+import 'package:flutter/foundation.dart';
+
 class ApiConstants {
   static const String _url = 'http://ea5-api.upc.edu';
+  static String get _url {
+    if (kIsWeb) {
+      return 'http://localhost:1338';
+    }
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:1338';
+    }
+    return 'http://localhost:1338';
+  }
 
   static String get baseUrl => _url;
 
