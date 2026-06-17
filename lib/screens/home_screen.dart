@@ -7,6 +7,7 @@ import '../controllers/create_post_controller.dart';
 import '../controllers/notification_controller.dart';
 import '../widgets/post_card.dart';
 import 'notifications_screen.dart';
+import 'map_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -38,6 +39,10 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         actions: [
+          IconButton(
+            onPressed: () => Get.to(() => const MapScreen()),
+            icon: const Icon(Icons.map_outlined, color: AppColors.textHeader),
+          ),
           IconButton(
             onPressed: () {
               final CreatePostController createPostController = Get.put(CreatePostController());
