@@ -15,6 +15,7 @@ import 'services/report_service.dart';
 import 'controllers/theme_controller.dart';
 import 'controllers/language_controller.dart';
 import 'locales/app_translations.dart';
+import 'services/push_notification_service.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -26,6 +27,10 @@ void main() async {
   } catch (e) {
     print("Error inicializando cámaras: $e");
   }
+
+  // Inicializar notificaciones push
+  final pushService = PushNotificationService();
+  await pushService.initialize();
   
   final AuthService authService = AuthService();
   final bool isLoggedIn = await authService.checkSession();

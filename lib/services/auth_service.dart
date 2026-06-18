@@ -6,6 +6,7 @@ import '../models/user.dart';
 import 'storage_service.dart';
 import 'auth_interceptor.dart';
 import 'socket_service.dart';
+import 'push_notification_service.dart';
 
 class AuthService {
   // Centralizamos la instancia de Dio
@@ -58,6 +59,12 @@ class AuthService {
         final user = User.fromJson(userData, accessToken);
         // Conectar al socket tras login exitoso
         await SocketService().connect();
+        // Subir token de FCM tras login exitoso
+        try {
+          await PushNotificationService().checkAndUploadToken();
+        } catch (e) {
+          print('Error al subir token FCM tras login: $e');
+        }
         return user;
       }
       return null;
