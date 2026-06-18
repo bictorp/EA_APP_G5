@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 class ApiConstants {
+  // static const String _url = 'http://ea5-api.upc.edu'; // Production URL
   static String get _url {
     if (kIsWeb) {
       return 'http://localhost:1337';

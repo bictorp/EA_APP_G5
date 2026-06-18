@@ -7,7 +7,7 @@ class Grado {
   Grado({
     required this.id,
     required this.nombre,
-    this.asignaturas = [],
+    this.asignaturas = const [],
     this.universidad,
   });
 
