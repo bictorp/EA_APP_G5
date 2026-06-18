@@ -12,6 +12,7 @@ class Evento {
   final List<User> asistentes;
   final int? maxAsistentes;
   final bool activo;
+  final DateTime? fechaLimite;
 
   Evento({
     required this.id,
@@ -25,6 +26,7 @@ class Evento {
     required this.asistentes,
     this.maxAsistentes,
     required this.activo,
+    this.fechaLimite,
   });
 
   factory Evento.fromJson(Map<String, dynamic> json) {
@@ -49,6 +51,9 @@ class Evento {
       }).toList() ?? [],
       maxAsistentes: json['maxAsistentes'],
       activo: json['activo'] ?? true,
+      fechaLimite: json['fechaLimite'] != null
+          ? DateTime.parse(json['fechaLimite'])
+          : null,
     );
   }
 }

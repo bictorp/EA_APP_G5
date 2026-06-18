@@ -45,57 +45,31 @@ class HomeScreen extends StatelessWidget {
           ),
           actions: [
             IconButton(
+              onPressed: () => Get.to(() => MapScreen()),
+              icon: Icon(Icons.map_outlined, color: AppColors.textHeader),
+            ),
+            IconButton(
               onPressed: () {
                 final CreatePostController createPostController = Get.put(CreatePostController());
                 createPostController.startMediaFlow();
               },
               icon: Icon(Icons.add_box_outlined, color: AppColors.textHeader),
             ),
-            IconButton(
+            Obx(() => IconButton(
               onPressed: () => Get.to(() => NotificationsScreen()),
               icon: Badge(
                 isLabelVisible: notificationController.hasUnread.value,
                 backgroundColor: AppColors.accent,
                 child: Icon(Icons.favorite_border_rounded, color: AppColors.textHeader),
               ),
-            ),
+            )),
           ],
         ),
-<<<<<<< HEAD
-        actions: [
-          IconButton(
-            onPressed: () => Get.to(() => const MapScreen()),
-            icon: const Icon(Icons.map_outlined, color: AppColors.textHeader),
-          ),
-          IconButton(
-            onPressed: () {
-              final CreatePostController createPostController = Get.put(CreatePostController());
-              createPostController.startMediaFlow();
-            },
-            icon: const Icon(Icons.add_box_outlined, color: AppColors.textHeader),
-          ),
-          Obx(() => IconButton(
-            onPressed: () => Get.to(() => const NotificationsScreen()),
-            icon: Badge(
-              isLabelVisible: notificationController.hasUnread.value,
-              backgroundColor: AppColors.accent,
-              child: const Icon(Icons.favorite_border_rounded, color: AppColors.textHeader),
-            ),
-          )),
-        ],
-      ),
-      body: Obx(() {
-        // Estado de carga inicial
-        if (controller.isLoading.value && controller.posts.isEmpty) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.textLink));
-        }
-=======
         body: Obx(() {
           // Estado de carga inicial
           if (controller.isLoading.value && controller.posts.isEmpty) {
             return Center(child: CircularProgressIndicator(color: AppColors.textLink));
           }
->>>>>>> develop
 
           // Estado vacío
           if (controller.posts.isEmpty) {
