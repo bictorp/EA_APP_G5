@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../constants/api_constants.dart';
 import '../models/user.dart';
 import 'storage_service.dart';
@@ -10,6 +11,13 @@ import 'socket_service.dart';
 class AuthService {
   // Centralizamos la instancia de Dio
   static final Dio _dio = _createDio();
+
+  // Instancia de Google Sign In
+  static final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: '115506975798-184jljfmf2df7v2jl89kurg5rc302uh4.apps.googleusercontent.com',
+  );
+
+  static GoogleSignIn get googleSignIn => _googleSignIn;
 
   static Dio _createDio() {
     final dio = Dio(BaseOptions(
@@ -43,6 +51,55 @@ class AuthService {
         data: {
           'email': email,
           'password': password,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = response.data;
+        final String accessToken = data['accessToken'] ?? '';
+        final String refreshToken = data['refreshToken'] ?? '';
+        final Map<String, dynamic> userData = data['usuario'] ?? {};
+        
+        await _storageService.saveTokens(accessToken, refreshToken);
+        await _storageService.saveUserData(jsonEncode(userData));
+        
+        final user = User.fromJson(userData, accessToken);
+        // Conectar al socket tras login exitoso
+        await SocketService().connect();
+        return user;
+      }
+      return null;
+    } catch (e) {
+      throw _parseError(e);
+    }
+  }
+
+  Future<User?> loginWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return null; // El usuario canceló la autenticación
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      return loginWithIdToken(idToken);
+    } catch (e) {
+      throw _parseError(e);
+    }
+  }
+
+  Future<User?> loginWithIdToken(String? idToken) async {
+    try {
+      if (idToken == null) {
+        throw 'No se pudo obtener el token de Google';
+      }
+
+      final response = await _dio.post(
+        ApiConstants.googleLoginEndpoint,
+        data: {
+          'token': idToken,
         },
       );
 
