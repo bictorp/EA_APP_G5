@@ -3,12 +3,12 @@ import 'package:flutter/foundation.dart';
 class ApiConstants {
   static String get _url {
     if (kIsWeb) {
-      return 'http://localhost:1337';
+      return 'http://localhost:1338';
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:1337';
+      return 'http://10.0.2.2:1338';
     }
-    return 'http://localhost:1337';
+    return 'http://localhost:1338';
   }
 
   static String get baseUrl => _url;
