@@ -174,5 +174,14 @@ class UserService {
       return [];
     }
   }
+
+  Future<bool> softDeleteUser(String usuarioId) async {
+    try {
+      final response = await _dio.patch('${ApiConstants.baseUrl}/usuarios/$usuarioId/soft-delete');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
