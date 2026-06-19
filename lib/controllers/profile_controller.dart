@@ -1,15 +1,19 @@
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/post.dart';
 import '../models/user.dart';
+import '../models/unimatch_profile.dart';
 import '../services/storage_service.dart';
 import '../services/post_service.dart';
 import '../services/user_service.dart';
+import '../services/unimatch_service.dart';
 import 'home_controller.dart';
 
 class ProfileController extends GetxController {
   final StorageService _storageService = StorageService();
   final PostService _postService = PostService();
   final UserService _userService = UserService();
+  final UnimatchService _unimatchService = UnimatchService();
   final String? userId;
 
   ProfileController({
@@ -18,7 +22,10 @@ class ProfileController extends GetxController {
 
   var user = Rxn<User>();
   var userPosts = <Post>[].obs;
+  var unimatchPhotos = <UnimatchPhoto>[].obs;
   var isLoading = true.obs;
+  var isLoadingUnimatch = false.obs;
+  var activeTab = 0.obs;
 
   var followersCount = 0.obs;
   var followingCount = 0.obs;
@@ -104,10 +111,67 @@ class ProfileController extends GetxController {
       postCount.value = userPosts.length;
       avatarTimestamp.value = DateTime.now().millisecondsSinceEpoch;
 
+      await loadUnimatchPhotos();
+
     } catch (e) {
       print("Error loading profile: $e");
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> loadUnimatchPhotos() async {
+    try {
+      isLoadingUnimatch.value = true;
+      final targetUserId = (userId == null || userId!.isEmpty) ? Get.find<HomeController>().currentUserId.value : userId!;
+      if (targetUserId.isEmpty) return;
+
+      List<dynamic> rawPhotos;
+      if (isMe) {
+        rawPhotos = await _unimatchService.getMyPhotos();
+      } else {
+        rawPhotos = await _unimatchService.getUserPhotos(targetUserId);
+      }
+      
+      unimatchPhotos.assignAll(rawPhotos.map((p) => UnimatchPhoto.fromJson(p)).toList());
+    } catch (e) {
+      print("Error loading UniMatch photos: $e");
+    } finally {
+      isLoadingUnimatch.value = false;
+    }
+  }
+
+  Future<bool> uploadUnimatchPhoto(XFile file) async {
+    try {
+      isLoadingUnimatch.value = true;
+      final result = await _unimatchService.uploadUnimatchPhoto(file);
+      if (result != null) {
+        await loadUnimatchPhotos();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Error uploading UniMatch photo: $e");
+      return false;
+    } finally {
+      isLoadingUnimatch.value = false;
+    }
+  }
+
+  Future<bool> deleteUnimatchPhoto(String photoId) async {
+    try {
+      isLoadingUnimatch.value = true;
+      final success = await _unimatchService.deleteUnimatchPhoto(photoId);
+      if (success) {
+        await loadUnimatchPhotos();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Error deleting UniMatch photo: $e");
+      return false;
+    } finally {
+      isLoadingUnimatch.value = false;
     }
   }
 

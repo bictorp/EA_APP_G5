@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/unimatch_profile.dart';
 import 'auth_service.dart';
 import '../constants/api_constants.dart';
@@ -75,6 +77,83 @@ class UnimatchService {
       return [];
     } catch (e) {
       print('Error al obtener matches de UniMatch: $e');
+      return [];
+    }
+  }
+
+  /// Subir una foto a UniMatch
+  Future<Map<String, dynamic>?> uploadUnimatchPhoto(XFile file) async {
+    try {
+      MultipartFile multipartFile;
+      if (kIsWeb) {
+        final bytes = await file.readAsBytes();
+        multipartFile = MultipartFile.fromBytes(
+          bytes,
+          filename: file.name,
+        );
+      } else {
+        multipartFile = await MultipartFile.fromFile(file.path);
+      }
+
+      final formData = FormData.fromMap({
+        'image': multipartFile,
+      });
+
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}/unimatch/photos',
+        data: formData,
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return response.data;
+      }
+      return null;
+    } catch (e) {
+      print('Error al subir foto de UniMatch: $e');
+      return null;
+    }
+  }
+
+  /// Eliminar una foto de UniMatch
+  Future<bool> deleteUnimatchPhoto(String photoId) async {
+    try {
+      final response = await _dio.delete(
+        '${ApiConstants.baseUrl}/unimatch/photos/$photoId',
+      );
+      return response.statusCode == 200 || response.statusCode == 204;
+    } catch (e) {
+      print('Error al eliminar foto de UniMatch: $e');
+      return false;
+    }
+  }
+
+  /// Obtener mis fotos de UniMatch
+  Future<List<dynamic>> getMyPhotos() async {
+    try {
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}/unimatch/photos',
+      );
+      if (response.statusCode == 200) {
+        return response.data ?? [];
+      }
+      return [];
+    } catch (e) {
+      print('Error al obtener mis fotos de UniMatch: $e');
+      return [];
+    }
+  }
+
+  /// Obtener fotos de UniMatch de otro usuario
+  Future<List<dynamic>> getUserPhotos(String userId) async {
+    try {
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}/unimatch/photos/$userId',
+      );
+      if (response.statusCode == 200) {
+        return response.data ?? [];
+      }
+      return [];
+    } catch (e) {
+      print('Error al obtener fotos de UniMatch del usuario: $e');
       return [];
     }
   }

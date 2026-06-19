@@ -1,18 +1,27 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/unimatch_profile.dart';
 import '../services/unimatch_service.dart';
 import '../services/auth_service.dart';
+import '../services/storage_service.dart';
 
 class UnimatchController extends GetxController {
   final UnimatchService _unimatchService = UnimatchService();
   final AuthService _authService = AuthService();
+  final StorageService _storageService = StorageService();
 
   var isLoading = true.obs;
   var isSwiping = false.obs;
   var hasAcceptedTerms = false.obs;
   var profiles = <UnimatchProfile>[].obs;
   var matches = <dynamic>[].obs;
+
+  var localOnboardingPhotos = <XFile>[].obs;
+  var isUploadingOnboarding = false.obs;
+
+  var currentUser = Rxn<Map<String, dynamic>>();
 
   @override
   void onInit() {
@@ -26,25 +35,16 @@ class UnimatchController extends GetxController {
       isLoading.value = true;
       final userProfile = await _authService.checkSession();
       if (userProfile) {
-        // Obtenemos los datos del usuario actual
-        final userData = await _authService.getToken();
-        if (userData != null) {
-          // Buscamos si tiene aceptado hasAcceptedUnimatchTerms consultando al endpoint getMe o usando el estado local
-          // Como ya tenemos getMe en el UserService, podemos usarlo
-          final me = await _authService.login('', ''); // Opcional, pero para estar seguros:
-          // De forma simplificada y robusta:
-          // El backend de discover perfiles devolverá error si no se aceptan términos, o podemos controlarlo.
-          // Vamos a asumir que por defecto cargamos los perfiles, y si devuelve un error específico o si el modelo de usuario lo indica, mostramos el modal.
-          // Para esta entrega, llamaremos a discoverProfiles directamente. Si no funciona o si no hay perfiles,
-          // permitimos al usuario interactuar de forma segura.
-          // Buscamos el perfil del usuario actual:
-          final currentUserData = await _authService.getToken();
-          // Por defecto, asumiremos que si descubrimos perfiles con éxito es porque ya aceptó, o guardamos en estado local.
-          // Dejaremos hasAcceptedTerms en true para simplificar, pero daremos la opción de cambiarlo.
-          hasAcceptedTerms.value = true; 
+        final userJson = await _storageService.getUserData();
+        if (userJson != null) {
+          final decoded = jsonDecode(userJson);
+          currentUser.value = decoded;
+          hasAcceptedTerms.value = decoded['hasAcceptedUnimatchTerms'] ?? false;
         }
       }
-      await loadProfiles();
+      if (hasAcceptedTerms.value) {
+        await loadProfiles();
+      }
     } catch (e) {
       print('Error al verificar sesión en UnimatchController: $e');
     } finally {
@@ -99,16 +99,50 @@ class UnimatchController extends GetxController {
     }
   }
 
-  /// Aceptar los términos de UniMatch
-  Future<void> acceptUnimatchTerms() async {
+  /// Aceptar los términos de UniMatch y subir fotos obligatorias de onboarding
+  Future<void> uploadOnboardingPhotosAndAcceptTerms() async {
+    if (localOnboardingPhotos.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Sube al menos 1 foto para empezar',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent.withOpacity(0.8),
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     try {
+      isUploadingOnboarding.value = true;
       isLoading.value = true;
+
+      // 1. Subir fotos
+      for (final xfile in localOnboardingPhotos) {
+        await _unimatchService.uploadUnimatchPhoto(xfile);
+      }
+
+      // 2. Aceptar términos
       final success = await _unimatchService.acceptTerms();
       if (success) {
+        final userJson = await _storageService.getUserData();
+        if (userJson != null) {
+          final decoded = jsonDecode(userJson);
+          decoded['hasAcceptedUnimatchTerms'] = true;
+          await _storageService.saveUserData(jsonEncode(decoded));
+        }
         hasAcceptedTerms.value = true;
         await loadProfiles();
       }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Error al configurar UniMatch: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent.withOpacity(0.8),
+        colorText: Colors.white,
+      );
     } finally {
+      isUploadingOnboarding.value = false;
       isLoading.value = false;
     }
   }
@@ -172,22 +206,51 @@ class UnimatchController extends GetxController {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Avatar de la otra persona
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFEC4899), width: 3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFFEC4899).withOpacity(0.3),
-                          blurRadius: 15,
+                  // Avatar del usuario actual
+                  Transform.translate(
+                    offset: const Offset(15, 0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFF7C3AED), width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF7C3AED).withOpacity(0.3),
+                            blurRadius: 15,
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        radius: 55,
+                        backgroundImage: NetworkImage(
+                          currentUser.value?['avatarUrl'] != null && currentUser.value!['avatarUrl'].toString().isNotEmpty
+                              ? currentUser.value!['avatarUrl']
+                              : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
                         ),
-                      ],
+                      ),
                     ),
-                    child: CircleAvatar(
-                      radius: 55,
-                      backgroundImage: NetworkImage(
-                        matchedUser.avatarUrl ?? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
+                  ),
+                  // Avatar de la otra persona
+                  Transform.translate(
+                    offset: const Offset(-15, 0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: const Color(0xFFEC4899), width: 3),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFFEC4899).withOpacity(0.3),
+                            blurRadius: 15,
+                          ),
+                        ],
+                      ),
+                      child: CircleAvatar(
+                        radius: 55,
+                        backgroundImage: NetworkImage(
+                          matchedUser.avatarUrl != null && matchedUser.avatarUrl!.isNotEmpty
+                              ? matchedUser.avatarUrl!
+                              : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde',
+                        ),
                       ),
                     ),
                   ),

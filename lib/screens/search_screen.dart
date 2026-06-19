@@ -12,6 +12,7 @@ import '../widgets/user_card.dart';
 import '../widgets/filter_modal.dart';
 import '../controllers/theme_controller.dart';
 import 'post_detail_screen.dart';
+import 'profile_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   SearchScreen({super.key});
@@ -330,7 +331,16 @@ void _onSearchChanged(String value) {
               )
             : const SizedBox.shrink();
         }
-        return UserCard(user: users[index], onTap: () {});
+        final u = users[index];
+        final String uid = u['_id'] ?? u['id'] ?? '';
+        return UserCard(
+          user: u,
+          onTap: () {
+            if (uid.isNotEmpty) {
+              Get.to(() => ProfileScreen(userId: uid), preventDuplicates: false);
+            }
+          },
+        );
       },
     ),
   );
