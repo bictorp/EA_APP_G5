@@ -9,6 +9,7 @@ import '../widgets/post_card.dart';
 import 'notifications_screen.dart';
 import 'map_screen.dart';
 import '../controllers/theme_controller.dart';
+import '../screens/saved_posts_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -63,6 +64,10 @@ class HomeScreen extends StatelessWidget {
                 child: Icon(Icons.favorite_border_rounded, color: AppColors.textHeader),
               ),
             )),
+            IconButton(
+              onPressed: () => Get.to(() => const SavedPostsScreen()),
+              icon: Icon(Icons.bookmark_border_rounded, color: AppColors.textHeader),
+            ),
           ],
         ),
         body: Obx(() {

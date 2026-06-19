@@ -10,6 +10,7 @@ class Post {
   final List<User> likes;
   final int commentsCount;
   final DateTime createdAt;
+  final bool isSaved;
 
   Post({
     required this.id,
@@ -19,6 +20,7 @@ class Post {
     required this.likes,
     required this.commentsCount,
     required this.createdAt,
+    this.isSaved = false,
   });
 
   String get timeAgo {
@@ -73,6 +75,7 @@ class Post {
         }).toList() ?? [],
         commentsCount: (json['comments'] as List?)?.length ?? 0,
         createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+        isSaved: json['isSaved'] ?? false,
       );
     } catch (e) {
       if (kDebugMode) {
@@ -81,5 +84,27 @@ class Post {
       }
       rethrow;
     }
+  }
+
+  Post copyWith({
+    String? id,
+    User? usuario,
+    String? imageUrl,
+    String? caption,
+    List<User>? likes,
+    int? commentsCount,
+    DateTime? createdAt,
+    bool? isSaved,
+  }) {
+    return Post(
+      id: id ?? this.id,
+      usuario: usuario ?? this.usuario,
+      imageUrl: imageUrl ?? this.imageUrl,
+      caption: caption ?? this.caption,
+      likes: likes ?? this.likes,
+      commentsCount: commentsCount ?? this.commentsCount,
+      createdAt: createdAt ?? this.createdAt,
+      isSaved: isSaved ?? this.isSaved,
+    );
   }
 }
