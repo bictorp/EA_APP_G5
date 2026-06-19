@@ -18,7 +18,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 class PushNotificationService {
-  final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+  late final FirebaseMessaging _fcm;
   final AuthService _authService = AuthService();
 
   /// Inicializa Firebase y configura todos los listeners de FCM.
@@ -27,6 +27,8 @@ class PushNotificationService {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    _fcm = FirebaseMessaging.instance;
 
     // 2. Registrar el Background Handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
