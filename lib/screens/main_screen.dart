@@ -6,6 +6,7 @@ import 'home_screen.dart';
 import 'search_screen.dart';
 import 'profile_screen.dart';
 import 'messages_screen.dart';
+import 'unimatch_screen.dart';
 import '../constants/app_colors.dart';
 
 import '../controllers/theme_controller.dart';
@@ -21,7 +22,7 @@ class _MainScreenState extends State<MainScreen> {
   List<Widget> get _pages => [
     HomeScreen(),
     SearchScreen(),
-    Scaffold(backgroundColor: AppColors.bg, body: Center(child: Text('tinder_mode'.tr, style: TextStyle(color: AppColors.textHeader)))),
+    UnimatchScreen(),
     MessagesScreen(),
     ProfileScreen(),
   ];
