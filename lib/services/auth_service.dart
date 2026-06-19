@@ -66,7 +66,7 @@ class AuthService {
     }
   }
 
-  Future<bool> register(String name, String email, String password) async {
+  Future<User?> register(String name, String email, String password) async {
     try {
       final response = await _dio.post(
         ApiConstants.registerEndpoint,
@@ -76,7 +76,20 @@ class AuthService {
           'password': password,
         },
       );
-      return response.statusCode == 201;
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> data = response.data;
+        final String accessToken = data['accessToken'] ?? '';
+        final String refreshToken = data['refreshToken'] ?? '';
+        final Map<String, dynamic> userData = data['usuario'] ?? {};
+        
+        await _storageService.saveTokens(accessToken, refreshToken);
+        await _storageService.saveUserData(jsonEncode(userData));
+        
+        final user = User.fromJson(userData, accessToken);
+        await SocketService().connect();
+        return user;
+      }
+      return null;
     } catch (e) {
       throw _parseError(e);
     }

@@ -34,4 +34,28 @@ class GradoService {
       return [];
     }
   }
+
+  Future<List<dynamic>> getGradosByUniversidad(String uniId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/grados/universidad/$uniId');
+      if (response.statusCode == 200) {
+        return response.data is List ? response.data : (response.data['data'] ?? response.data ?? []);
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<dynamic>> getAsignaturasByGrado(String gradoId) async {
+    try {
+      final response = await _dio.get('${ApiConstants.baseUrl}/grados/$gradoId/asignaturas');
+      if (response.statusCode == 200) {
+        return response.data is List ? response.data : (response.data['data'] ?? response.data ?? []);
+      }
+      return [];
+    } catch (e) {
+      return [];
+    }
+  }
 }
