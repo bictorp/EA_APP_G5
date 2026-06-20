@@ -16,15 +16,11 @@ import 'controllers/theme_controller.dart';
 import 'controllers/language_controller.dart';
 import 'locales/app_translations.dart';
 import 'services/push_notification_service.dart';
-import 'config/environment.dart';
 
 List<CameraDescription> cameras = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Inicializar variables de entorno (.env)
-  await Environment.init();
   
   try {
     cameras = await availableCameras();

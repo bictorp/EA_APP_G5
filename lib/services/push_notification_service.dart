@@ -18,6 +18,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 class PushNotificationService {
+  static final PushNotificationService _instance = PushNotificationService._internal();
+  
+  factory PushNotificationService() {
+    return _instance;
+  }
+
+  PushNotificationService._internal();
+
   late final FirebaseMessaging _fcm;
   final AuthService _authService = AuthService();
 
@@ -30,6 +38,9 @@ class PushNotificationService {
 
     _fcm = FirebaseMessaging.instance;
 
+    // Solicitar permisos de notificación nativos (Android 13+ e iOS)
+    await requestPermissions();
+
     // 2. Registrar el Background Handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -39,6 +50,10 @@ class PushNotificationService {
     // 4. Capturar y guardar el FCM Token si el usuario ya está logueado
     await checkAndUploadToken();
   }
+
+
+
+
 
   /// Solicita permisos nativos al usuario (especialmente importante en iOS y Android 13+)
   Future<void> requestPermissions() async {
