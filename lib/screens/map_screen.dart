@@ -668,14 +668,22 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                       keyboardType: TextInputType.number,
                                       style: TextStyle(color: AppColors.textHeader),
                                       decoration: _inputDecoration('map_event_max_attendees_label'.tr),
+                                      validator: (v) {
+                                        if (v == null || v.isEmpty) return null;
+                                        if (int.tryParse(v) == null) {
+                                          return 'map_event_max_attendees_error'.tr;
+                                        }
+                                        return null;
+                                      },
                                     ),
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: OutlinedButton.icon(
                                       style: OutlinedButton.styleFrom(
-                                        side: BorderSide(color: AppColors.border),
-                                        padding: const EdgeInsets.symmetric(vertical: 15),
+                                        backgroundColor: AppColors.socialBg,
+                                        side: BorderSide.none,
+                                        padding: const EdgeInsets.symmetric(vertical: 18),
                                         shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(12)),
                                       ),
@@ -720,8 +728,9 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                   Expanded(
                                     child: OutlinedButton.icon(
                                       style: OutlinedButton.styleFrom(
-                                        side: BorderSide(color: AppColors.border),
-                                        padding: const EdgeInsets.symmetric(vertical: 15),
+                                        backgroundColor: AppColors.socialBg,
+                                        side: BorderSide.none,
+                                        padding: const EdgeInsets.symmetric(vertical: 18),
                                         shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(12)),
                                       ),
