@@ -85,6 +85,34 @@ class PostService {
     }
   }
 
+  Future<Map<String, dynamic>> getSavedPostsFeed({int page = 1, int limit = 10}) async {
+    try {
+      if (kDebugMode) {
+        print('Fetching saved feed from: ${ApiConstants.baseUrl}/posts/saved');
+      }
+    
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}/posts/saved',
+        queryParameters: {'page': page, 'limit': limit},
+      );
+
+      if (response.statusCode == 200) {
+        final List docs = response.data['docs'] ?? [];
+        final List<Post> posts = docs.map((json) => Post.fromJson(json)).toList();
+      
+        return {
+          'posts': posts,
+          'hasNextPage': response.data['hasNextPage'] ?? false,
+          'nextPage': response.data['nextPage'],
+        };
+      }
+      return {'posts': <Post>[], 'hasNextPage': false};
+    } catch (e) {
+      if (kDebugMode) print('Error in getSavedPostsFeed: $e');
+      return {'posts': <Post>[], 'hasNextPage': false};
+    }
+  }
+
 
   Future<Post?> toggleLike(String postId) async {
     try {
@@ -249,6 +277,16 @@ class PostService {
     } catch (e) {
       if (kDebugMode) print('Error toggling comment like: $e');
       return null;
+    }
+  }
+
+  Future<bool> toggleSavePost(String postId) async {
+    try {
+      final response = await _dio.patch('${ApiConstants.baseUrl}/posts/$postId/save');
+      return response.statusCode == 200;
+    } catch (e) {
+      if (kDebugMode) print('Error toggling save post: $e');
+      return false;
     }
   }
 }

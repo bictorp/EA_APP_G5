@@ -197,6 +197,17 @@ class HomeController extends GetxController {
     }
   }
 
+  Future<void> toggleSave(String postId) async {
+    final success = await _postService.toggleSavePost(postId);
+    if (success) {
+      final index = posts.indexWhere((p) => p.id == postId);
+      if (index != -1) {
+        posts[index] = posts[index].copyWith(isSaved: !(posts[index].isSaved ?? false));
+        posts.refresh();
+      }
+    }
+  }
+
   @override
   void onClose() {
     scrollController.dispose();

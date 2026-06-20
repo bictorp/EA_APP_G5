@@ -7,6 +7,7 @@ import '../widgets/heart_anim_button.dart';
 import '../widgets/large_heart_anim.dart';
 import '../widgets/comments_bottom_sheet.dart';
 import '../controllers/home_controller.dart';
+import '../controllers/saved_posts_controller.dart';
 import '../screens/profile_screen.dart';
 import '../widgets/share_post_bottom_sheet.dart';
 import '../utils/ui_utils.dart';
@@ -28,6 +29,22 @@ class _PostCardState extends State<PostCard> {
     if (Get.isRegistered<HomeController>()) return Get.find<HomeController>();
     return null;
   }
+
+  SavedPostsController? get _savedCtrl {
+    if (Get.isRegistered<SavedPostsController>()) return Get.find<SavedPostsController>();
+    return null;
+  }
+
+void _handleBookmarkTap() {
+  if (Get.isRegistered<SavedPostsController>()) {
+    final savedCtrl = Get.find<SavedPostsController>();
+    savedCtrl.toggleSave(widget.post.id);
+  }
+  else if (Get.isRegistered<HomeController>()) {
+    final homeCtrl = Get.find<HomeController>();
+    homeCtrl.toggleSave(widget.post.id);
+  }
+}
 
   String get _myId => _ctrl?.currentUserId.value ?? '';
   bool get _isLiked => widget.post.likes.any((u) => u.id == _myId);
@@ -342,6 +359,7 @@ class _PostCardState extends State<PostCard> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // LIKE ACTION
                 GestureDetector(
                   onTap: _toggleLike,
                   child: Row(
@@ -366,6 +384,8 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 SizedBox(width: 20),
+                
+                // COMMENT ACTION
                 GestureDetector(
                   onTap: () => _showComments(context),
                   child: Row(
@@ -385,11 +405,23 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
                 SizedBox(width: 20),
+                
+                // SHARE ACTION
                 GestureDetector(
                   onTap: () => _showShareSheet(context),
                   child: Icon(Icons.send_rounded, color: AppColors.textHeader, size: 20),
                 ),
-                Spacer(),
+                // Pushes the bookmark icon button entirely to the right side
+                const Spacer(),
+                //BOOKMARK ACTION
+                GestureDetector(
+                  onTap: _handleBookmarkTap,
+                  child: Icon(
+                    widget.post.isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                    color: widget.post.isSaved ? AppColors.accent : AppColors.textHeader,
+                    size: 24,
+                  ),
+                ),
               ],
             ),
           ),

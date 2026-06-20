@@ -86,6 +86,24 @@ class UserService {
     }
   }
 
+  Future<Map<String, dynamic>?> updateAsignaturas(String usuarioId, List<String> asignaturas) async {
+    try {
+      final response = await _dio.patch(
+        '${ApiConstants.baseUrl}/usuarios/$usuarioId/asignaturas',
+        data: {'asignaturas': asignaturas},
+      );
+      if (response.statusCode == 200) {
+        if (response.data is Map && response.data.containsKey('usuario')) {
+          return response.data['usuario'];
+        }
+        return response.data;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<Map<String, dynamic>?> getMe() async {
     try {
       final response = await _dio.get('${ApiConstants.baseUrl}/auth/me');
@@ -154,6 +172,15 @@ class UserService {
       return [];
     } catch (e) {
       return [];
+    }
+  }
+
+  Future<bool> softDeleteUser(String usuarioId) async {
+    try {
+      final response = await _dio.patch('${ApiConstants.baseUrl}/usuarios/$usuarioId/soft-delete');
+      return response.statusCode == 200;
+    } catch (e) {
+      return false;
     }
   }
 }

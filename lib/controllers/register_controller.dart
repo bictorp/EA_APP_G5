@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/auth_service.dart';
+import '../controllers/chat_controller.dart';
 
 class RegisterController extends GetxController {
   final AuthService _authService = AuthService();
@@ -30,14 +31,15 @@ class RegisterController extends GetxController {
     errorMessage.value = '';
 
     try {
-      final success = await _authService.register(
-        nameController.text,
-        emailController.text,
+      final user = await _authService.register(
+        nameController.text.trim(),
+        emailController.text.trim(),
         passwordController.text,
       );
 
-      if (success) {
-        Get.back(); // Regresar al login
+      if (user != null) {
+        Get.put(ChatController(), permanent: true);
+        Get.offAllNamed('/select-university');
         Get.snackbar(
           'Éxito',
           'Usuario registrado correctamente',

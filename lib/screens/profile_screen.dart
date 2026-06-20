@@ -1,15 +1,17 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import '../controllers/profile_controller.dart';
 import '../constants/app_colors.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'settings_screen.dart';
 import '../utils/ui_utils.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/home_controller.dart';
 import '../services/user_service.dart';
 import '../widgets/safe_circle_avatar.dart';
+import '../models/unimatch_profile.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String? userId;
@@ -70,8 +72,8 @@ class ProfileScreen extends StatelessWidget {
                     _buildAppBar(user, controller),
                     _buildProfileHeader(user, controller),
                     _buildAcademicInfo(user),
-                    _buildSectionDivider(),
-                    _buildPhotoGrid(controller),
+                    _buildSectionTabs(controller),
+                    _buildContent(controller),
                   ],
                 ),
               );
@@ -424,25 +426,262 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionDivider() {
-    return SliverToBoxAdapter(
-      child: Column(
-        children: [
-          SizedBox(height: 20),
-          Text(
-            'posts_title'.tr,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 2,
-              color: AppColors.textMuted,
+  Widget _buildSectionTabs(ProfileController controller) {
+    final showTabs = controller.isMe || controller.unimatchPhotos.isNotEmpty;
+    
+    if (!showTabs) {
+      return SliverToBoxAdapter(
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            Text(
+              'posts_title'.tr,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+                color: AppColors.textMuted,
+              ),
             ),
+            const SizedBox(height: 8),
+            Container(width: 40, height: 2, color: AppColors.accent),
+            const SizedBox(height: 20),
+          ],
+        ),
+      );
+    }
+
+    return SliverToBoxAdapter(
+      child: Obx(() {
+        final active = controller.activeTab.value;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Tab 1: PUBLICACIONES
+              GestureDetector(
+                onTap: () => controller.activeTab.value = 0,
+                child: IntrinsicWidth(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Text(
+                          'posts_title'.tr.toUpperCase(),
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1.5,
+                            color: active == 0 
+                                ? const Color(0xFF7C3AED) 
+                                : AppColors.textMuted,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        height: 2,
+                        color: active == 0 ? const Color(0xFF7C3AED) : Colors.transparent,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 30),
+              // Tab 2: UniMatch
+              GestureDetector(
+                onTap: () => controller.activeTab.value = 1,
+                child: IntrinsicWidth(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.local_fire_department_outlined,
+                              size: 18,
+                              color: active == 1 ? const Color(0xFFEC4899) : AppColors.textMuted,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'UniMatch',
+                              style: GoogleFonts.inter(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 1.5,
+                                color: active == 1 
+                                    ? const Color(0xFFEC4899) 
+                                    : AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 2,
+                        color: active == 1 ? const Color(0xFFEC4899) : Colors.transparent,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: 8),
-          Container(width: 40, height: 2, color: AppColors.accent),
-          SizedBox(height: 20),
-        ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildContent(ProfileController controller) {
+    return Obx(() {
+      final showTabs = controller.isMe || controller.unimatchPhotos.isNotEmpty;
+      final active = showTabs ? controller.activeTab.value : 0;
+      
+      if (active == 0) {
+        return _buildPhotoGrid(controller);
+      } else {
+        return _buildUnimatchGrid(controller);
+      }
+    });
+  }
+
+  Widget _buildUnimatchGrid(ProfileController controller) {
+    final List<UnimatchPhoto> photos = controller.unimatchPhotos;
+    final isMe = controller.isMe;
+    final totalCount = isMe ? photos.length + 1 : photos.length;
+
+    if (totalCount == 0) {
+      return SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 60),
+          child: Center(child: Text('no_photos'.tr, style: TextStyle(color: AppColors.textMuted))),
+        ),
+      );
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            if (isMe && index == 0) {
+              return GestureDetector(
+                onTap: () => _pickAndUploadUnimatchPhoto(controller),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.04),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white.withOpacity(0.08)),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.add_a_photo_outlined, color: Colors.white60, size: 28),
+                  ),
+                ),
+              );
+            }
+
+            final photoIndex = isMe ? index - 1 : index;
+            final photo = photos[photoIndex];
+
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      photo.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Colors.grey[900],
+                        child: const Icon(Icons.broken_image_outlined, color: Colors.white24),
+                      ),
+                    ),
+                  ),
+                ),
+                if (isMe)
+                  Positioned(
+                    top: 4,
+                    right: 4,
+                    child: GestureDetector(
+                      onTap: () => _showDeleteConfirmation(controller, photo.id),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 16),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+          childCount: totalCount,
+        ),
       ),
+    );
+  }
+
+  Future<void> _pickAndUploadUnimatchPhoto(ProfileController controller) async {
+    final ImagePicker picker = ImagePicker();
+    try {
+      final XFile? image = await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+      if (image != null) {
+        final success = await controller.uploadUnimatchPhoto(image);
+        if (success) {
+          Get.snackbar(
+            'Éxito',
+            'Foto de UniMatch subida correctamente',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: AppColors.accent.withOpacity(0.8),
+            colorText: Colors.white,
+          );
+        } else {
+          Get.snackbar(
+            'Error',
+            'No se pudo subir la foto de UniMatch',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.redAccent.withOpacity(0.8),
+            colorText: Colors.white,
+          );
+        }
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Error al seleccionar imagen: $e');
+    }
+  }
+
+  void _showDeleteConfirmation(ProfileController controller, String photoId) {
+    Get.defaultDialog(
+      title: 'Eliminar Foto',
+      middleText: '¿Estás seguro de que quieres eliminar esta foto de UniMatch?',
+      textConfirm: 'Eliminar',
+      textCancel: 'Cancelar',
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.redAccent,
+      onConfirm: () async {
+        Get.back(); // close dialog
+        final success = await controller.deleteUnimatchPhoto(photoId);
+        if (success) {
+          Get.snackbar(
+            'Éxito',
+            'Foto eliminada',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: AppColors.accent.withOpacity(0.8),
+            colorText: Colors.white,
+          );
+        }
+      },
     );
   }
 
