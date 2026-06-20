@@ -7,8 +7,9 @@ import '../controllers/login_controller.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/error_banner.dart';
-
 import '../screens/register_screen.dart';
+import '../widgets/google_sign_in_button_stub.dart'
+    if (dart.library.html) '../widgets/google_sign_in_button_web.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -103,6 +104,30 @@ class LoginScreen extends StatelessWidget {
                         Obx(() => CustomButton(
                           text: 'Iniciar Sesión',
                           onPressed: controller.login,
+                          isLoading: controller.isLoading.value,
+                        )),
+                        
+                        SizedBox(height: 24),
+                        Row(
+                          children: [
+                            const Expanded(child: Divider(color: Colors.white24)),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Text(
+                                'O continuar con',
+                                style: GoogleFonts.inter(
+                                  color: AppColors.textMuted,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            const Expanded(child: Divider(color: Colors.white24)),
+                          ],
+                        ),
+                        SizedBox(height: 20),
+                        
+                        Obx(() => buildGoogleSignInButton(
+                          onPressed: controller.loginWithGoogle,
                           isLoading: controller.isLoading.value,
                         )),
                         
