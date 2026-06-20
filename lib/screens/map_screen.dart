@@ -220,11 +220,11 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           _sheetController.animateTo(0.52,
               duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
         }
-        Get.snackbar('Éxito', 'Evento publicado exitosamente',
+        Get.snackbar('success'.tr, 'map_event_published_success'.tr,
             backgroundColor: AppColors.success.withOpacity(0.8), colorText: Colors.white);
       }
     } catch (e) {
-      Get.snackbar('Error', 'Hubo un problema al crear el evento',
+      Get.snackbar('error'.tr, 'map_event_create_error'.tr,
           backgroundColor: AppColors.error.withOpacity(0.8), colorText: Colors.white);
     }
   }
@@ -240,11 +240,11 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
         });
       }
     } catch (e) {
-      String msg = 'No se pudo actualizar la asistencia';
+      String msg = 'map_event_join_error'.tr;
       if (e is DioException && e.response?.data != null) {
         msg = e.response?.data['message'] ?? msg;
       }
-      Get.snackbar('Error', msg,
+      Get.snackbar('error'.tr, msg,
           backgroundColor: AppColors.error.withOpacity(0.8), colorText: Colors.white);
     }
   }
@@ -281,11 +281,11 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
           _sheetController.animateTo(0.1,
               duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
         }
-        Get.snackbar('Éxito', 'Evento eliminado correctamente',
+        Get.snackbar('success'.tr, 'map_event_deleted_success'.tr,
             backgroundColor: AppColors.success.withOpacity(0.8), colorText: Colors.white);
       }
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo eliminar el evento',
+      Get.snackbar('error'.tr, 'map_event_delete_error'.tr,
           backgroundColor: AppColors.error.withOpacity(0.8), colorText: Colors.white);
     }
   }
@@ -624,8 +624,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                     Expanded(
                                       child: Text(
                                         _tempCoords != null
-                                            ? '📍 ${_tempCoords!.latitude.toStringAsFixed(5)}, ${_tempCoords!.longitude.toStringAsFixed(5)}\nToca el mapa para ajustar la ubicación.'
-                                            : 'Toca el mapa para colocar el marcador del evento.',
+                                            ? '📍 ${_tempCoords!.latitude.toStringAsFixed(5)}, ${_tempCoords!.longitude.toStringAsFixed(5)}\n' + 'map_adjust_location'.tr
+                                            : 'map_place_marker'.tr,
                                         style: GoogleFonts.inter(
                                             color: AppColors.textHeader, fontSize: 12),
                                       ),
@@ -636,18 +636,18 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                 TextFormField(
                                   controller: _tituloCtrl,
                                   style: TextStyle(color: AppColors.textHeader),
-                                  decoration: _inputDecoration('Título del evento *'),
+                                  decoration: _inputDecoration('map_event_title_label'.tr),
                                   validator: (v) =>
-                                      v == null || v.isEmpty ? 'Introduce un título' : null,
+                                      v == null || v.isEmpty ? 'map_event_title_error'.tr : null,
                                 ),
                                 const SizedBox(height: 10),
                                 TextFormField(
                                   controller: _descCtrl,
                                   maxLines: 2,
                                   style: TextStyle(color: AppColors.textHeader),
-                                  decoration: _inputDecoration('Descripción *'),
+                                  decoration: _inputDecoration('map_event_desc_label'.tr),
                                   validator: (v) => v == null || v.isEmpty
-                                      ? 'Introduce una descripción'
+                                      ? 'map_event_desc_error'.tr
                                       : null,
                                 ),
                                 const SizedBox(height: 10),
@@ -655,9 +655,9 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                   controller: _ubicacionNameCtrl,
                                   style: TextStyle(color: AppColors.textHeader),
                                   decoration:
-                                      _inputDecoration('Nombre del lugar * (Ej: Aula 102)'),
+                                      _inputDecoration('map_event_location_label'.tr),
                                   validator: (v) => v == null || v.isEmpty
-                                      ? 'Introduce el nombre del lugar'
+                                      ? 'map_event_location_error'.tr
                                       : null,
                                 ),
                                 const SizedBox(height: 10),
@@ -667,7 +667,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                       controller: _maxAsistentesCtrl,
                                       keyboardType: TextInputType.number,
                                       style: TextStyle(color: AppColors.textHeader),
-                                      decoration: _inputDecoration('Máx. Asistentes'),
+                                      decoration: _inputDecoration('map_event_max_attendees_label'.tr),
                                     ),
                                   ),
                                   const SizedBox(width: 10),
@@ -752,8 +752,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                           color: Colors.amber, size: 16),
                                       label: Text(
                                           _selectedDeadlineDate == null
-                                              ? 'Fecha Límite (Opcional)'
-                                              : 'Límite: ${DateFormat('dd/MM HH:mm').format(_selectedDeadlineDate!)}',
+                                              ? 'map_event_deadline_optional'.tr
+                                              : 'map_event_deadline_prefix'.tr + DateFormat('dd/MM HH:mm').format(_selectedDeadlineDate!),
                                           style: GoogleFonts.inter(
                                               color: AppColors.textHeader, fontSize: 12)),
                                     ),
@@ -854,7 +854,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                       color: Colors.amber, size: 15),
                                   const SizedBox(width: 5),
                                   Text(
-                                      'Límite de inscripción: ${DateFormat('dd MMM, HH:mm').format(_selectedEvento!.fechaLimite!)}',
+                                      'map_registration_limit'.tr + DateFormat('dd MMM, HH:mm').format(_selectedEvento!.fechaLimite!),
                                       style: GoogleFonts.inter(
                                           color: Colors.amber, fontSize: 13, fontWeight: FontWeight.w500)),
                                 ]),
@@ -895,7 +895,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                     color: AppColors.textMuted, size: 18),
                                 const SizedBox(width: 6),
                                 Text(
-                                  'Asistentes (${_selectedEvento!.asistentes.length}'
+                                  'map_attendees'.tr + ' (${_selectedEvento!.asistentes.length}'
                                   '${_selectedEvento!.maxAsistentes != null ? ' / ${_selectedEvento!.maxAsistentes}' : ''})',
                                   style: GoogleFonts.inter(
                                       color: AppColors.textHeader,
@@ -955,8 +955,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                           _toggleAsistir(_selectedEvento!),
                                       child: Text(
                                         isJoined
-                                            ? 'Abandonar Evento'
-                                            : 'Apuntarse al Evento',
+                                            ? 'map_leave_event'.tr
+                                            : 'map_join_event'.tr,
                                         style: GoogleFonts.inter(
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
@@ -1128,8 +1128,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                     const SizedBox(height: 12),
                                     Text(
                                       _eventos.isEmpty
-                                          ? 'No hay eventos en la plataforma.'
-                                          : 'No hay eventos en este rango.',
+                                          ? 'map_no_events_platform'.tr
+                                          : 'map_no_events_range'.tr,
                                       style: GoogleFonts.inter(
                                           color: AppColors.textMuted, fontSize: 14),
                                       textAlign: TextAlign.center,
