@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:convert';
 import '../services/auth_service.dart';
+import '../services/storage_service.dart';
+import '../services/user_service.dart';
 import 'bug_report_screen.dart';
 import '../controllers/theme_controller.dart';
 import '../controllers/language_controller.dart';
@@ -101,6 +104,14 @@ class SettingsScreen extends StatelessWidget {
                   title: 'account'.tr,
                   isDark: isDark,
                   children: [
+                    _buildSettingsItem(
+                      icon: Icons.delete_forever_rounded,
+                      title: 'delete_account'.tr,
+                      color: Color(0xFFEF4444),
+                      onTap: () => _showDeleteAccountDialog(context, isDark),
+                      isDark: isDark,
+                    ),
+                    Divider(color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.04), height: 1),
                     _buildSettingsItem(
                       icon: Icons.logout_rounded,
                       title: 'logout'.tr,
@@ -440,6 +451,150 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       child: Text(
                         'logout'.tr,
+                        style: GoogleFonts.inter(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context, bool isDark) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: isDark ? Color(0xFF1E293B) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.1)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Color(0xFFEF4444).withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.delete_forever_rounded,
+                  color: Color(0xFFEF4444),
+                  size: 32,
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'delete_account_confirm_title'.tr,
+                style: GoogleFonts.inter(
+                  color: isDark ? Colors.white : Color(0xFF1A1B23),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'delete_account_confirm_msg'.tr,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  color: isDark ? Color(0xFF94A3B8) : Color(0xFF64748B),
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () => Get.back(),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Text(
+                        'cancel'.tr,
+                        style: GoogleFonts.inter(
+                          color: isDark ? Colors.white : Color(0xFF64748B),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Get.back(); // close confirmation dialog
+                        // Show loading indicator
+                        Get.dialog(
+                          Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFEF4444)),
+                            ),
+                          ),
+                          barrierDismissible: false,
+                        );
+
+                        try {
+                          final storageService = StorageService();
+                          final userDataStr = await storageService.getUserData();
+                          if (userDataStr != null) {
+                            final userData = jsonDecode(userDataStr);
+                            final userId = userData['_id'];
+                            if (userId != null) {
+                              final userService = UserService();
+                              final success = await userService.softDeleteUser(userId);
+                              if (success) {
+                                final authService = AuthService();
+                                await authService.logout();
+                                Get.back(); // Remove loading dialog
+                                Get.offAllNamed('/login');
+                                Get.snackbar(
+                                  'success'.tr,
+                                  'Cuenta eliminada correctamente',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.green.withOpacity(0.8),
+                                  colorText: Colors.white,
+                                );
+                                return;
+                              }
+                            }
+                          }
+                          throw 'No se pudo eliminar la cuenta';
+                        } catch (e) {
+                          Get.back(); // Remove loading dialog
+                          Get.snackbar(
+                            'Error',
+                            'No se pudo eliminar la cuenta. Inténtalo de nuevo.',
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.red.withOpacity(0.8),
+                            colorText: Colors.white,
+                          );
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFEF4444),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Text(
+                        'delete'.tr,
                         style: GoogleFonts.inter(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
