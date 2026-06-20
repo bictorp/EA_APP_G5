@@ -52,6 +52,7 @@ class ProfileScreen extends StatelessWidget {
             color: isDark ? null : AppColors.bg,
           ),
           child: SafeArea(
+            top: false,
             child: Obx(() {
               if (controller.isLoading.value && controller.user.value == null) {
                 return Center(child: CircularProgressIndicator(color: AppColors.btnStart));
@@ -87,18 +88,11 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildAppBar(dynamic user, ProfileController controller) {
     return SliverAppBar(
       backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
       elevation: 0,
-      pinned: true,
+      pinned: false,
       centerTitle: true,
       iconTheme: IconThemeData(color: AppColors.textHeader),
-      flexibleSpace: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
-          child: Container(
-            color: AppColors.bg.withOpacity(0.7),
-          ),
-        ),
-      ),
       actions: [
         if (controller.isMe)
           IconButton(
