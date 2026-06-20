@@ -33,13 +33,10 @@ class PushNotificationService {
     // 2. Registrar el Background Handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    // 3. Solicitar permisos de notificación
-    await requestPermissions();
-
-    // 4. Configurar los Listeners en los distintos estados
+    // 3. Configurar los Listeners en los distintos estados
     _setupNotificationListeners();
 
-    // 5. Capturar y guardar el FCM Token si el usuario ya está logueado
+    // 4. Capturar y guardar el FCM Token si el usuario ya está logueado
     await checkAndUploadToken();
   }
 

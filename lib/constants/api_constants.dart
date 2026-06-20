@@ -1,14 +1,15 @@
 import 'package:flutter/foundation.dart';
+import '../config/environment.dart';
 
 class ApiConstants {
   static String get _url {
     if (kIsWeb) {
-      return 'http://localhost:1338';
+      return Environment.apiUrlWeb;
     }
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:1338';
+      return Environment.apiUrlAndroid;
     }
-    return 'http://localhost:1338';
+    return Environment.apiUrlIos;
   }
 
   static String get baseUrl => _url;

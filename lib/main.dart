@@ -16,11 +16,15 @@ import 'controllers/theme_controller.dart';
 import 'controllers/language_controller.dart';
 import 'locales/app_translations.dart';
 import 'services/push_notification_service.dart';
+import 'config/environment.dart';
 
 List<CameraDescription> cameras = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Inicializar variables de entorno (.env)
+  await Environment.init();
   
   try {
     cameras = await availableCameras();
@@ -28,9 +32,13 @@ void main() async {
     print("Error inicializando cámaras: $e");
   }
 
-  // Inicializar notificaciones push
+  // Inicializar notificaciones push en segundo plano de manera no bloqueante
   final pushService = PushNotificationService();
-  await pushService.initialize();
+  pushService.initialize().then((_) {
+    print("PushNotificationService inicializado asíncronamente con éxito.");
+  }).catchError((e) {
+    print("Error al inicializar PushNotificationService: $e");
+  });
   
   final AuthService authService = AuthService();
   final bool isLoggedIn = await authService.checkSession();
