@@ -5,6 +5,7 @@ import '../controllers/theme_controller.dart';
 import '../constants/app_colors.dart';
 import 'chat_detail_screen.dart';
 import 'assistant_screen.dart';
+import 'universities_screen.dart';
 import '../widgets/safe_circle_avatar.dart';
 
 class MessagesScreen extends StatelessWidget {
@@ -23,6 +24,10 @@ class MessagesScreen extends StatelessWidget {
           elevation: 0,
           centerTitle: false,
           actions: [
+            IconButton(
+              icon: Icon(Icons.school_outlined, color: AppColors.textHeader, size: 26),
+              onPressed: () => Get.to(() => UniversitiesScreen()),
+            ),
             IconButton(
               icon: Icon(Icons.smart_toy_outlined, color: AppColors.textHeader, size: 26),
               onPressed: () => Get.to(() => AssistantScreen()),

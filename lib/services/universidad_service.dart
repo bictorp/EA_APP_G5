@@ -19,4 +19,22 @@ class UniversidadService {
       return [];
     }
   }
+
+  Future<bool> joinChat(String id) async {
+    try {
+      final response = await _dio.post('${ApiConstants.baseUrl}/universidades/$id/join');
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  Future<bool> leaveChat(String id) async {
+    try {
+      final response = await _dio.post('${ApiConstants.baseUrl}/universidades/$id/leave');
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (e) {
+      return false;
+    }
+  }
 }
