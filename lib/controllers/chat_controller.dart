@@ -63,15 +63,19 @@ class ChatController extends GetxController {
     _socketService.on('receive_message', (data) {
       final message = Message.fromJson(data);
       
-      if (activeChatId == message.remitenteId) {
+      if (activeChatId == message.remitenteId || activeChatId == message.destinatarioId) {
         messages.insert(0, message); // Insertar al principio para reverse: true
         update();
       } else {
-        unreadCounts[message.remitenteId] = (unreadCounts[message.remitenteId] ?? 0) + 1;
+        final key = (message.destinatarioId.isNotEmpty && message.destinatarioId != currentUserId.value)
+            ? message.destinatarioId
+            : message.remitenteId;
+            
+        unreadCounts[key] = (unreadCounts[key] ?? 0) + 1;
         _updateTotalUnreadCount();
 
         // Actualizar estados locales pero dejar que Firebase maneje la notificación en primer plano
-        final contact = contacts.firstWhereOrNull((c) => c['_id'] == message.remitenteId);
+        final contact = contacts.firstWhereOrNull((c) => c['_id'] == key);
       }
 
       _updateContactLastMessage(message);
@@ -257,14 +261,37 @@ class ChatController extends GetxController {
   void sendMessage(String destinatarioId, String contenido, {String? postId}) {
     if (contenido.trim().isEmpty && postId == null) return;
     
+    final contact = contacts.firstWhereOrNull((c) => c['_id'] == destinatarioId);
+    final isGroup = contact != null ? (contact['isGroup'] ?? false) : false;
+    
     _socketService.emit('send_message', {
       'destinatarioId': destinatarioId,
       'contenido': contenido,
       'postId': postId,
       'parentMessageId': replyingTo.value?.id,
+      'isGroup': isGroup,
     });
 
     replyingTo.value = null;
+  }
+
+  Future<Map<String, dynamic>?> createGroupChat(String nombre, List<String> miembrosIds) async {
+    try {
+      final response = await AuthService.dio.post(
+        '${ApiConstants.baseUrl}/chat/groups',
+        data: {
+          'nombre': nombre,
+          'miembros': miembrosIds,
+        },
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        await fetchContacts();
+        return response.data;
+      }
+    } catch (e) {
+      print('[Chat] Error al crear grupo: $e');
+    }
+    return null;
   }
 
   Future<void> sharePost(String postId, List<String> contactIds, String comment) async {

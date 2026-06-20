@@ -30,7 +30,9 @@ class Message {
       return Message(
         id: json['_id']?.toString() ?? '',
         remitenteId: (json['remitente'] is Map ? json['remitente']['_id'] : json['remitente'])?.toString() ?? '',
-        destinatarioId: (json['destinatario'] is Map ? json['destinatario']['_id'] : json['destinatario'])?.toString() ?? '',
+        destinatarioId: (json['destinatario'] is Map 
+            ? json['destinatario']['_id'] 
+            : (json['destinatario'] ?? json['grupo']))?.toString() ?? '',
         contenido: json['contenido']?.toString() ?? '',
         post: (json['post'] != null && json['post'] is Map) 
                ? Post.fromJson(Map<String, dynamic>.from(json['post'])) 

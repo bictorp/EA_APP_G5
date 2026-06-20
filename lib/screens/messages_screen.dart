@@ -46,15 +46,7 @@ class MessagesScreen extends StatelessWidget {
                     duration: Duration(seconds: 3),
                   );
                 } else if (value == 'create_group') {
-                  Get.snackbar(
-                    'soon'.tr,
-                    'create_group_soon'.tr,
-                    snackPosition: SnackPosition.BOTTOM,
-                    backgroundColor: Color(0xFF1E293B),
-                    colorText: Colors.white,
-                    margin: const EdgeInsets.all(15),
-                    duration: Duration(seconds: 3),
-                  );
+                  _showCreateGroupSheet(context, Get.find<ChatController>());
                 }
                 print('Seleccionado: $value');
               },
@@ -300,6 +292,243 @@ class MessagesScreen extends StatelessWidget {
           SizedBox(width: 12),
           Text(title, style: TextStyle(color: AppColors.textHeader, fontSize: 14)),
         ],
+      ),
+    );
+  }
+
+  void _showCreateGroupSheet(BuildContext context, ChatController controller) {
+    final List<dynamic> allFriends = controller.contacts.where((c) => c['isGroup'] != true).toList();
+    
+    String groupName = "";
+    final selectedIds = <String>{}.obs;
+    String searchQuery = "";
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.surface,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          final filteredFriends = allFriends.where((c) {
+            final name = (c['nombre'] ?? '').toString().toLowerCase();
+            return name.contains(searchQuery.toLowerCase());
+          }).toList();
+
+          final bool isValid = groupName.trim().isNotEmpty && selectedIds.length >= 2;
+
+          return Container(
+            padding: EdgeInsets.only(
+              top: 20,
+              left: 20,
+              right: 20,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: AppColors.textMuted.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                Center(
+                  child: Text(
+                    'create_group'.tr,
+                    style: TextStyle(color: AppColors.textHeader, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(height: 15),
+                Divider(color: AppColors.borderWhite, thickness: 1),
+                SizedBox(height: 15),
+
+                // Nombre del grupo
+                Text(
+                  'group_name_label'.tr,
+                  style: TextStyle(color: AppColors.textHeader, fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.containerBg.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border.withOpacity(0.2)),
+                  ),
+                  child: TextField(
+                    style: TextStyle(color: AppColors.textHeader),
+                    decoration: InputDecoration(
+                      hintText: 'group_name_hint'.tr,
+                      hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5)),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    onChanged: (value) {
+                      setSheetState(() {
+                        groupName = value;
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(height: 20),
+
+                // Selección de miembros
+                Text(
+                  'select_members'.tr,
+                  style: TextStyle(color: AppColors.textHeader, fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.containerBg.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border.withOpacity(0.2)),
+                  ),
+                  child: TextField(
+                    style: TextStyle(color: AppColors.textHeader),
+                    decoration: InputDecoration(
+                      hintText: 'search_friends'.tr,
+                      hintStyle: TextStyle(color: AppColors.textMuted.withOpacity(0.5)),
+                      prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onChanged: (value) {
+                      setSheetState(() {
+                        searchQuery = value;
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(height: 15),
+
+                if (filteredFriends.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
+                        Icon(Icons.search_off, size: 40, color: AppColors.textMuted.withOpacity(0.3)),
+                        SizedBox(height: 10),
+                        Text(
+                          searchQuery.isEmpty ? 'no_new_contacts'.tr : 'no_results'.tr,
+                          style: TextStyle(color: AppColors.textMuted),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxHeight: 250),
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: filteredFriends.length,
+                        itemBuilder: (context, index) {
+                          final friend = filteredFriends[index];
+                          final friendId = friend['_id'] as String;
+                          final isSelected = selectedIds.contains(friendId);
+
+                          return CheckboxListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(
+                              friend['nombre'] ?? 'Usuario',
+                              style: TextStyle(color: AppColors.textHeader, fontWeight: FontWeight.w500),
+                            ),
+                            secondary: SafeCircleAvatar(
+                              radius: 18,
+                              url: friend['avatarUrl'],
+                              name: friend['nombre'] ?? 'Usuario',
+                            ),
+                            activeColor: AppColors.accent,
+                            checkColor: Colors.white,
+                            value: isSelected,
+                            onChanged: (bool? checked) {
+                              setSheetState(() {
+                                if (checked == true) {
+                                  selectedIds.add(friendId);
+                                } else {
+                                  selectedIds.remove(friendId);
+                                }
+                              });
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                SizedBox(height: 20),
+
+                ElevatedButton(
+                  onPressed: isValid
+                      ? () async {
+                          Get.back();
+                          final newGroup = await controller.createGroupChat(
+                            groupName.trim(),
+                            selectedIds.toList(),
+                          );
+                          if (newGroup != null) {
+                            Get.snackbar(
+                              'success'.tr,
+                              'group_created_success'.tr,
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.green,
+                              colorText: Colors.white,
+                              margin: const EdgeInsets.all(15),
+                            );
+                            Get.to(() => ChatDetailScreen(
+                                  contactId: newGroup['_id'],
+                                  contactName: newGroup['nombre'],
+                                  contactAvatar: newGroup['avatarUrl'],
+                                ));
+                          } else {
+                            Get.snackbar(
+                              'error'.tr,
+                              'group_created_error'.tr,
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.redAccent,
+                              colorText: Colors.white,
+                              margin: const EdgeInsets.all(15),
+                            );
+                          }
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent,
+                    disabledBackgroundColor: AppColors.textMuted.withOpacity(0.2),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: Text(
+                    'create_group'.tr,
+                    style: TextStyle(
+                      color: isValid ? Colors.white : AppColors.textMuted,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                if (!isValid && selectedIds.length < 2) ...[
+                  SizedBox(height: 8),
+                  Text(
+                    'group_min_members'.tr,
+                    style: TextStyle(color: Colors.redAccent, fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ],
+            ),
+          );
+        },
       ),
     );
   }
