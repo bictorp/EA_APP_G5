@@ -38,7 +38,7 @@ class _UnimatchScreenState extends State<UnimatchScreen> {
         controller.localOnboardingPhotos.add(selected);
       }
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo seleccionar la imagen');
+      Get.snackbar('error'.tr, 'unimatch_error_select_image'.tr);
     }
   }
 
@@ -471,7 +471,7 @@ class _UnimatchScreenState extends State<UnimatchScreen> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Has llegado al final del campus',
+              'unimatch_end_campus'.tr,
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 fontSize: 22,
@@ -481,7 +481,7 @@ class _UnimatchScreenState extends State<UnimatchScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'No hay más perfiles por ahora.\n¡Vuelve más tarde para descubrir nuevas personas!',
+              'unimatch_no_more_profiles'.tr,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 14,
@@ -493,7 +493,7 @@ class _UnimatchScreenState extends State<UnimatchScreen> {
             ElevatedButton.icon(
               onPressed: () => controller.loadProfiles(),
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Buscar de nuevo'),
+              label: Text('unimatch_search_again'.tr),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accent,
                 foregroundColor: Colors.white,
@@ -522,7 +522,7 @@ class _UnimatchScreenState extends State<UnimatchScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              '¡Bienvenido a UniMatch!',
+              'unimatch_welcome'.tr,
               textAlign: TextAlign.center,
               style: GoogleFonts.outfit(
                 fontSize: 26,
@@ -532,7 +532,7 @@ class _UnimatchScreenState extends State<UnimatchScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Conecta con compañeros de tu misma universidad, grado o asignaturas mediante el swipe de tarjetas.',
+              'unimatch_welcome_desc'.tr,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 14,
@@ -546,7 +546,7 @@ class _UnimatchScreenState extends State<UnimatchScreen> {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Sube al menos 1 foto para empezar:',
+                'unimatch_upload_photo_prompt'.tr,
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -646,9 +646,9 @@ class _UnimatchScreenState extends State<UnimatchScreen> {
                         width: 20,
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
-                    : const Text(
-                        'Aceptar Términos y Empezar',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    : Text(
+                        'unimatch_accept_terms_btn'.tr,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
               );
             }),

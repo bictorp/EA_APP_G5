@@ -253,18 +253,18 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
     final confirm = await Get.dialog<bool>(
       AlertDialog(
         backgroundColor: AppColors.containerBg,
-        title: Text('¿Eliminar evento?', style: TextStyle(color: AppColors.textHeader)),
-        content: Text('Esta acción es permanente y no se puede deshacer.',
+        title: Text('map_delete_event_title'.tr, style: TextStyle(color: AppColors.textHeader)),
+        content: Text('map_delete_event_msg'.tr,
             style: TextStyle(color: AppColors.textMuted)),
         actions: [
           TextButton(
             onPressed: () => Get.back(result: false),
-            child: Text('Cancelar', style: TextStyle(color: AppColors.textMuted)),
+            child: Text('cancel'.tr, style: TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () => Get.back(result: true),
-            child: const Text('Eliminar', style: TextStyle(color: Colors.white)),
+            child: Text('delete'.tr, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -467,7 +467,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                     CircularProgressIndicator(strokeWidth: 2, color: AppColors.accent),
                     const SizedBox(width: 12),
-                    Text('Cargando eventos...', style: TextStyle(color: AppColors.textMuted)),
+                    Text('map_loading_events'.tr, style: TextStyle(color: AppColors.textMuted)),
                   ]),
                 ),
               ),
@@ -594,7 +594,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text('Crear Evento',
+                                    Text('map_create_event'.tr,
                                         style: GoogleFonts.inter(
                                             color: AppColors.textHeader,
                                             fontSize: 20,
@@ -775,7 +775,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                         borderRadius: BorderRadius.circular(12)),
                                   ),
                                   onPressed: _submitCreation,
-                                  child: Text('Publicar Evento',
+                                  child: Text('map_publish_event'.tr,
                                       style: GoogleFonts.inter(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -807,7 +807,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                       borderRadius: BorderRadius.circular(20),
                                       border: Border.all(color: AppColors.accentBorder),
                                     ),
-                                    child: Text('Evento',
+                                    child: Text('map_event_detail_title'.tr,
                                         style: GoogleFonts.inter(
                                             color: AppColors.accent,
                                             fontSize: 11,
@@ -879,7 +879,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                 Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('Organizado por',
+                                      Text('map_organized_by'.tr,
                                           style: GoogleFonts.inter(
                                               color: AppColors.textMuted, fontSize: 11)),
                                       Text(_selectedEvento!.creador.nombre,
@@ -905,7 +905,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                               ]),
                               const SizedBox(height: 8),
                               if (_selectedEvento!.asistentes.isEmpty)
-                                Text('Nadie se ha apuntado todavía. ¡Sé el primero!',
+                                Text('map_no_attendees'.tr,
                                     style: GoogleFonts.inter(
                                         color: AppColors.textMuted,
                                         fontSize: 12,
@@ -1006,7 +1006,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Row(children: [
-                                Text('Eventos Cercanos',
+                                Text('map_nearby_events'.tr,
                                     style: GoogleFonts.inter(
                                         color: AppColors.textHeader,
                                         fontSize: 16,
@@ -1026,7 +1026,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                 ),
                                 if (filteredEventos.length != _eventos.length) ...[
                                   const SizedBox(width: 6),
-                                  Text('(${_eventos.length} total)',
+                                  Text('map_total_events'.trParams({'count': '${_eventos.length}'}),
                                       style: GoogleFonts.inter(
                                           color: AppColors.textMuted, fontSize: 11)),
                                 ],
@@ -1066,7 +1066,7 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                         Icon(Icons.location_on_outlined,
                                             color: AppColors.textMuted, size: 14),
                                         const SizedBox(width: 4),
-                                        Text('Radio máximo',
+                                        Text('map_max_radius'.tr,
                                             style: GoogleFonts.inter(
                                                 color: AppColors.textMuted,
                                                 fontSize: 13)),
@@ -1237,8 +1237,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                                     color: AppColors.success
                                                         .withOpacity(0.3)),
                                               ),
-                                              child: const Text('✓ Asistiré',
-                                                  style: TextStyle(
+                                              child: Text('map_attending'.tr,
+                                                  style: const TextStyle(
                                                       color: AppColors.success,
                                                       fontSize: 10,
                                                       fontWeight:
@@ -1258,8 +1258,8 @@ class _MapScreenState extends State<MapScreen> with TickerProviderStateMixin {
                                                     color: Colors.amber
                                                         .withOpacity(0.3)),
                                               ),
-                                              child: const Text('★ Creador',
-                                                  style: TextStyle(
+                                              child: Text('map_creator'.tr,
+                                                  style: const TextStyle(
                                                       color: Colors.amber,
                                                       fontSize: 10,
                                                       fontWeight:

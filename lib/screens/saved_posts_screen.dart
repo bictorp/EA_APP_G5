@@ -19,7 +19,7 @@ class SavedPostsScreen extends StatelessWidget {
         backgroundColor: AppColors.surface,
         elevation: 0,
         title: Text(
-          'Tus posts guardados',
+          'saved_posts_title'.tr,
           style: GoogleFonts.inter(
             color: AppColors.textHeader,
             fontWeight: FontWeight.bold,
@@ -31,7 +31,7 @@ class SavedPostsScreen extends StatelessWidget {
         // 1. Loading State
         if (controller.isLoading.value) {
           return Center(
-            child: Text('Cargando...', style: TextStyle(color: AppColors.textMuted)),
+            child: Text('loading'.tr, style: TextStyle(color: AppColors.textMuted)),
           );
         }
 
@@ -48,7 +48,7 @@ class SavedPostsScreen extends StatelessWidget {
         // 3. Empty State
         if (controller.posts.isEmpty) {
           return Center(
-            child: Text('No hay posts guardados', style: TextStyle(color: AppColors.textMuted)),
+            child: Text('no_saved_posts'.tr, style: TextStyle(color: AppColors.textMuted)),
           );
         }
 
@@ -67,9 +67,9 @@ class SavedPostsScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Center(
                     child: controller.isLoadingMore.value
-                        ? Text('Cargando...', style: TextStyle(color: AppColors.textMuted))
+                        ? Text('loading'.tr, style: TextStyle(color: AppColors.textMuted))
                         : (!controller.hasNextPage.value
-                            ? Text('No hay más posts guardados', style: TextStyle(color: AppColors.textMuted))
+                            ? Text('no_more_saved_posts'.tr, style: TextStyle(color: AppColors.textMuted))
                             : const SizedBox.shrink()),
                   ),
                 );
