@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import '../constants/api_constants.dart';
 import '../firebase_options.dart';
 import 'auth_service.dart';
+import '../screens/chat_detail_screen.dart';
+import '../controllers/chat_controller.dart';
 
 /// Manejador global para notificaciones en segundo plano (Terminated o Background).
 /// Debe ser una función top-level (fuera de cualquier clase) y estar anotada con @pragma('vm:entry-point')
@@ -190,9 +192,29 @@ class PushNotificationService {
   void _handleNotificationNavigation(Map<String, dynamic> data) {
     print('Datos de redirección: $data');
     
-    // Ejemplo de navegación modular usando GetX
-    // if (data.containsKey('route')) {
-    //   Get.toNamed(data['route'], arguments: data);
-    // }
+    if (data['type'] == 'chat_message' && data.containsKey('senderId')) {
+      final String senderId = data['senderId'].toString();
+      
+      // Intentamos obtener el nombre y avatar si el contacto ya existe en ChatController
+      String name = 'Usuario';
+      String? avatar;
+      
+      try {
+        final chatController = Get.put(ChatController());
+        final contact = chatController.contacts.firstWhereOrNull((c) => c['_id'] == senderId);
+        if (contact != null) {
+          name = contact['nombre'] ?? 'Usuario';
+          avatar = contact['avatarUrl'];
+        }
+      } catch (e) {
+        print('Error al buscar contacto en ChatController: $e');
+      }
+
+      Get.to(() => ChatDetailScreen(
+        contactId: senderId,
+        contactName: name,
+        contactAvatar: avatar,
+      ));
+    }
   }
 }

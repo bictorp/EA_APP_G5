@@ -70,28 +70,8 @@ class ChatController extends GetxController {
         unreadCounts[message.remitenteId] = (unreadCounts[message.remitenteId] ?? 0) + 1;
         _updateTotalUnreadCount();
 
-        // Mostrar notificación si no estamos en el chat
+        // Actualizar estados locales pero dejar que Firebase maneje la notificación en primer plano
         final contact = contacts.firstWhereOrNull((c) => c['_id'] == message.remitenteId);
-        final senderName = contact?['nombre'] ?? 'someone'.tr;
-        
-        Get.snackbar(
-          'message_from'.trParams({'name': senderName}),
-          message.post != null ? 'sent_post_notif'.tr : message.contenido,
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: AppColors.accent.withOpacity(0.9),
-          colorText: Colors.white,
-          duration: Duration(seconds: 3),
-          icon: Icon(Icons.chat_bubble_rounded, color: Colors.white),
-          onTap: (snack) {
-            if (contact != null) {
-              Get.to(() => ChatDetailScreen(
-                contactId: contact['_id'],
-                contactName: contact['nombre'] ?? 'user'.tr,
-                contactAvatar: contact['avatarUrl'],
-              ));
-            }
-          },
-        );
       }
 
       _updateContactLastMessage(message);
