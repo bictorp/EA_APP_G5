@@ -1,5 +1,5 @@
-class ApiConstants {
-  static const String _url = 'http://ea5-api.upc.edu';
+﻿class ApiConstants {
+  static const String _url = 'https://ea5-api.upc.edu';
 
   static String get baseUrl => _url;
 
