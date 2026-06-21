@@ -3,6 +3,8 @@ import 'post.dart';
 class Message {
   final String id;
   final String remitenteId;
+  final String? remitenteNombre;
+  final String? remitenteAvatar;
   final String destinatarioId;
   final String contenido;
   final Post? post; 
@@ -15,6 +17,8 @@ class Message {
   Message({
     required this.id,
     required this.remitenteId,
+    this.remitenteNombre,
+    this.remitenteAvatar,
     required this.destinatarioId,
     required this.contenido,
     this.post,
@@ -30,6 +34,8 @@ class Message {
       return Message(
         id: json['_id']?.toString() ?? '',
         remitenteId: (json['remitente'] is Map ? json['remitente']['_id'] : json['remitente'])?.toString() ?? '',
+        remitenteNombre: json['remitente'] is Map ? json['remitente']['nombre']?.toString() : null,
+        remitenteAvatar: json['remitente'] is Map ? json['remitente']['avatarUrl']?.toString() : null,
         destinatarioId: (json['destinatario'] is Map 
             ? json['destinatario']['_id'] 
             : (json['destinatario'] ?? json['grupo']))?.toString() ?? '',

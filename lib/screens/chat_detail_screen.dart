@@ -225,6 +225,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   }
 
   Widget _buildMessageBubble(Message msg, bool isMe, bool isSelected, String myId) {
+    final contact = _chatController.contacts.firstWhereOrNull((c) => c['_id'] == widget.contactId);
+    final isGroup = contact != null ? (contact['isGroup'] ?? false) : false;
+
     return Dismissible(
       key: Key('reply_${msg.id}'),
       direction: msg.eliminadoParaTodos ? DismissDirection.none : DismissDirection.startToEnd,
@@ -254,137 +257,170 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           color: _highlightedMessageId == msg.id 
               ? AppColors.accent.withOpacity(0.3) 
               : (isSelected ? AppColors.accent.withOpacity(0.15) : Colors.transparent),
-                      child: Column(
-              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
               children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-                  padding: msg.post != null 
-                      ? EdgeInsets.zero 
-                      : const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: (msg.eliminadoParaTodos || msg.post != null)
-                        ? Colors.transparent
-                        : (isMe ? AppColors.accent : AppColors.incomingBubble),
-                    border: (msg.eliminadoParaTodos && msg.post == null)
-                        ? Border.all(color: AppColors.textMuted.withOpacity(0.3))
-                        : null,
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(16),
-                      topRight: const Radius.circular(16),
-                      bottomLeft: Radius.circular(isMe ? 16 : 4),
-                      bottomRight: Radius.circular(isMe ? 4 : 16),
-                    ),
+                if (!isMe && isGroup) ...[
+                  SafeCircleAvatar(
+                    radius: 14,
+                    url: msg.remitenteAvatar?.replaceAll('/svg', '/png'),
+                    name: msg.remitenteNombre ?? 'Usuario',
                   ),
-                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                  SizedBox(width: 8),
+                ],
+                Flexible(
                   child: Column(
                     crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                     children: [
-                      if (msg.parentMessage != null) ...[
-                        GestureDetector(
-                          onTap: () => _scrollToMessage(msg.parentMessage!.id),
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isMe ? Colors.black.withOpacity(0.15) : AppColors.bg,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border(
-                                left: BorderSide(
-                                  color: isMe ? Colors.white.withOpacity(0.5) : AppColors.accent,
-                                  width: 4,
-                                ),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  msg.parentMessage!.remitenteId == myId ? 'you'.tr : widget.contactName,
-                                  style: GoogleFonts.inter(
-                                    color: isMe ? Colors.white.withOpacity(0.9) : AppColors.accent,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                                SizedBox(height: 2),
-                                Text(
-                                  msg.parentMessage!.contenido,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: GoogleFonts.inter(
-                                    color: isMe ? Colors.white.withOpacity(0.6) : AppColors.textMuted,
-                                    fontSize: 12,
-                                    height: 1.3,
-                                  ),
-                                ),
-                              ],
-                            ),
+                      Container(
+                        padding: msg.post != null 
+                            ? EdgeInsets.zero 
+                            : const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: (msg.eliminadoParaTodos || msg.post != null)
+                              ? Colors.transparent
+                              : (isMe ? AppColors.accent : AppColors.incomingBubble),
+                          border: (msg.eliminadoParaTodos && msg.post == null)
+                              ? Border.all(color: AppColors.textMuted.withOpacity(0.3))
+                              : null,
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(16),
+                            topRight: const Radius.circular(16),
+                            bottomLeft: Radius.circular(isMe ? 16 : 4),
+                            bottomRight: Radius.circular(isMe ? 4 : 16),
                           ),
                         ),
-                      ],
-                      if (msg.post != null) _buildPostPreview(msg.post!, myId, isMe: isMe, hasComment: msg.contenido.isNotEmpty),
-                      if (msg.post != null && msg.contenido.isNotEmpty) SizedBox(height: 4),
-                      if (msg.eliminadoParaTodos)
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
+                        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.block, size: 14, color: AppColors.textMuted.withOpacity(0.7)),
-                            SizedBox(width: 5),
-                            Text(
-                              msg.contenido,
-                              style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontStyle: FontStyle.italic),
-                            ),
-                          ],
-                        )
-                      else if (msg.contenido.isNotEmpty)
-                        Container(
-                          padding: msg.post != null 
-                              ? const EdgeInsets.symmetric(horizontal: 14, vertical: 10)
-                              : EdgeInsets.zero,
-                          decoration: msg.post != null
-                              ? BoxDecoration(
-                                  color: isMe ? AppColors.accent : AppColors.incomingBubble,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: const Radius.circular(16),
-                                    topRight: const Radius.circular(16),
-                                    bottomLeft: Radius.circular(isMe ? 16 : 4),
-                                    bottomRight: Radius.circular(isMe ? 4 : 16),
+                            if (!isMe && isGroup && msg.remitenteNombre != null) ...[
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: Text(
+                                  msg.remitenteNombre!,
+                                  style: GoogleFonts.inter(
+                                    color: Colors.deepOrangeAccent,
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 12,
                                   ),
-                                )
-                              : null,
-                          child: Text(
-                            msg.contenido,
-                            style: TextStyle(color: isMe ? Colors.white : AppColors.textHeader, fontSize: 15),
+                                ),
+                              ),
+                            ],
+                            if (msg.parentMessage != null) ...[
+                              GestureDetector(
+                                onTap: () => _scrollToMessage(msg.parentMessage!.id),
+                                child: Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: isMe ? Colors.black.withOpacity(0.15) : AppColors.bg,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border(
+                                      left: BorderSide(
+                                        color: isMe ? Colors.white.withOpacity(0.5) : AppColors.accent,
+                                        width: 4,
+                                      ),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        msg.parentMessage!.remitenteId == myId 
+                                            ? 'you'.tr 
+                                            : (msg.parentMessage!.remitenteNombre ?? widget.contactName),
+                                        style: GoogleFonts.inter(
+                                          color: isMe ? Colors.white.withOpacity(0.9) : AppColors.accent,
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        msg.parentMessage!.contenido,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: GoogleFonts.inter(
+                                          color: isMe ? Colors.white.withOpacity(0.6) : AppColors.textMuted,
+                                          fontSize: 12,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                            if (msg.post != null) _buildPostPreview(msg.post!, myId, isMe: isMe, hasComment: msg.contenido.isNotEmpty),
+                            if (msg.post != null && msg.contenido.isNotEmpty) SizedBox(height: 4),
+                            if (msg.eliminadoParaTodos)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.block, size: 14, color: AppColors.textMuted.withOpacity(0.7)),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    msg.contenido,
+                                    style: TextStyle(color: AppColors.textMuted.withOpacity(0.7), fontSize: 13, fontStyle: FontStyle.italic),
+                                  ),
+                                ],
+                              )
+                            else if (msg.contenido.isNotEmpty)
+                              Container(
+                                padding: msg.post != null 
+                                    ? const EdgeInsets.symmetric(horizontal: 14, vertical: 10)
+                                    : EdgeInsets.zero,
+                                decoration: msg.post != null
+                                    ? BoxDecoration(
+                                        color: isMe ? AppColors.accent : AppColors.incomingBubble,
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: const Radius.circular(16),
+                                          topRight: const Radius.circular(16),
+                                          bottomLeft: Radius.circular(isMe ? 16 : 4),
+                                          bottomRight: Radius.circular(isMe ? 4 : 16),
+                                        ),
+                                      )
+                                    : null,
+                                child: Text(
+                                  msg.contenido,
+                                  style: TextStyle(color: isMe ? Colors.white : AppColors.textHeader, fontSize: 15),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (!msg.eliminadoParaTodos)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: isMe ? 0 : 4,
+                            right: isMe ? 4 : 0,
+                            bottom: 4,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                DateFormat('HH:mm').format(msg.createdAt),
+                                style: TextStyle(
+                                  color: AppColors.textMuted.withOpacity(0.6),
+                                  fontSize: 9,
+                                ),
+                              ),
+                              SizedBox(width: 4),
+                              _buildReactionsBadge(msg),
+                            ],
                           ),
                         ),
                     ],
                   ),
                 ),
-                if (!msg.eliminadoParaTodos)
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: isMe ? 0 : 20,
-                      right: isMe ? 20 : 0,
-                      bottom: 4,
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          DateFormat('HH:mm').format(msg.createdAt),
-                          style: TextStyle(
-                            color: AppColors.textMuted.withOpacity(0.6),
-                            fontSize: 9,
-                          ),
-                        ),
-                        SizedBox(width: 4),
-                        _buildReactionsBadge(msg),
-                      ],
-                    ),
-                  ),
               ],
             ),
+          ),
         ),
       ),
     );

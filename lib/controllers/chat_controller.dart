@@ -112,6 +112,8 @@ class ChatController extends GetxController {
             messages[i] = Message(
               id: messages[i].id,
               remitenteId: messages[i].remitenteId,
+              remitenteNombre: messages[i].remitenteNombre,
+              remitenteAvatar: messages[i].remitenteAvatar,
               destinatarioId: messages[i].destinatarioId,
               contenido: 'message_deleted_placeholder'.tr,
               createdAt: messages[i].createdAt,
